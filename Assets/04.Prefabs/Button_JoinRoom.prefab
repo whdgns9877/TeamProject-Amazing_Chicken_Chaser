@@ -147,9 +147,10 @@ GameObject:
   - component: {fileID: 2594041679022383608}
   - component: {fileID: 2594041679022383609}
   - component: {fileID: 2594041679022383610}
+  - component: {fileID: 7930509091562442009}
   m_Layer: 5
   m_Name: Button_JoinRoom
-  m_TagString: Untagged
+  m_TagString: ROOM
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -257,3 +258,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7930509091562442009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2594041679022383612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9011dc9c5088d66469cadd38ef588412, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  roomName: 
+  playerCount: 0
+  maxPlayer: 8
+  isOpen: 0
