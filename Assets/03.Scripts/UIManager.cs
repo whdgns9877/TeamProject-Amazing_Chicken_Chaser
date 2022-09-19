@@ -88,6 +88,17 @@ public class UIManager : MonoBehaviourPunCallbacks
         ninkNameInputField = inStr;
     }
 
+    // 방 생성할때 입력 컨트롤
+    public void OnvalueChangedCreateRoom(string inStr)
+    {
+        if (string.IsNullOrEmpty(inStr))
+            CreateRoomButton.interactable = false;
+        else
+            CreateRoomButton.interactable = true;
+
+        roomNameText = inStr;
+    }
+
     // 로비 연결 버튼에 쓰일 함수
     public void OnClick_JoinLobby()
     {
@@ -164,7 +175,7 @@ public class UIManager : MonoBehaviourPunCallbacks
 
             // 해당 방의 인원이 꽉차있으면 버튼클릭을 막아 접속할수 없게한다
             if (roomData.playerCount == roomData.maxPlayer)
-                roomData.GetComponent<Button>().interactable = false;
+                _room.GetComponent<Button>().interactable = false;
 
             // 방이 닫혀있으면 못들어오게 버튼 클릭을 막고
             if (roomData.isOpen == false)
@@ -172,13 +183,12 @@ public class UIManager : MonoBehaviourPunCallbacks
             else
             {
                 // 방이 열려있으면
-                // 이 녀석이 실제로 방을 만드는 버튼인데  delegate로 내용을 참조하여 클릭했을때 실행되도록 한다
+                // delegate로 내용을 참조하여 클릭했을때 방에 참가할 수 있도록 처리
                 roomData.GetComponent<Button>().onClick.AddListener
                 (
                     delegate
                     {
-                        //curRoomData = roomData;
-                        //roomNameText = roomData.roomName;
+                        roomNameText = roomData.roomName;
                         // 이 부분이 실제로 방에 참가하는 부분
                         PhotonNetwork.JoinRoom(roomData.roomName, null);
                     }
@@ -199,8 +209,6 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 방 생성 버튼에 달 함수
     public void OnCreateRoomButtonClicked()
     {
-        // 방의 텍스트는 인풋필드로 받은 텍스트를 넣고
-        roomNameText = InputField_RoomName.text;
         // 방을 만들었으니 생성버튼을 다시 사용할수 있게 클릭을 풀어주고
         CreateRoomPanelButton.GetComponent<Button>().interactable = true;
 
@@ -208,18 +216,18 @@ public class UIManager : MonoBehaviourPunCallbacks
         RoomOptions ro = new RoomOptions();
         ro.IsVisible = true;                        // 방이 보이게
         ro.IsOpen = true;                           // 방을 열고
-        ro.MaxPlayers = 2;                          // 최대 인원수는 2
+        ro.MaxPlayers = 8;                          // 최대 인원수는 8
         ro.CleanupCacheOnLeave = true;
 
         PhotonNetwork.CreateRoom(roomNameText, ro); // 실제로 방을 만드는 함수
-        InputField_RoomName.text = null;             // 다음에 다시 만들수 있으니 인풋필드는 비워놓는다
     }
 
     // 방에 참가하면 자동적으로 호출되는 콜백함수
     public override void OnJoinedRoom()
     {
         curRoom = PhotonNetwork.CurrentRoom;
-        _roomNameText.text = "방 : " + roomNameText;
+
+        _roomNameText.text = "방 : " + curRoom.Name;
 
         Panel_Login.SetActive(false);
         Panel_Lobby.SetActive(false);
@@ -250,5 +258,8 @@ public class UIManager : MonoBehaviourPunCallbacks
             // InputField는 상호작용 가능하게
             InputField_NickName.interactable = true;
         }
+
+        if (!CreateRoomPanel.activeInHierarchy)
+            InputField_RoomName.text = null;
     }
 }

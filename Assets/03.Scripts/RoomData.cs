@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class RoomData : MonoBehaviour
 {
@@ -11,11 +12,11 @@ public class RoomData : MonoBehaviour
     public bool isOpen;
 
     [System.NonSerialized]
-    public Text roomDataText;
+    public TextMeshProUGUI roomDataText;
 
     void Awake()
     {
-        roomDataText = GetComponentInChildren<Text>();
+        roomDataText = GetComponentInChildren<TextMeshProUGUI>();
     }
 
     public void UpdateInfo()
