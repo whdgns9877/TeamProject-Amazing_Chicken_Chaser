@@ -7,7 +7,7 @@ using System.Runtime.ExceptionServices;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
 
-public class PlayerMove : MonoBehaviourPun
+public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
     public float Acceleration = 100f;       // 자동차 속도
@@ -35,6 +35,26 @@ public class PlayerMove : MonoBehaviourPun
     //플레이어 sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
 
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // this is my player, sned data to other players 
+            for (int i = 0; i < 4; i++)
+            {
+                stream.SendNext((bool)trailrenderers[i].emitting);
+            }
+        }
+
+        else
+        {
+            //remote player, receive data 
+            for (int i = 0; i < 4; i++)
+            {
+                trailrenderers[i].emitting = (bool)stream.ReceiveNext();
+            }
+        }
+    }
 
     private void Awake()
     {
@@ -47,7 +67,9 @@ public class PlayerMove : MonoBehaviourPun
     private void Start()
     {
         // turn off all the trail renderers 
+
         StartCoroutine(skidMark(false, 4, 3f));
+        //RPC_skidMark(false, 4, 3f);
     }
 
     private void Update()
@@ -64,7 +86,9 @@ public class PlayerMove : MonoBehaviourPun
 
             // reduce rear wheel stiffness to drifting
             StartDrift();
+
             StartCoroutine(skidMark(true, 4, 1.5f));
+            //RPC_skidMark(true, 4, 1.5f);
         }
 
         // release brakes 
@@ -77,7 +101,9 @@ public class PlayerMove : MonoBehaviourPun
 
             //increase rear wheel stiffness to stop drifting
             Endrift();
+
             StartCoroutine(skidMark(false, 4, 1.5f));
+            //RPC_skidMark(false, 4, 1.5f);
         }
     }
 
@@ -141,7 +167,6 @@ public class PlayerMove : MonoBehaviourPun
     }
 
     // to move wheelmash as wheelCollider moves  
-    //[PunRPC]
     void UpdateWheelPos(WheelCollider collider, Transform transform)
     {
         Vector3 position;
@@ -197,21 +222,21 @@ public class PlayerMove : MonoBehaviourPun
     }
 
 
-
     // emitting on or off, and how many wheels? 
     IEnumerator skidMark(bool on, int wheels, float sec)
     {
         // if skid mark false, wait for seconds 
-        if(!on)
-        yield return new WaitForSeconds(sec);
+        if (!on)
+            yield return new WaitForSeconds(sec);
 
         // set trailrenderer 
         for (int i = 0; i < wheels; i++)
         {
-            trailrenderers[i].emitting = on;      // rear wheel only        
+            trailrenderers[i].emitting = on;      // selected wheel only        
         }
 
         yield return null;
 
     }
+
 }
