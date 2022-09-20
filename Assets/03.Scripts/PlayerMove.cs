@@ -52,6 +52,9 @@ public class PlayerMove : MonoBehaviourPun
 
     private void Update()
     {
+        if (!PV.IsMine)
+            return;
+
         // Apply brakes
         if (Input.GetKeyDown(KeyCode.Space))
         {
