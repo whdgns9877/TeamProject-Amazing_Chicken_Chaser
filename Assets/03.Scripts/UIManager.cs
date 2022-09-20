@@ -26,9 +26,13 @@ public class UIManager : MonoBehaviourPunCallbacks
     [SerializeField] TMP_InputField InputField_RoomName     = null;  // 방 이름을 받을 인풋필드
 
     [Header("** 방 UI **")]
-    [SerializeField] TextMeshProUGUI   _roomNameText   = null;    // 방 이름
-    [SerializeField] GameObject        Panel_Room      = null;    // 방의 전체적인 패널
-    [SerializeField] TextMeshProUGUI[] PlayerNickNames = null;    // 플레이어들의 닉네임을 담을 배열
+    [SerializeField] TextMeshProUGUI   _roomNameText    = null;    // 방 이름
+    [SerializeField] GameObject        Panel_Room       = null;    // 방의 전체적인 패널
+    [SerializeField] TextMeshProUGUI[] PlayerNickNames  = null;    // 플레이어들의 닉네임을 담을 배열
+    [SerializeField] GameObject        Button_StartGame = null;    // 게임 시작 버튼
+
+    // ------------------------- 임시 참조 변수
+    [SerializeField] GameObject Button_ImsiStartGame = null;    // 임시 게임 시작 버튼
 
     [SerializeField] TextMeshProUGUI Text_ConnectionInfo = null;  // 현재 네트워크 상태 메세지를 나타낼 TextMeshPro
 
@@ -45,6 +49,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     private void Awake()
     {
         Screen.SetResolution(960, 540, false);
+        PhotonNetwork.AutomaticallySyncScene = true;
     }
 
     // Start is called before the first frame update
@@ -232,6 +237,11 @@ public class UIManager : MonoBehaviourPunCallbacks
         Panel_Login.SetActive(false);
         Panel_Lobby.SetActive(false);
         Panel_Room.SetActive(true);
+
+        if(PhotonNetwork.IsMasterClient)
+        {
+
+        }
     }
 
     private void Update()
@@ -261,5 +271,12 @@ public class UIManager : MonoBehaviourPunCallbacks
 
         if (!CreateRoomPanel.activeInHierarchy)
             InputField_RoomName.text = null;
+    }
+
+
+    //------------------------------- 임시로 만든 입장 함수---------------------------------------------------------
+    public void ImsiGameStart()
+    {
+        PhotonNetwork.LoadLevel("GameScene");
     }
 }

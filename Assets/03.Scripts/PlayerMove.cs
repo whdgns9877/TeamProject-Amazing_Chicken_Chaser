@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Timeline.Actions;
-using UnityEngine;
 
-public class PlayerMove : MonoBehaviour
+using UnityEngine;
+using Photon.Pun;
+
+public class PlayerMove : MonoBehaviourPun
 {
     [Header("Car Info")]
     public float Acceleration = 100f;       // 자동차 속도
@@ -14,6 +15,8 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] GameObject[] wheelMeshes = new GameObject[4];
     [SerializeField] WheelCollider[] wheelColliders = new WheelCollider[4];
 
+    // 동기화에 사용되는 포톤뷰
+    PhotonView PV;
 
     Rigidbody playerRigid;
 
@@ -21,6 +24,8 @@ public class PlayerMove : MonoBehaviour
 
     private void Awake()
     {
+        // 포톤뷰를 캐싱하여 가져온다 (GetComponent로 가져오는것 생각하면 됨)
+        PV = photonView;
         playerRigid = GetComponent<Rigidbody>();
     }
 
@@ -31,8 +36,6 @@ public class PlayerMove : MonoBehaviour
         //playerRigid.centerOfMass = new Vector3(0, -1f, 0.25f);
     
     }
-
-
 
     //private void Update()
     //{
@@ -64,6 +67,9 @@ public class PlayerMove : MonoBehaviour
 
     private void Update()
     {
+        // 본인의 제어권 안쪽만 실행
+        if (!PV.IsMine)
+            return;
 
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
@@ -112,6 +118,7 @@ public class PlayerMove : MonoBehaviour
         {
             // wheel collider에 맞춰 wheel mesh를 움직일 수 있도록 함 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
+            //PV.RPC("UpdateWheelPos", RpcTarget.AllViaServer, wheelColliders[i], wheelMeshes[i].transform);
         }
 
 
@@ -150,8 +157,8 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-
     // to move wheelmash as wheelCollider moves  
+    //[PunRPC]
     void UpdateWheelPos(WheelCollider collider, Transform transform)
     {
         Vector3 position;
@@ -164,5 +171,4 @@ public class PlayerMove : MonoBehaviour
         transform.position = position;
         transform.rotation = rotation;
     }
-
 }
