@@ -9,6 +9,7 @@ public class PlayerCAM : MonoBehaviour
 
 
     Transform myTarget;
+    float myCAMTurn;
 
     // Start is called before the first frame update
     void Start()
@@ -25,12 +26,23 @@ public class PlayerCAM : MonoBehaviour
 
         // look at player
         transform.LookAt(myTarget.position);
-     
+
 
         // rotate camera
         transform.RotateAround(myTarget.position, myTarget.right, myCAMAngle);
 
         // turne camrea by steer angle 
+        Vector3 turn = (Vector3.right * myCAMTurn);
 
+        transform.Translate(turn, myTarget);
     }
+
+
+
+
+    float TurnMyCAM(float steerAngle)
+    {
+        return myCAMTurn = steerAngle;
+    }
+
 }
