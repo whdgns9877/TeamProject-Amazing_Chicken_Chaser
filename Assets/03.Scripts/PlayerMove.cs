@@ -37,40 +37,37 @@ public class PlayerMove : MonoBehaviourPun
     
     }
 
-    //private void Update()
-    //{
-    //    // Apply brakes
-    //    if (Input.GetKeyDown(KeyCode.Space))
-    //    {
-    //        Debug.Log("## apply brake~!");
-    //        // Rear Wheel Brake
-    //        wheelColliders[2].brakeTorque = BrakingForce;
-    //        wheelColliders[3].brakeTorque = BrakingForce;
-
-    //        // wheelColliders[0].brakeTorque = BrakingForce;
-    //        // wheelColliders[1].brakeTorque = BrakingForce;
-
-    //    }
-
-    //    // release brakes 
-    //    if (Input.GetKeyUp(KeyCode.Space))
-    //    {
-    //        Debug.Log("## release brake~!");
-
-    //        wheelColliders[0].brakeTorque = 0f;
-    //        wheelColliders[1].brakeTorque = 0f;
-    //        wheelColliders[2].brakeTorque = 0f;
-    //        wheelColliders[3].brakeTorque = 0f;
-    //    }
-    //}
-
-
     private void Update()
+    {
+        // Apply brakes
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // Rear Wheel Brake
+            wheelColliders[2].brakeTorque = BrakingForce;
+            wheelColliders[3].brakeTorque = BrakingForce;
+
+            // wheelColliders[0].brakeTorque = BrakingForce;
+            // wheelColliders[1].brakeTorque = BrakingForce;
+        }
+
+        // release brakes 
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            wheelColliders[0].brakeTorque = 0f;
+            wheelColliders[1].brakeTorque = 0f;
+            wheelColliders[2].brakeTorque = 0f;
+            wheelColliders[3].brakeTorque = 0f;
+        }
+    }
+
+
+    private void FixedUpdate()
     {
         // 본인의 제어권 안쪽만 실행
         if (!PV.IsMine)
             return;
 
+        // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
         //input keys 
@@ -85,9 +82,6 @@ public class PlayerMove : MonoBehaviourPun
             wheelColliders[0].steerAngle = xAxis * MaxTurnAngle;    // front left wheel 
             wheelColliders[1].steerAngle = xAxis * MaxTurnAngle;    // front right wheel
         }
-
-        //Debug.Log("### move!" + zAxis);
-        //Debug.Log("### Speed!" + playerRigid.velocity);
 
         if (zAxis != 0f)
         {
@@ -107,10 +101,7 @@ public class PlayerMove : MonoBehaviourPun
             wheelColliders[1].motorTorque = 0;
             wheelColliders[2].motorTorque = 0;
             wheelColliders[3].motorTorque = 0;
-
         }
-
-        Debug.Log("## wheel speed" + wheelColliders[0].motorTorque);
 
 
         //set all the wheelmash position & rotation as same as wheelCollider
@@ -121,40 +112,6 @@ public class PlayerMove : MonoBehaviourPun
             //PV.RPC("UpdateWheelPos", RpcTarget.AllViaServer, wheelColliders[i], wheelMeshes[i].transform);
         }
 
-
-
-        // Apply brakes
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("## apply brake~!");
-            // Rear Wheel Brake
-            // space 키를 누르면 브레이크
-
-            // 후방 휠 
-            wheelColliders[2].brakeTorque = BrakingForce;
-            wheelColliders[3].brakeTorque = BrakingForce;
-
-            ////전방 휠 
-            //wheelColliders[0].brakeTorque = BrakingForce;
-            //wheelColliders[1].brakeTorque = BrakingForce;
-
-            //// RWD
-            //wheelColliders[2].motorTorque = 0;
-            //wheelColliders[3].motorTorque = 0;
-
-        }
-
-        // release brakes 
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            Debug.Log("## release brake~!");
-
-            // spcae키를 때면 브레이크를 0으로 리셋 
-            for (int i = 0; i < wheelColliders.Length; i++)
-            {
-                wheelColliders[i].brakeTorque = 0f;
-            }
-        }
     }
 
     // to move wheelmash as wheelCollider moves  
