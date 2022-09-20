@@ -15,9 +15,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     public float MaxTurnAngle = 45f;        // 회전 각
 
     [Header("Wheel Info")]
-    [SerializeField] GameObject[] wheelMeshes = new GameObject[4];
-    [SerializeField] WheelCollider[] wheelColliders = new WheelCollider[4];
-    [SerializeField] TrailRenderer[] trailrenderers = new TrailRenderer[4];
+    [SerializeField] GameObject[] wheelMeshes = new GameObject[4];          // wheel mesh
+    [SerializeField] WheelCollider[] wheelColliders = new WheelCollider[4]; // wheel collider
+    [SerializeField] TrailRenderer[] trailrenderers = new TrailRenderer[4]; // wheel trailrenderer
 
     // 동기화에 사용되는 포톤뷰
     PhotonView PV;
@@ -35,6 +35,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //플레이어 sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
 
+
+    // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -66,10 +68,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     private void Start()
     {
-        // turn off all the trail renderers 
-
+        // turn off all the trailrenderers 
         StartCoroutine(skidMark(false, 4, 3f));
-        //RPC_skidMark(false, 4, 3f);
+
     }
 
     private void Update()
@@ -84,11 +85,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[2].brakeTorque = BrakingForce;
             wheelColliders[3].brakeTorque = BrakingForce;
 
-            // reduce rear wheel stiffness to drifting
+            // reduce wheel stiffness to drifting
             StartDrift();
 
+            //start making skidmarks
             StartCoroutine(skidMark(true, 4, 1.5f));
-            //RPC_skidMark(true, 4, 1.5f);
         }
 
         // release brakes 
@@ -99,11 +100,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[2].brakeTorque = 0f;
             wheelColliders[3].brakeTorque = 0f;
 
-            //increase rear wheel stiffness to stop drifting
+            //increase wheel stiffness to stop drifting
             Endrift();
-
+            
+            // stop making skidmarks
             StartCoroutine(skidMark(false, 4, 1.5f));
-            //RPC_skidMark(false, 4, 1.5f);
         }
     }
 
@@ -225,18 +226,17 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     // emitting on or off, and how many wheels? 
     IEnumerator skidMark(bool on, int wheels, float sec)
     {
-        // if skid mark false, wait for seconds 
+        // if trail renderer emitting is false, wait for few seconds to turn off
         if (!on)
             yield return new WaitForSeconds(sec);
 
-        // set trailrenderer 
+        // set trailrenderer emitting
         for (int i = 0; i < wheels; i++)
         {
             trailrenderers[i].emitting = on;      // selected wheel only        
         }
 
         yield return null;
-
     }
 
 }
