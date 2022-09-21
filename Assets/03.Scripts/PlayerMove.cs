@@ -6,13 +6,15 @@ using Photon.Pun;
 using System.Runtime.ExceptionServices;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
+using Photon.Pun.Demo.Cockpit;
 
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
-    public float Acceleration = 100f;       // 자동차 속도
-    public float BrakingForce = 1000f;      // 브레이크 
-    public float MaxTurnAngle = 45f;        // 회전 각
+    [SerializeField] public float Acceleration = 1000f;       // 자동차 속도
+    [SerializeField] public float BrakingForce = 1000f;      // 브레이크 
+    [SerializeField] public float MaxTurnAngle = 45f;        // 회전 각
+    [SerializeField] public float MaxSpeed = 100f;
 
     [Header("Wheel Info")]
     [SerializeField] GameObject[] wheelMeshes = new GameObject[4];          // wheel mesh
@@ -28,6 +30,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     // 플레이어 무게 중심 
     public GameObject mycg;
+
+    float currSpeed;
 
     // 플레이어 카메라 
     GameObject myCAM;
@@ -94,14 +98,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         // drift key "shift"
         if (Input.GetKeyDown(KeyCode.LeftShift))
-        {           
+        {
             Drift(0.1f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
         }
 
         // drift key "shift"
         if (Input.GetKeyUp(KeyCode.LeftShift))
-        { 
+        {
             Drift(5f);          // increase wheel stiffness to stop drifting
             SkidMark(2, false); // skidmark off
         }
@@ -124,6 +128,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         float xAxis = Input.GetAxis("Horizontal");
         float zAxis = Input.GetAxis("Vertical");
 
+        // currentspeed of car 
+        currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
+
 
         // Send xAxis info to myCAM
         myCAM.SendMessage("TurnMyCAM", xAxis, SendMessageOptions.DontRequireReceiver);
@@ -141,10 +148,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // 전방 휠 움직임 
             wheelColliders[0].steerAngle = 0f;    // front left wheel 
             wheelColliders[1].steerAngle = 0f;    // front right wheel
-
         }
 
-        if (zAxis != 0f)
+        if (zAxis != 0f && currSpeed <= MaxSpeed)
         {
             // 토크를 주는 휠 
             // FWD 
@@ -173,8 +179,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // wheel collider에 맞춰 wheel mesh를 움직일 수 있도록 함 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
         }
-
-
     }
 
 
@@ -222,8 +226,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             if (wheelColliders[i].isGrounded)
                 trailrenderers[i].emitting = emitting;      // selected wheel only
-
-            Debug.Log(i);
         }
     }
 
