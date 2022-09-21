@@ -66,30 +66,19 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         myCAM = GameObject.FindGameObjectWithTag("MainCamera");
     }
 
-    private void Start()
-    {
-        // turn off all the trailrenderers 
-        StartCoroutine(skidMark(false, 4, 3f));
-
-    }
-
     private void Update()
     {
         if (!PV.IsMine)
             return;
 
         // Apply brakes
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space))
         {
             // Rear Wheel Brake
             wheelColliders[2].brakeTorque = BrakingForce;
             wheelColliders[3].brakeTorque = BrakingForce;
-
-            // reduce wheel stiffness to drifting
-            StartDrift();
-
             //start making skidmarks
-            StartCoroutine(skidMark(true, 4, 1.5f));
+            SkidMark(0, true);
         }
 
         // release brakes 
@@ -99,13 +88,26 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[1].brakeTorque = 0f;
             wheelColliders[2].brakeTorque = 0f;
             wheelColliders[3].brakeTorque = 0f;
-
-            //increase wheel stiffness to stop drifting
-            Endrift();
-            
-            // stop making skidmarks
-            StartCoroutine(skidMark(false, 4, 1.5f));
+            //start making skidmarks
+            SkidMark(0, false);
         }
+
+        // drift key "shift"
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {           
+            Drift(0.1f);        // decrease wheel stiffness for drifting
+            SkidMark(2, true);  // skidmark on
+        }
+
+        // drift key "shift"
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        { 
+            Drift(5f);          // increase wheel stiffness to stop drifting
+            SkidMark(2, false); // skidmark off
+        }
+
+        // if wheel is off ground, no skidmark
+        EraseSkidMark();
     }
 
 
@@ -132,6 +134,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // 전방 휠 움직임 
             wheelColliders[0].steerAngle = xAxis * MaxTurnAngle;    // front left wheel 
             wheelColliders[1].steerAngle = xAxis * MaxTurnAngle;    // front right wheel
+        }
+
+        else
+        {
+            // 전방 휠 움직임 
+            wheelColliders[0].steerAngle = 0f;    // front left wheel 
+            wheelColliders[1].steerAngle = 0f;    // front right wheel
+
         }
 
         if (zAxis != 0f)
@@ -162,10 +172,12 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             // wheel collider에 맞춰 wheel mesh를 움직일 수 있도록 함 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
-            //PV.RPC("UpdateWheelPos", RpcTarget.AllViaServer, wheelColliders[i], wheelMeshes[i].transform);
         }
 
+
     }
+
+
 
     // to move wheelmash as wheelCollider moves  
     void UpdateWheelPos(WheelCollider collider, Transform transform)
@@ -181,29 +193,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         transform.rotation = rotation;
     }
 
-
-
-
-    void StartDrift()
-    {
-        // change only rear wheels
-        for (int i = 2; i < 4; i++)
-        {
-            // increase sideways slip value for drifting
-            myFriction.extremumSlip = wheelColliders[i].sidewaysFriction.extremumSlip;
-            myFriction.extremumValue = wheelColliders[i].sidewaysFriction.extremumValue;
-            myFriction.asymptoteSlip = wheelColliders[i].sidewaysFriction.asymptoteSlip;
-            myFriction.asymptoteValue = wheelColliders[i].sidewaysFriction.asymptoteValue;
-
-            //change stiffness Value 
-            myFriction.stiffness = 0.01f;
-
-            wheelColliders[i].sidewaysFriction = myFriction;
-        }
-    }
-
-
-    void Endrift()
+    void Drift(float stiffness)
     {
 
         // change only rear wheels 
@@ -216,27 +206,38 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             myFriction.asymptoteValue = wheelColliders[i].sidewaysFriction.asymptoteValue;
 
             //change stiffness Value 
-            myFriction.stiffness = 3f;
+            myFriction.stiffness = stiffness;
 
             wheelColliders[i].sidewaysFriction = myFriction;
         }
     }
 
 
-    // emitting on or off, and how many wheels? 
-    IEnumerator skidMark(bool on, int wheels, float sec)
+    // which wheel to be emitted, and how many wheels? 
+    void SkidMark(int wheel, bool emitting)
     {
-        // if trail renderer emitting is false, wait for few seconds to turn off
-        if (!on)
-            yield return new WaitForSeconds(sec);
 
         // set trailrenderer emitting
-        for (int i = 0; i < wheels; i++)
+        for (int i = wheel; i < trailrenderers.Length; i++)
         {
-            trailrenderers[i].emitting = on;      // selected wheel only        
-        }
+            if (wheelColliders[i].isGrounded)
+                trailrenderers[i].emitting = emitting;      // selected wheel only
 
-        yield return null;
+            Debug.Log(i);
+        }
+    }
+
+
+
+    // if wheel is not grounded, turn trailrenderer emitting off
+    void EraseSkidMark()
+    {
+
+        for (int i = 0; i < trailrenderers.Length; i++)
+        {
+            if (!wheelColliders[i].isGrounded)
+                trailrenderers[i].emitting = false;
+        }
     }
 
 }
