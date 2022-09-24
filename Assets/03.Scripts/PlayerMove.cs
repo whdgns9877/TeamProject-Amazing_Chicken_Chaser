@@ -24,22 +24,34 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     // 동기화에 사용되는 포톤뷰
     PhotonView PV;
 
+    //닉네임 
+    UIPlayerInfo UIPlayerInfo;
 
+    //============================================================
+    // 움직임과 관련된 변수
+    #region 움직임과 관련된 변수
     // 플레이어 Rigidbody 
     Rigidbody playerRigid;
-
     // 플레이어 무게 중심 
     public GameObject mycg;
 
+    // 현재 속도
     float currSpeed;
-
-    // 플레이어 카메라 
-    GameObject myCAM;
 
     //플레이어 sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
+    #endregion
+    //============================================================
 
 
+    //============================================================
+    // 치킨과 관련된 변수 
+
+    Transform myChicken = null;
+    Animator ChickenAni = null;
+
+
+    //============================================================
     // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
@@ -48,7 +60,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // this is my player, sned data to other players 
             for (int i = 0; i < 4; i++)
             {
-                stream.SendNext((bool)trailrenderers[i].emitting);
+                stream.SendNext(trailrenderers[i].emitting);
+                stream.SendNext(myChicken.gameObject.activeSelf);
+
+                if (myChicken.gameObject.activeSelf)
+                { stream.SendNext(ChickenAni.GetBool("Turn Head")); }
             }
         }
 
@@ -58,22 +74,56 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             for (int i = 0; i < 4; i++)
             {
                 trailrenderers[i].emitting = (bool)stream.ReceiveNext();
+                myChicken.gameObject.SetActive((bool)stream.ReceiveNext());
+
+                if (myChicken.gameObject.activeSelf)
+                {
+                    ChickenAni = GetComponentInChildren<Animator>();
+                    ChickenAni.SetBool("Turn Head", ((bool)stream.ReceiveNext())); 
+                }
             }
         }
     }
+
+
+
+
+    //============================================================
 
     private void Awake()
     {
         // 포톤뷰를 캐싱하여 가져온다 (GetComponent로 가져오는것 생각하면 됨)
         PV = photonView;
         playerRigid = GetComponent<Rigidbody>();
-        myCAM = GameObject.FindGameObjectWithTag("MainCamera");
+
+        UIPlayerInfo = GetComponentInChildren<UIPlayerInfo>();
+
+        myChicken = transform.Find("MyChicken");
+    }
+
+
+
+
+
+
+
+
+
+
+    void Start()
+    {
+        UIPlayerInfo.NickName(photonView.Controller.NickName);
+
     }
 
     private void Update()
     {
         if (!PV.IsMine)
             return;
+
+        //=====================================================================
+        // Player braking
+        #region 플레이어 브레이크와 관련된 코드 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -112,6 +162,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         // if wheel is off ground, no skidmark
         EraseSkidMark();
+
+        #endregion
+        //=====================================================================
+
+
     }
 
 
@@ -121,6 +176,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         if (!PV.IsMine)
             return;
 
+        //=====================================================================
+        //Player car movment 
+        #region 플레이어 움직임에 대한 코드
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
@@ -130,10 +188,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
-
-
-        // Send xAxis info to myCAM
-        myCAM.SendMessage("TurnMyCAM", xAxis, SendMessageOptions.DontRequireReceiver);
 
         //if has horizontal key input, Steer wheels 
         if (xAxis != 0f)
@@ -179,9 +233,51 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // wheel collider에 맞춰 wheel mesh를 움직일 수 있도록 함 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
         }
+        #endregion
+        //=====================================================================
+
     }
 
 
+    //If get Chicken, active mychicken
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.tag == "Chicken")
+        {
+            if (myChicken.gameObject.activeSelf)
+                return; 
+
+            myChicken.gameObject.SetActive(true);
+            ChickenAni = GetComponentInChildren<Animator>();
+            ChickenAni.SetBool("Turn Head", true);
+
+            //Let GameManager to deactivate chicken from chicken pool on the map.
+            GameManager.Inst.Destroy(collision.gameObject);
+
+        }
+
+        if (collision.collider.tag == "Player")
+        {
+            // if detected player's MyChicken is not activated, drop the chicken 
+            if (collision.transform.Find("MyChicken").gameObject.activeSelf)
+                return;
+
+            if (!PhotonNetwork.IsMasterClient)
+                return; 
+
+                // deactive MyChicken
+                GameManager.Inst.Instantiate("Chicken", transform.position + Vector3.up * 3f + Vector3.forward * 1f, Quaternion.identity);
+            
+        }
+    }
+
+
+
+
+
+    //===========================================================================
+    // function related to car movement 
+    #region 자동차 움직임에 관한 함수들 
 
     // to move wheelmash as wheelCollider moves  
     void UpdateWheelPos(WheelCollider collider, Transform transform)
@@ -199,7 +295,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     void Drift(float stiffness)
     {
-
         // change only rear wheels 
         for (int i = 2; i < 4; i++)
         {
@@ -216,7 +311,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
     }
 
-
     // which wheel to be emitted, and how many wheels? 
     void SkidMark(int wheel, bool emitting)
     {
@@ -229,8 +323,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
     }
 
-
-
     // if wheel is not grounded, turn trailrenderer emitting off
     void EraseSkidMark()
     {
@@ -241,5 +333,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 trailrenderers[i].emitting = false;
         }
     }
+
+    #endregion
+    //===========================================================================
+
 
 }

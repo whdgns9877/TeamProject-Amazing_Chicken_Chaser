@@ -31,18 +31,6 @@ public class PlayerCAM : MonoBehaviour
         // rotate camera
         transform.RotateAround(myTarget.position, myTarget.right, myCAMAngle);
 
-        // turne camrea by steer angle 
-        Vector3 turn = (Vector3.right * myCAMTurn);
-
-        transform.Translate(turn, myTarget);
-    }
-
-
-
-
-    float TurnMyCAM(float steerAngle)
-    {
-        return myCAMTurn = steerAngle;
     }
 
 }
