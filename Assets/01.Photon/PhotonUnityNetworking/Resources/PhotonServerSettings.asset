@@ -40,6 +40,11 @@ MonoBehaviour:
   - Fire
   - RespawnSpaceship
   - UpdateWheelPos
+  - RPC_skidMark
+  - RPC_GotChicken
+  - RPC_DropTheChicken
+  - Destroy
+  - Instantiate
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

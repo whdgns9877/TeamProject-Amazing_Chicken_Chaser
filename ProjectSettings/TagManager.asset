@@ -4,15 +4,18 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - ROOM
+  - Building
+  - Ground
+  - Chicken
+  - FriedChicken
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
+  - Chicken
   - 
   - 
   - 
