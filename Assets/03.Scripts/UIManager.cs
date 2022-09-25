@@ -34,10 +34,8 @@ public class UIManager : MonoBehaviourPunCallbacks
     [SerializeField] GameObject        Panel_Room       = null;    // 방의 전체적인 패널
     //[SerializeField] TextMeshProUGUI[] PlayerNickNames  = null;    // 플레이어들의 닉네임을 담을 배열
     [SerializeField] GameObject        Button_StartGame = null;    // 게임 시작 버튼
+    [SerializeField] GameObject        Button_Ready     = null;    // 게임 레디 버튼
     [SerializeField] GameObject[]      Panel_PlayerSlot = null;    // 플레이어들이 들어올수 있는 슬롯
-
-    // ------------------------- 임시 참조 변수
-    [SerializeField] GameObject Button_ImsiStartGame = null;    // 임시 게임 시작 버튼
 
     // 닉네임에 쓰일 InputField
     private string nickNameInputField = "";
@@ -55,12 +53,17 @@ public class UIManager : MonoBehaviourPunCallbacks
     // RoomOption의 maxPlayer가 byte타입이라서 byte타입
     private byte myRoomMaxPlayer = 0;
 
+    // 방정보를 갱신하는 시간을 0.2초로
     private WaitForSeconds delayUpdateTime = new WaitForSeconds(0.2f);
 
+    // 자기 자신의 레디상태
+    private bool ready = false;
 
     private void Awake()
     {
+        // 초기 화면 세팅
         Screen.SetResolution(960, 540, false);
+        // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
         PhotonNetwork.AutomaticallySyncScene = true;
     }
 
@@ -78,15 +81,17 @@ public class UIManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Text_ConnectionInfo.text = "마스터 서버에 연결 완료!";
+        // 로그인 되어있는 상태로 마스터 서버에 연결되면 자동적으로 로비에 입장
         if (isLogin) PhotonNetwork.JoinLobby();
     }
 
     // 마스터 서버와 연결이 끊어졌을 때 호출
     public override void OnDisconnected(DisconnectCause cause)
     {
-        Debug.Log("서버 연결 끊김");
         Text_ConnectionInfo.text = "마스터 서버에서 끊어짐...";
+        // 접속이 끊어진 상태에서는 로비 패널을 비활성화하고 
         Panel_Lobby.SetActive(false);
+        // 닉네임을 입력받는 InputField와 입장 Button을 활성화 시켜준다
         InputField_NickName.interactable = true;
         Button_JoinLobby.interactable = true;
 
@@ -295,12 +300,6 @@ public class UIManager : MonoBehaviourPunCallbacks
 
         Text_roomName.text = "방 : " + curRoom.Name;
 
-        // 게임 시작버튼은 마스터 클라이언트만 가지고 있는다
-        if(PhotonNetwork.IsMasterClient)
-            Button_StartGame.SetActive(true);
-        else
-            Button_StartGame.SetActive(false);
-
         // 패널들의 UI들을 맞게 처리해준다
         Panel_Login.SetActive(false);
         Panel_Lobby.SetActive(false);
@@ -318,8 +317,16 @@ public class UIManager : MonoBehaviourPunCallbacks
             yield return delayUpdateTime;
             // 방장이 바뀌었을때 바뀐플레이어가 방장이면 해당 플레이어의 게임시작버튼이 활성화 된다
             if (PhotonNetwork.IsMasterClient)
+            {
+                Button_Ready.SetActive(false);
                 Button_StartGame.SetActive(true);
-            Debug.Log("방 정보 갱신중");
+                SetLocalTag("IsReady", false);
+            }
+            else
+            {
+                Button_Ready.SetActive(true);
+                Button_StartGame.SetActive(false);
+            }
 
             // 플레이어들 레디 조건 설정
             for(int i = 0; i < 8; i++)
@@ -338,46 +345,43 @@ public class UIManager : MonoBehaviourPunCallbacks
                 }
                 else if (GetRoomTag(i) > 0)
                 {
+                    // 슬롯이 열려있는 상태인데 플레이어가 없다면 비우는 처리
                     if (GetPlayer(i) == null)
                     {
                         Panel_PlayerSlot[i].GetComponentInChildren<TextMeshProUGUI>().text = "";
                         Panel_PlayerSlot[i].transform.GetChild(1).gameObject.SetActive(false);
+                        Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive(false);
                         Panel_PlayerSlot[i].transform.GetChild(3).gameObject.SetActive(false);
                     }
+                    // 반대 경우라면 해당 플레이어 정보 넣어주는 처리
                     else
                     {
                         Panel_PlayerSlot[i].GetComponentInChildren<TextMeshProUGUI>().text = GetPlayer(i).NickName; ;
                         Panel_PlayerSlot[i].transform.GetChild(1).gameObject.SetActive(true);
                         Panel_PlayerSlot[i].transform.GetChild(3).gameObject.SetActive(true);
-                        Panel_PlayerSlot[i].transform.GetChild(4).gameObject.SetActive(false);
-                    }
-                }
 
-                // 레디상태 보이기
-                if (GetPlayer(i) != null)
-                {
-                    // 방장은 본인의 방장표시를 켜줌
-                    if (GetPlayer(i).IsMasterClient)
-                        Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(true);
-                    else if ((bool)GetPlayer(i).CustomProperties["IsReady"])
-                    {
-                        Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive(true);
-                    }else
-                        Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(false);
+                        // 방장은 본인의 방장표시를 켜줌
+                        if (GetPlayer(i).IsMasterClient)
+                        {
+                            Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive(false);
+                            Panel_PlayerSlot[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = "방 장";
+                            Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            // 클라이언트들은 본인의 레디상태에 따라 레디이미지를 띄우거나 내리고 방장표시는 내린다
+                            Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive((bool)GetPlayer(i).CustomProperties["IsReady"]);
+                            Panel_PlayerSlot[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = "READY";
+                            Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(false);
+                        }
+                    }
                 }
             }
         }
     }
 
-    //public override void OnMasterClientSwitched(Player newMasterClient)
-    //{
-    //    // 방장이 바뀌었을때 바뀐플레이어가 방장이면 해당 플레이어의 게임시작버튼이 활성화 된다
-    //    if (PhotonNetwork.IsMasterClient)
-    //        Button_StartGame.SetActive(true);
-    //}
-
     public void OnLeaveRoomButtonClicked() => PhotonNetwork.LeaveRoom();
-
+    
 
     // 플레이어가 방을 나갔을때 해당 콜백함수가 실행
     public override void OnLeftRoom()
@@ -449,9 +453,39 @@ public class UIManager : MonoBehaviourPunCallbacks
         return (bool)PhotonNetwork.LocalPlayer.CustomProperties[key];
     }
 
-    //------------------------------- 임시로 만든 입장 함수---------------------------------------------------------
-    public void ImsiGameStart()
+    public void OnClick_ReadyButton()
     {
-        PhotonNetwork.LoadLevel("GameScene");
+        if (ready == true)
+            ready = false;
+        else
+            ready = true;
+        SetLocalTag("IsReady", ready);
+        Debug.Log("현재 나의 레디 상태는 " + ready);
+    }
+
+    public void OnClick_StartGame()
+    {
+        if (CheckPlayersReady())
+        {
+            curRoom.IsOpen = false;
+            PhotonNetwork.LoadLevel("GameScene");
+        }
+        else
+            Debug.Log("아직 모든 플레이어가 레디상태가 아닙니다");
+    }
+
+    public bool CheckPlayersReady()
+    {
+        int readyCnt = 0;
+        for(int i = 0; i < curRoom.PlayerCount; i++)
+        {
+            if ((bool)GetPlayer(i).CustomProperties["IsReady"])
+                readyCnt++;
+        }
+
+        if (readyCnt == curRoom.PlayerCount - 1)
+            return true;
+        else
+            return false;
     }
 }
