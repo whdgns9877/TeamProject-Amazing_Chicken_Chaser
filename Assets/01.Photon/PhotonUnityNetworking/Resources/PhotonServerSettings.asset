@@ -39,6 +39,8 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
+  - UpdateWheelPos
+  - RPC_skidMark
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -4,7 +4,16 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - ROOM
+  - Building
+  - Ground
+  - Jump
+  - JumpFix
+  - Boost
+  - Jump2
+  - Jump3
+  - Jump4
+  - Boost2
+  - Jump5
   layers:
   - Default
   - TransparentFX
