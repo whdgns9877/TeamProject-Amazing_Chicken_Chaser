@@ -3860,8 +3860,8 @@ namespace Photon.Realtime
         /// <summary>
         /// Called when the local user/client left a room, so the game's logic can clean up it's internal state.
         /// </summary>
-        /// <remarks>
-        /// When leaving a room, the LoadBalancingClient will disconnect the Game Server and connect to the Master Server.
+        /// <remarks>er and connect to the Master Server.
+        /// When leaving a room, the LoadBalancingClient will disconnect the Game Serv
         /// This wraps up multiple internal actions.
         ///
         /// Wait for the callback OnConnectedToMaster, before you use lobbies and join or create rooms.

@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,16 +16,22 @@ public class AIMove_JSP : MonoBehaviour
     public float maxSteerAngle = 45;
 
 
+    //============================================================================
+    // AI target 관련 
     GameObject TargetObject;
     Transform target;
 
-    NavMeshAgent myNavMesh = null;
-    NavMeshPath myPath = null;
+    NavMeshAgent myNavMesh;
 
+
+    public LayerMask Players;
+
+    float closesTargetDistance = float.MaxValue;
+    //============================================================================
 
     private void Awake()
     {
-        // myNavMesh = GetComponent<NavMeshAgent>();
+        myNavMesh = GetComponent<NavMeshAgent>();
 
         TargetObject = GameObject.FindWithTag("Player");
         target = TargetObject.transform;
@@ -33,7 +40,7 @@ public class AIMove_JSP : MonoBehaviour
 
     private void FixedUpdate()
     {
-        WheelSteer();
+        StartCoroutine(UpdatePath());
 
         for (int i = 0; i < wheelColliders.Length; i++)
         {
@@ -45,15 +52,17 @@ public class AIMove_JSP : MonoBehaviour
         wheelColliders[2].motorTorque = AItorque;
         wheelColliders[3].motorTorque = AItorque;
 
+        //myNavMesh.SetDestination(target.position);
+
     }
 
 
 
-    void WheelSteer()
+    void WheelSteer(Vector3 waypoint)
     {
 
         // get target's vector relative with my position 
-        Vector3 relativeVector = transform.InverseTransformPoint(target.position);
+        Vector3 relativeVector = transform.InverseTransformPoint(waypoint);
 
 
         // divide relativeVector x by lenght of vector => direction between -1 ~ 1
@@ -74,6 +83,35 @@ public class AIMove_JSP : MonoBehaviour
         transform.rotation = rotation;
 
     }
+
+
+
+    //AI의 타겟을 찾는 코루틴
+    IEnumerator UpdatePath()
+    {
+        NavMeshPath myPath = new NavMeshPath();
+
+        Collider[] targetColliders = Physics.OverlapSphere(transform.position, 1000f, Players);
+
+        for (int i = 0; i < targetColliders.Length; i++)
+        {
+            if (NavMesh.CalculatePath(transform.position, targetColliders[i].transform.position, myNavMesh.areaMask, myPath))
+            {
+                WheelSteer(myPath.corners[1]);
+            }
+
+            for (int j = 0; j < myPath.corners.Length - 1; j++)
+            {
+                Debug.DrawLine(myPath.corners[j], myPath.corners[j + 1]);
+            }
+       
+        }
+
+
+        
+        yield return null;
+    }
+
 
 
 }

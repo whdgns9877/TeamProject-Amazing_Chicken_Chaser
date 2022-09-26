@@ -25,7 +25,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     PhotonView PV;
 
     //닉네임 
-    //UIPlayerInfo UIPlayerInfo;
+    UIPlayerInfo UIPlayerInfo;
 
     //============================================================
     // 움직임과 관련된 변수
@@ -43,34 +43,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
-    //============================================================
-    // 맵에 배치된 발판들과 관련된 변수
-    #region 발판 관련 변수
-    [Header("MapTypeInfo")]
-    [SerializeField] int jumpForceX;
-    [SerializeField] int jumpForceY;
-    [SerializeField] int jumpForceZ;
-
-    [SerializeField] int BoostForceZ;
-    [SerializeField] int BoostForceZ2;
-
-    [SerializeField] int jumpForceY2;
-    [SerializeField] int jumpForceZ2;
-
-    [SerializeField] int jumpForceX3;
-    [SerializeField] int jumpForceY3;
-    [SerializeField] int jumpForceZ3;
-
-    [SerializeField] int jumpForceX4;
-    [SerializeField] int jumpForceY4;
-    [SerializeField] int jumpForceZ4;
-
-    [SerializeField] int jumpForceX5;
-    [SerializeField] int jumpForceY5;
-    [SerializeField] int jumpForceZ5;
-
-    #endregion
-    //============================================================
 
     //============================================================
     // 치킨과 관련된 변수 
@@ -90,6 +62,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             {
                 stream.SendNext(trailrenderers[i].emitting);
                 stream.SendNext(myChicken.gameObject.activeSelf);
+
                 if (myChicken.gameObject.activeSelf)
                 { stream.SendNext(ChickenAni.GetBool("Turn Head")); }
             }
@@ -102,11 +75,20 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             {
                 trailrenderers[i].emitting = (bool)stream.ReceiveNext();
                 myChicken.gameObject.SetActive((bool)stream.ReceiveNext());
+
                 if (myChicken.gameObject.activeSelf)
-                { ChickenAni.SetBool("Turn Head", ((bool)stream.ReceiveNext())); }
+                {
+                    ChickenAni = GetComponentInChildren<Animator>();
+                    ChickenAni.SetBool("Turn Head", ((bool)stream.ReceiveNext())); 
+                }
             }
         }
     }
+
+
+
+
+    //============================================================
 
     private void Awake()
     {
@@ -114,7 +96,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         PV = photonView;
         playerRigid = GetComponent<Rigidbody>();
 
-        //UIPlayerInfo = GetComponentInChildren<UIPlayerInfo>();
+        UIPlayerInfo = GetComponentInChildren<UIPlayerInfo>();
 
         myChicken = transform.Find("MyChicken");
     }
@@ -130,13 +112,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     void Start()
     {
-        //UIPlayerInfo.NickName(photonView.Controller.NickName);
+        UIPlayerInfo.NickName(photonView.Controller.NickName);
+
     }
 
     private void Update()
     {
         if (!PV.IsMine)
             return;
+
+        //=====================================================================
+        // Player braking
+        #region 플레이어 브레이크와 관련된 코드 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -175,6 +162,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         // if wheel is off ground, no skidmark
         EraseSkidMark();
+
+        #endregion
+        //=====================================================================
+
+
     }
 
 
@@ -184,6 +176,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         if (!PV.IsMine)
             return;
 
+        //=====================================================================
+        //Player car movment 
+        #region 플레이어 움직임에 대한 코드
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
@@ -238,6 +233,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // wheel collider에 맞춰 wheel mesh를 움직일 수 있도록 함 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
         }
+        #endregion
+        //=====================================================================
+
     }
 
 
@@ -246,20 +244,30 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (collision.collider.tag == "Chicken")
         {
+            if (myChicken.gameObject.activeSelf)
+                return; 
+
             myChicken.gameObject.SetActive(true);
             ChickenAni = GetComponentInChildren<Animator>();
             ChickenAni.SetBool("Turn Head", true);
 
-            // Send message to GameManager to deactivate chicken from chicken pool on the map.
-            gameObject.SendMessage("GotChicken");
+            //Let GameManager to deactivate chicken from chicken pool on the map.
+            GameManager.Inst.Destroy(collision.gameObject);
+
         }
 
         if (collision.collider.tag == "Player")
         {
-            myChicken.gameObject.SetActive(false);
+            // if detected player's MyChicken is not activated, drop the chicken 
+            if (collision.transform.Find("MyChicken").gameObject.activeSelf)
+                return;
 
-            // send meesage to GameManager to activate chicken from chicken pool on the map
-            gameObject.SendMessage("DropTheChicken", myChicken.gameObject);
+            if (!PhotonNetwork.IsMasterClient)
+                return; 
+
+                // deactive MyChicken
+                GameManager.Inst.Instantiate("Chicken", transform.position + Vector3.up * 3f + Vector3.forward * 1f, Quaternion.identity);
+            
         }
     }
 
@@ -329,42 +337,5 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //===========================================================================
 
-    //===========================================================================
-    #region 발판 관련 함수들
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
-        {
-            GetComponent<Rigidbody>().AddForce(jumpForceX, jumpForceY, jumpForceZ);
-        }
-        if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
-        {
-            GetComponent<Rigidbody>().AddForce(jumpForceX, jumpForceY2, jumpForceZ2);
-        }
-        if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
-        {
-            GetComponent<Rigidbody>().AddForce(jumpForceX3, jumpForceY3, jumpForceZ3);
-        }
-        if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
-        {
-            GetComponent<Rigidbody>().AddForce(jumpForceX4, jumpForceY4, jumpForceZ4);
-        }
-        if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
-        {
-            GetComponent<Rigidbody>().AddForce(jumpForceX5, jumpForceY5, jumpForceZ5);
-        }
-
-
-        if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
-        {
-            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
-        }
-        if (other.gameObject.tag == "Boost2") //부스트발판 밟았을때
-        {
-            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
-        }
-    }
-    #endregion
-    //===========================================================================
 
 }

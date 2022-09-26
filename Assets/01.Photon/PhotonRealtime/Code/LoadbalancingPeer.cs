@@ -1848,7 +1848,7 @@ namespace Photon.Realtime
         /// </remarks>
         public bool CleanupCacheOnLeave { get { return this.cleanupCacheOnLeave; } set { this.cleanupCacheOnLeave = value; } }
         private bool cleanupCacheOnLeave = true;
-
+        
         /// <summary>The room's custom properties to set. Use string keys!</summary>
         /// <remarks>
         /// Custom room properties are any key-values you need to define the game's setup.

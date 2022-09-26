@@ -6,22 +6,16 @@ TagManager:
   tags:
   - Building
   - Ground
-  - Jump
-  - JumpFix
-  - Boost
-  - Jump2
-  - Jump3
-  - Jump4
-  - Boost2
-  - Jump5
+  - Chicken
+  - FriedChicken
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
+  - Chicken
   - 
   - 
   - 
