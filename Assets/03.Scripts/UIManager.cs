@@ -268,6 +268,8 @@ public class UIManager : MonoBehaviourPunCallbacks
     {
         // 현재 방에 달려있는 태그를 Hashtable 형식인 curRoomProperties 라는 변수에 넣어준다
         curRoom = PhotonNetwork.CurrentRoom;
+        // 현재 있는 방의 UI 의 Text에 현재 방의 text를 넣어준다
+        Text_roomName.text = "방 : " + curRoom.Name;
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -275,12 +277,13 @@ public class UIManager : MonoBehaviourPunCallbacks
             int max = curRoom.MaxPlayers - 1;
             //// 방장이 처음에 방을 파게되면 방의 초기 슬롯들의 설정을 해준다
             curRoom.SetCustomProperties(new Hashtable
-            {                
+            {
                 // 방장(호스트)는 0에 본인 번호, 참여가능 슬롯은0, 참여불가능 슬롯은 -1
                 // 해당 슬롯의 인덱스와 방옵션의 MaxPlayer를 비교하여 MaxPlayer가 넘어가는 슬롯은 닫아준다
                 {"0", PhotonNetwork.LocalPlayer.ActorNumber }, {"1", 0 },
                 {"2", 2 <= max ? 0 : -1 }, {"3", 3 <= max ? 0 : -1 }, {"4", 4 <= max ? 0 : -1 },
-                {"5", 5 <= max ? 0 : -1 }, {"6", 6 <= max ? 0 : -1 }, {"7", 7 <= max ? 0 : -1 } });
+                {"5", 5 <= max ? 0 : -1 }, {"6", 6 <= max ? 0 : -1 }, {"7", 7 <= max ? 0 : -1 } 
+            });
         }
         else
         {
@@ -298,8 +301,6 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 방에 참가하면 준비상태를 false로
         SetLocalTag("IsReady", false);
 
-        Text_roomName.text = "방 : " + curRoom.Name;
-
         // 패널들의 UI들을 맞게 처리해준다
         Panel_Login.SetActive(false);
         Panel_Lobby.SetActive(false);
@@ -315,6 +316,9 @@ public class UIManager : MonoBehaviourPunCallbacks
         while (PhotonNetwork.InRoom)
         {
             yield return delayUpdateTime;
+            // 업데이트 도중 방에서 나가게되면 방정보 갱신을 멈춘다
+            if(!PhotonNetwork.InRoom) yield break;
+
             // 방장이 바뀌었을때 바뀐플레이어가 방장이면 해당 플레이어의 게임시작버튼이 활성화 된다
             if (PhotonNetwork.IsMasterClient)
             {
@@ -328,52 +332,57 @@ public class UIManager : MonoBehaviourPunCallbacks
                 Button_StartGame.SetActive(false);
             }
 
+
             // 플레이어들 레디 조건 설정
-            for(int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
-                // 슬롯에 플레이어는 없고 사람번호가 있으면 방장이 0을 대입해준다
+                // 방장(마스터클라이언트)이 방설정을 해준다
                 if (PhotonNetwork.IsMasterClient)
                 {
+                    // 슬롯이 열려있는데 사람은 비어있으면 해당 슬롯에 0을 대입
                     if (GetPlayer(i) == null && GetRoomTag(i) > 0) SetRoomTag(i, 0);
-                    else Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(false);
                 }
 
                 // 방 태그를 줄때 열리고 닫히고를 0, -1로 태그값을 줬으므로 이를 통해 판단
                 if (GetRoomTag(i) == -1)
                 {
+                    // 슬롯이 닫혔다는 UI 이미지를 띄워준다
                     Panel_PlayerSlot[i].transform.GetChild(4).gameObject.SetActive(true);
                 }
                 else if (GetRoomTag(i) > 0)
                 {
-                    // 슬롯이 열려있는 상태인데 플레이어가 없다면 비우는 처리
-                    if (GetPlayer(i) == null)
+                    Panel_PlayerSlot[i].transform.GetChild(4).gameObject.SetActive(false);
+                }
+
+                // 슬롯이 열려있는 상태인데 플레이어가 없다면 비우는 처리
+                if (GetPlayer(i) == null)
+                {
+                    Panel_PlayerSlot[i].GetComponentInChildren<TextMeshProUGUI>().text = "";
+                    Panel_PlayerSlot[i].transform.GetChild(1).gameObject.SetActive(false);
+                    Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive(false);
+                    Panel_PlayerSlot[i].transform.GetChild(3).gameObject.SetActive(false);
+                    Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(false);
+                }
+                // 반대 경우라면 해당 플레이어 정보 넣어주는 처리
+                else
+                {
+                    Panel_PlayerSlot[i].GetComponentInChildren<TextMeshProUGUI>().text = GetPlayer(i).NickName; ;
+                    Panel_PlayerSlot[i].transform.GetChild(1).gameObject.SetActive(true);
+                    Panel_PlayerSlot[i].transform.GetChild(3).gameObject.SetActive(true);
+
+                    // 방장은 본인의 방장표시를 켜줌
+                    if (GetPlayer(i).IsMasterClient)
                     {
-                        Panel_PlayerSlot[i].GetComponentInChildren<TextMeshProUGUI>().text = "";
-                        Panel_PlayerSlot[i].transform.GetChild(1).gameObject.SetActive(false);
                         Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive(false);
-                        Panel_PlayerSlot[i].transform.GetChild(3).gameObject.SetActive(false);
+                        Panel_PlayerSlot[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = "방 장";
+                        Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(true);
                     }
-                    // 반대 경우라면 해당 플레이어 정보 넣어주는 처리
                     else
                     {
-                        Panel_PlayerSlot[i].GetComponentInChildren<TextMeshProUGUI>().text = GetPlayer(i).NickName; ;
-                        Panel_PlayerSlot[i].transform.GetChild(1).gameObject.SetActive(true);
-                        Panel_PlayerSlot[i].transform.GetChild(3).gameObject.SetActive(true);
-
-                        // 방장은 본인의 방장표시를 켜줌
-                        if (GetPlayer(i).IsMasterClient)
-                        {
-                            Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive(false);
-                            Panel_PlayerSlot[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = "방 장";
-                            Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(true);
-                        }
-                        else
-                        {
-                            // 클라이언트들은 본인의 레디상태에 따라 레디이미지를 띄우거나 내리고 방장표시는 내린다
-                            Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive((bool)GetPlayer(i).CustomProperties["IsReady"]);
-                            Panel_PlayerSlot[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = "READY";
-                            Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(false);
-                        }
+                        // 클라이언트들은 본인의 레디상태에 따라 레디이미지를 띄우거나 내리고 방장표시는 내린다
+                        Panel_PlayerSlot[i].transform.GetChild(2).gameObject.SetActive((bool)GetPlayer(i).CustomProperties["IsReady"]);
+                        Panel_PlayerSlot[i].transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = "READY";
+                        Panel_PlayerSlot[i].transform.GetChild(5).gameObject.SetActive(false);
                     }
                 }
             }
@@ -381,15 +390,28 @@ public class UIManager : MonoBehaviourPunCallbacks
     }
 
     public void OnLeaveRoomButtonClicked() => PhotonNetwork.LeaveRoom();
-    
 
     // 플레이어가 방을 나갔을때 해당 콜백함수가 실행
     public override void OnLeftRoom()
     {
+        ResetMyRoom();
         // UI들을 상황에 맞게 처리
         Panel_Room.SetActive(false);
         Panel_Login.SetActive(true);
         Panel_Lobby.SetActive(true);
+    }
+
+    private void ResetMyRoom()
+    {
+        // 방을 나가면 다음방에 들어가기전 UI처리들을 초기화하여준다
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 1; j <= 5; j++)
+            {
+                Panel_PlayerSlot[i].transform.GetChild(j).gameObject.SetActive(false);
+                Panel_PlayerSlot[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
+            }
+        }
     }
 
     private void Update()
@@ -421,37 +443,27 @@ public class UIManager : MonoBehaviourPunCallbacks
             InputField_RoomName.text = null;
     }
 
-    public void SetRoomTag(int slotIndex, int value)
-    {
-        curRoom.SetCustomProperties(new Hashtable { { slotIndex.ToString(), value } });
-    }
+    private void SetRoomTag(int slotIndex, int value) => curRoom.SetCustomProperties(new Hashtable { { slotIndex.ToString(), value } });
 
-    public int GetRoomTag(int slotIndex)
-    {
-        if (curRoom == null) return -2;
-        return (int)curRoom.CustomProperties[slotIndex.ToString()];
-    }
 
-    Player GetPlayer(int slotIndex)
+    private int GetRoomTag(int slotIndex) => (int)curRoom.CustomProperties[slotIndex.ToString()];
+    
+
+    private Player GetPlayer(int slotIndex)
     {
         for(int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
-            int getRoomTag = GetRoomTag(slotIndex);
-            if (PhotonNetwork.PlayerList[i].ActorNumber == getRoomTag)
+            if (PhotonNetwork.PlayerList[i].ActorNumber == GetRoomTag(slotIndex))
                 return PhotonNetwork.PlayerList[i];
         }
         return null;
     }
 
-    public void SetLocalTag(string key, bool value)
-    {
-        PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable { { key, value } });
-    }
+    private void SetLocalTag(string key, bool value) => PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable { { key, value } });
 
-    public object GetLocalTag(string key)
-    {
-        return (bool)PhotonNetwork.LocalPlayer.CustomProperties[key];
-    }
+
+    //private object GetLocalTag(string key) => (bool)PhotonNetwork.LocalPlayer.CustomProperties[key];
+    
 
     public void OnClick_ReadyButton()
     {

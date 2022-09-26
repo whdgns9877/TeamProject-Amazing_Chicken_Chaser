@@ -1613,7 +1613,6 @@ MonoBehaviour:
   - {fileID: 707338945}
   - {fileID: 1854267363}
   - {fileID: 1724733996}
-  Button_ImsiStartGame: {fileID: 0}
 --- !u!4 &282476730
 Transform:
   m_ObjectHideFlags: 0
