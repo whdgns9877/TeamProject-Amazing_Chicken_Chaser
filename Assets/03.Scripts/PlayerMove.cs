@@ -43,6 +43,50 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
+    //============================================================
+    // 맵에 배치된 발판들과 관련된 변수
+    #region 발판 관련 변수
+    [Header("MapTypeInfo")]
+
+    [SerializeField] int jumpForceY;
+    [SerializeField] int jumpForceZ;
+
+    [SerializeField] int BoostForceZ;
+    [SerializeField] int BoostForceZ2;
+
+    [SerializeField] int jumpForceY2;
+    [SerializeField] int jumpForceZ2;
+
+
+    [SerializeField] int jumpForceY3;
+    [SerializeField] int jumpForceZ3;
+
+
+    [SerializeField] int jumpForceY4;
+    [SerializeField] int jumpForceZ4;
+
+
+    [SerializeField] int jumpForceY5;
+    [SerializeField] int jumpForceZ5;
+
+    [SerializeField] int jumpForceY6;
+    [SerializeField] int jumpForceZ6;
+
+    #endregion
+    //============================================================
+
+    //============================================================
+    #region 아이템 관련 변수
+    [SerializeField] bool missile = false;
+    [SerializeField] bool shield = false;
+    [SerializeField] bool mine = false;
+
+    [SerializeField] GameObject MissileObj;
+
+
+
+    #endregion
+    //============================================================
 
     //============================================================
     // 치킨과 관련된 변수 
@@ -166,7 +210,16 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //=====================================================================
 
-
+        //=====================================================================
+        #region 아이템 관련 스크립트
+        if(missile == true)
+        {
+            if(Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                Instantiate(MissileObj, transform.position, Quaternion.identity);
+            }
+        }
+        #endregion
     }
 
 
@@ -272,9 +325,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     }
 
 
-
-
-
     //===========================================================================
     // function related to car movement 
     #region 자동차 움직임에 관한 함수들 
@@ -337,5 +387,47 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //===========================================================================
 
+    //===========================================================================
+    #region 발판 관련 함수
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
+        }
+        if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
+        }
+        if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
+        }
+        if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
+        }
+        if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
+        }
+        if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
+        }
+
+        if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
+        {
+            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
+        }
+        if (other.gameObject.tag == "Boost2") //부스트발판 밟았을때
+        {
+            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
+        }
+
+    }
+    #endregion
+    //===========================================================================
 
 }
+
