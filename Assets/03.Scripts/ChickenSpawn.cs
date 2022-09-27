@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 {
@@ -51,8 +52,8 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
         for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount - 1; i++)
         {
-            PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, 0), Quaternion.identity);
-            
+            PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, i + 2), Quaternion.identity);
+
             Debug.Log("만들어라 치킨");
 
         }
@@ -63,9 +64,13 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
     {
         Debug.Log("## Destroy!");
 
-        gameObject.SetActive(false);
+        Chicken.SetActive(false);
         ChickenList.Enqueue(Chicken);
+
+        Debug.Log("My queue count" + ChickenList.Count);
+
     }
+
 
     public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)
     {
@@ -77,10 +82,10 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
             chicken.transform.position = position;
             chicken.transform.rotation = rotation;
             chicken.SetActive(true);
+
             return chicken;
         }
 
-        return Instantiate(prefabId, position, rotation);
+        return null;
     }
-
 }
