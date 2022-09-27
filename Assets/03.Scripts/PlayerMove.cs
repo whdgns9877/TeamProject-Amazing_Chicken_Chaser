@@ -157,7 +157,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     void Start()
     {
         UIPlayerInfo.NickName(photonView.Controller.NickName);
-
     }
 
     private void Update()
@@ -317,7 +316,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
             //Let ChickenSpawn deactivates chicken from chicken pool on the map.
             PV.RPC("GotChicken", RpcTarget.MasterClient, collision.gameObject);
-
+            
         }
 
         if (collision.collider.tag == "Player")
@@ -338,20 +337,20 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 if (collision.transform.Find("MyChicken").gameObject.activeSelf)
                 {
                     // deactive opponent chicken 
-                    colliPV.RPC("MyChicken", RpcTarget.All, false);
+                    colliPV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to pool chicken and active
-                    colliPV.RPC("DropChicken", RpcTarget.MasterClient, collision.transform);
+                    colliPV.RPC("DropChicken", RpcTarget.AllViaServer, collision.transform);
                 }
 
                 // if I have chicken
                 else if (myChicken.gameObject.activeSelf)
                 {
                     // deactive my chicken 
-                    PV.RPC("MyChicken", RpcTarget.All, false);
+                    PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to active chicken 
-                    PV.RPC("DropChicken", RpcTarget.MasterClient, transform);
+                    PV.RPC("DropChicken", RpcTarget.AllViaServer, transform);
                 }
             }
         }

@@ -13,29 +13,35 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 public class UIManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] TextMeshProUGUI Text_ConnectionInfo = null;  // 현재 네트워크 상태 메세지를 나타낼 TextMeshPro
+    [SerializeField] GameObject      Panel_Notice        = null;  // 현재 알림 상태를 띄울 패널
 
     [Header("** 로그인 UI **")]
     [SerializeField] TMP_InputField InputField_NickName = null;  // 닉네임을 입력받을 InputField
     [SerializeField] Button         Button_JoinLobby    = null;  // 로비 접속 버튼
 
     [Header("** 로비 UI **")]
-    [SerializeField] GameObject     Panel_Login             = null;  // 로그인 패널
-    [SerializeField] GameObject     Panel_Lobby             = null;  // 로비 패널
-    [SerializeField] GameObject     Panel_CreateRoom        = null;  // 방을 생성하는데 쓰일 패널
-    [SerializeField] Button         Button_CreateRoomPanel  = null;  // 방생성 판넬을 띄워줄 버튼
-    [SerializeField] Transform      Tr_Content_Room         = null;  // 방 생성시 스크롤뷰에 넣어줄 방의 위치(Vertical Layout Group 사용으로 알맞게 들어가게 할것임)
-    [SerializeField] Button         Button_CreateRoom       = null;  // 방을 생성하는 버튼
-    [SerializeField] TMP_InputField InputField_RoomName     = null;  // 방 이름을 받을 인풋필드
-    [SerializeField] GameObject     room                    = null;  // 방정보에 따라 만들어줄 방 프리팹
-    [SerializeField] Toggle[]       togglesForMaxPlayer     = null;  // 최대 플레이어를 정해줄 토글들
-    [SerializeField] TMP_InputField curRoomListCount        = null;  // 현재 로비의 방 개수
+    [SerializeField] GameObject      Panel_Login             = null;  // 로그인 패널
+    [SerializeField] GameObject      Panel_Lobby             = null;  // 로비 패널
+    [SerializeField] GameObject      Panel_CreateRoom        = null;  // 방을 생성하는데 쓰일 패널
+    [SerializeField] Button          Button_CreateRoomPanel  = null;  // 방생성 판넬을 띄워줄 버튼
+    [SerializeField] Transform       Tr_Content_Room         = null;  // 방 생성시 스크롤뷰에 넣어줄 방의 위치(Vertical Layout Group 사용으로 알맞게 들어가게 할것임)
+    [SerializeField] Button          Button_CreateRoom       = null;  // 방을 생성하는 버튼
+    [SerializeField] TMP_InputField  InputField_RoomName     = null;  // 방 이름을 받을 인풋필드
+    [SerializeField] GameObject      room                    = null;  // 방정보에 따라 만들어줄 방 프리팹
+    [SerializeField] Toggle[]        togglesForMaxPlayer     = null;  // 최대 플레이어를 정해줄 토글들
+    [SerializeField] TextMeshProUGUI Text_MyCost             = null;  // 나의 코스트
 
     [Header("** 방 UI **")]
-    [SerializeField] TextMeshProUGUI   Text_roomName    = null;    // 방 이름
-    [SerializeField] GameObject        Panel_Room       = null;    // 방의 전체적인 패널
-    [SerializeField] GameObject        Button_StartGame = null;    // 게임 시작 버튼
-    [SerializeField] GameObject        Button_Ready     = null;    // 게임 레디 버튼
-    [SerializeField] GameObject[]      Panel_PlayerSlot = null;    // 플레이어들이 들어올수 있는 슬롯
+    [SerializeField] TextMeshProUGUI   Text_roomName           = null;    // 방 이름
+    [SerializeField] TextMeshProUGUI   Text_RoomCost           = null;    // 방 코스트
+    [SerializeField] TextMeshProUGUI   Text_MyCostInRoom       = null;    // 방 안에서의 나의 코스트
+    [SerializeField] GameObject        Panel_Room              = null;    // 방의 전체적인 패널
+    [SerializeField] GameObject        Button_StartGame        = null;    // 게임 시작 버튼
+    [SerializeField] GameObject        Button_Ready            = null;    // 게임 레디 버튼
+    [SerializeField] GameObject[]      Panel_PlayerSlot        = null;    // 플레이어들이 들어올수 있는 슬롯
+
+    // 방 입장과 게임에 쓰일 코스트
+    private int myCost = 0;
 
     // 닉네임에 쓰일 InputField
     private string nickNameInputField = "";
@@ -65,6 +71,8 @@ public class UIManager : MonoBehaviourPunCallbacks
         Screen.SetResolution(960, 540, false);
         // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
         PhotonNetwork.AutomaticallySyncScene = true;
+        // DAPPX를 위한 Cost
+        myCost = 10000;
     }
 
     // Start is called before the first frame update
@@ -89,8 +97,9 @@ public class UIManager : MonoBehaviourPunCallbacks
     public override void OnDisconnected(DisconnectCause cause)
     {
         Text_ConnectionInfo.text = "마스터 서버에서 끊어짐...";
-        // 접속이 끊어진 상태에서는 로비 패널을 비활성화하고 
-        Panel_Lobby.SetActive(false);
+        // 접속이 끊어진 상태에서는 로비 패널을 비활성화하고
+        if(Panel_Lobby.activeInHierarchy)
+            Panel_Lobby.SetActive(false);
         // 닉네임을 입력받는 InputField와 입장 Button을 활성화 시켜준다
         InputField_NickName.interactable = true;
         Button_JoinLobby.interactable = true;
@@ -140,7 +149,9 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 로비에 연결 완료시 호출되는 함수
     public override void OnJoinedLobby()
     {
+        // 로비에서 표시할 텍스트 들을 띄워줌
         Text_ConnectionInfo.text = "로비 접속 완료!";
+        Text_MyCost.text = "MyCost : " + myCost.ToString();
         // 로비에 접속 완료시 로그인 패널은 비활성화 로비 패널은 활성화 해준다
         Panel_Lobby.SetActive(true);
         InputField_NickName.interactable = false;
@@ -197,6 +208,7 @@ public class UIManager : MonoBehaviourPunCallbacks
             roomData.maxPlayer = roomInfo.MaxPlayers;
             roomData.playerCount = roomInfo.PlayerCount;
             roomData.isOpen = roomInfo.IsOpen;
+            roomData.roomCost = roomInfo.MaxPlayers * 1000;
             roomData.UpdateInfo();
 
             // 해당 방의 인원이 꽉차있으면 버튼클릭을 막아 접속할수 없게한다
@@ -282,7 +294,8 @@ public class UIManager : MonoBehaviourPunCallbacks
                 // 해당 슬롯의 인덱스와 방옵션의 MaxPlayer를 비교하여 MaxPlayer가 넘어가는 슬롯은 닫아준다
                 {"0", PhotonNetwork.LocalPlayer.ActorNumber }, {"1", 0 },
                 {"2", 2 <= max ? 0 : -1 }, {"3", 3 <= max ? 0 : -1 }, {"4", 4 <= max ? 0 : -1 },
-                {"5", 5 <= max ? 0 : -1 }, {"6", 6 <= max ? 0 : -1 }, {"7", 7 <= max ? 0 : -1 } 
+                {"5", 5 <= max ? 0 : -1 }, {"6", 6 <= max ? 0 : -1 }, {"7", 7 <= max ? 0 : -1 },
+                {"RoomCost", curRoom.MaxPlayers*1000}
             });
         }
         else
@@ -300,6 +313,9 @@ public class UIManager : MonoBehaviourPunCallbacks
 
         // 방에 참가하면 준비상태를 false로
         SetLocalTag("IsReady", false);
+
+        myCost -= 1000;
+        Text_MyCostInRoom.text = "MyCost : " + myCost.ToString();
 
         // 패널들의 UI들을 맞게 처리해준다
         Panel_Login.SetActive(false);
@@ -319,6 +335,8 @@ public class UIManager : MonoBehaviourPunCallbacks
             // 업데이트 도중 방에서 나가게되면 방정보 갱신을 멈춘다
             if(!PhotonNetwork.InRoom) yield break;
 
+            Text_RoomCost.text = "방 베팅 금액 " + ((int)curRoom.CustomProperties["RoomCost"]).ToString();
+
             // 방장이 바뀌었을때 바뀐플레이어가 방장이면 해당 플레이어의 게임시작버튼이 활성화 된다
             if (PhotonNetwork.IsMasterClient)
             {
@@ -331,7 +349,6 @@ public class UIManager : MonoBehaviourPunCallbacks
                 Button_Ready.SetActive(true);
                 Button_StartGame.SetActive(false);
             }
-
 
             // 플레이어들 레디 조건 설정
             for (int i = 0; i < 8; i++)
@@ -390,7 +407,12 @@ public class UIManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void OnLeaveRoomButtonClicked() => PhotonNetwork.LeaveRoom();
+    public void OnLeaveRoomButtonClicked()
+    {
+        PhotonNetwork.LeaveRoom();
+        myCost += 1000;
+        Text_MyCost.text = myCost.ToString();
+    }
 
     // 플레이어가 방을 나갔을때 해당 콜백함수가 실행
     public override void OnLeftRoom()
@@ -484,7 +506,10 @@ public class UIManager : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel("GameScene");
         }
         else
-            Debug.Log("아직 모든 플레이어가 레디상태가 아닙니다");
+        {
+            Panel_Notice.GetComponentInChildren<TextMeshProUGUI>().text = "아직 모든 플레이어가 준비 되지 않았습니다";
+            Panel_Notice.SetActive(true);
+        }
     }
 
     public bool CheckPlayersReady()
@@ -496,7 +521,7 @@ public class UIManager : MonoBehaviourPunCallbacks
                 readyCnt++;
         }
 
-        if (readyCnt == curRoom.PlayerCount - 1)
+        if (readyCnt == curRoom.MaxPlayers - 1)
             return true;
         else
             return false;
