@@ -49,7 +49,7 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
         if (!PhotonNetwork.IsMasterClient)
             return;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount - 1; i++)
         {
             PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, 0), Quaternion.identity);
             
