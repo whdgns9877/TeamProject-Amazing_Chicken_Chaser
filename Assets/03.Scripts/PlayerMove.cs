@@ -297,33 +297,80 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (collision.collider.tag == "Chicken")
         {
+            // If I have chicken
             if (myChicken.gameObject.activeSelf)
-                return; 
+                return;
 
             myChicken.gameObject.SetActive(true);
             ChickenAni = GetComponentInChildren<Animator>();
             ChickenAni.SetBool("Turn Head", true);
 
-            //Let GameManager to deactivate chicken from chicken pool on the map.
-            GameManager.Inst.Destroy(collision.gameObject);
+            //Let ChickenSpawn deactivates chicken from chicken pool on the map.
+            PV.RPC("GotChicken", RpcTarget.MasterClient, collision.gameObject);
 
         }
 
         if (collision.collider.tag == "Player")
         {
-            // if detected player's MyChicken is not activated, drop the chicken 
-            if (collision.transform.Find("MyChicken").gameObject.activeSelf)
+            PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
+
+            // if I have chicken and opponent have chicken too 
+            if (myChicken.gameObject.activeSelf && collision.transform.Find("MyChicken").gameObject.activeSelf)
                 return;
 
-            if (!PhotonNetwork.IsMasterClient)
-                return; 
+            // if I don't have a chicken, opponent doesn't have chicken too 
+            else if (!myChicken.gameObject.activeSelf && !collision.transform.Find("MyChicken").gameObject.activeSelf)
+                return;
 
-                // deactive MyChicken
-                GameManager.Inst.Instantiate("Chicken", transform.position + Vector3.up * 3f + Vector3.forward * 1f, Quaternion.identity);
-            
+            else
+            {
+                // if opponent has chicken 
+                if (collision.transform.Find("MyChicken").gameObject.activeSelf)
+                {
+                    // deactive opponent chicken 
+                    colliPV.RPC("MyChicken", RpcTarget.All, false);
+
+                    // request master client to pool chicken and active
+                    colliPV.RPC("DropChicken", RpcTarget.MasterClient, collision.transform);
+                }
+
+                // if I have chicken
+                else if (myChicken.gameObject.activeSelf)
+                {
+                    // deactive my chicken 
+                    PV.RPC("MyChicken", RpcTarget.All, false);
+
+                    // request master client to active chicken 
+                    PV.RPC("DropChicken", RpcTarget.MasterClient, transform);
+                }
+            }
         }
     }
 
+
+    [PunRPC]
+    public void MyChicken(bool has)
+    {
+        myChicken.gameObject.SetActive(has);
+    }
+
+    [PunRPC]
+    public void DropChicken(Transform where)
+    {
+
+        Debug.Log("## 치킨 만들게!" + photonView.ViewID);
+
+        // Pool chicken and active
+        ChickenSpawn.Inst.Instantiate("Chicken", where.position + new Vector3(0f, 4f, 0f), Quaternion.identity);
+    }
+
+    [PunRPC]
+    public void GotChicken(GameObject Chicken)
+    {
+        Debug.Log("## 치킨 없앨게!" + photonView.ViewID);
+
+        ChickenSpawn.Inst.Destroy(Chicken);
+    }
 
     //===========================================================================
     // function related to car movement 
