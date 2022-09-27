@@ -10,7 +10,6 @@ public class RoomData : MonoBehaviour
     public int playerCount = 0;
     public int maxPlayer = 0;
     public bool isOpen;
-    public int roomCost = 0;
 
     [System.NonSerialized]
     public TextMeshProUGUI roomDataText;
@@ -22,6 +21,6 @@ public class RoomData : MonoBehaviour
 
     public void UpdateInfo()
     {
-        roomDataText.text = string.Format(" {0} [{1} / {2}] \n Cost : {3}", roomName, playerCount, maxPlayer, roomCost);
+        roomDataText.text = string.Format(" {0} [{1} / {2}]", roomName, playerCount, maxPlayer);
     }
 }

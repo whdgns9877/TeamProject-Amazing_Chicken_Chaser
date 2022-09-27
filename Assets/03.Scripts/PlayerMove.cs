@@ -21,6 +21,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     [SerializeField] WheelCollider[] wheelColliders = new WheelCollider[4]; // wheel collider
     [SerializeField] TrailRenderer[] trailrenderers = new TrailRenderer[4]; // wheel trailrenderer
 
+    float xAxis;
+    float zAxis;
+
+
     // 동기화에 사용되는 포톤뷰
     PhotonView PV;
 
@@ -157,22 +161,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     void Start()
     {
         UIPlayerInfo.NickName(photonView.Controller.NickName);
+
     }
 
+    //==============================================      UPDATE      ===========================================
     private void Update()
     {
         if (!PV.IsMine)
             return;
-        //=====================================================================
-        // Player Pos Reset
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            transform.position = Vector3.zero;
-            transform.rotation = Quaternion.identity;
-            playerRigid.velocity = Vector3.zero;
-        }
-        //=====================================================================
 
+        //input keys 
+        xAxis = Input.GetAxis("Horizontal");
+        zAxis = Input.GetAxis("Vertical");
 
         //=====================================================================
         // Player braking
@@ -221,11 +221,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         #region 아이템 관련 스크립트
-        if(missile == true)
+        //if(missile == true)
         {
             if(Input.GetKeyDown(KeyCode.LeftControl))
             {
-                Instantiate(MissileObj, transform.position, Quaternion.identity);
+                //if (transform.Find("Missile").gameObject.activeSelf == true) //활성화 중이라면 반환
+                //return;
+                //Instantiate(MissileObj, transform.position, Quaternion.identity);
+                PhotonNetwork.Instantiate("Missile", transform.position, Quaternion.identity);
             }
         }
         #endregion
@@ -244,9 +247,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
-        //input keys 
-        float xAxis = Input.GetAxis("Horizontal");
-        float zAxis = Input.GetAxis("Vertical");
+        
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
@@ -306,80 +307,33 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (collision.collider.tag == "Chicken")
         {
-            // If I have chicken
             if (myChicken.gameObject.activeSelf)
-                return;
+                return; 
 
             myChicken.gameObject.SetActive(true);
             ChickenAni = GetComponentInChildren<Animator>();
             ChickenAni.SetBool("Turn Head", true);
 
-            //Let ChickenSpawn deactivates chicken from chicken pool on the map.
-            PV.RPC("GotChicken", RpcTarget.MasterClient, collision.gameObject);
-            
+            //Let GameManager to deactivate chicken from chicken pool on the map.
+            GameManager.Inst.Destroy(collision.gameObject);
+
         }
 
         if (collision.collider.tag == "Player")
         {
-            PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
-
-            // if I have chicken and opponent have chicken too 
-            if (myChicken.gameObject.activeSelf && collision.transform.Find("MyChicken").gameObject.activeSelf)
+            // if detected player's MyChicken is not activated, drop the chicken 
+            if (collision.transform.Find("MyChicken").gameObject.activeSelf)
                 return;
 
-            // if I don't have a chicken, opponent doesn't have chicken too 
-            else if (!myChicken.gameObject.activeSelf && !collision.transform.Find("MyChicken").gameObject.activeSelf)
-                return;
+            if (!PhotonNetwork.IsMasterClient)
+                return; 
 
-            else
-            {
-                // if opponent has chicken 
-                if (collision.transform.Find("MyChicken").gameObject.activeSelf)
-                {
-                    // deactive opponent chicken 
-                    colliPV.RPC("MyChicken", RpcTarget.AllViaServer, false);
-
-                    // request master client to pool chicken and active
-                    colliPV.RPC("DropChicken", RpcTarget.AllViaServer, collision.transform);
-                }
-
-                // if I have chicken
-                else if (myChicken.gameObject.activeSelf)
-                {
-                    // deactive my chicken 
-                    PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
-
-                    // request master client to active chicken 
-                    PV.RPC("DropChicken", RpcTarget.AllViaServer, transform);
-                }
-            }
+                // deactive MyChicken
+                GameManager.Inst.Instantiate("Chicken", transform.position + Vector3.up * 3f + Vector3.forward * 1f, Quaternion.identity);
+            
         }
     }
 
-
-    [PunRPC]
-    public void MyChicken(bool has)
-    {
-        myChicken.gameObject.SetActive(has);
-    }
-
-    [PunRPC]
-    public void DropChicken(Transform where)
-    {
-
-        Debug.Log("## 치킨 만들게!" + photonView.ViewID);
-
-        // Pool chicken and active
-        ChickenSpawn.Inst.Instantiate("Chicken", where.position + new Vector3(0f, 4f, 0f), Quaternion.identity);
-    }
-
-    [PunRPC]
-    public void GotChicken(GameObject Chicken)
-    {
-        Debug.Log("## 치킨 없앨게!" + photonView.ViewID);
-
-        ChickenSpawn.Inst.Destroy(Chicken);
-    }
 
     //===========================================================================
     // function related to car movement 
