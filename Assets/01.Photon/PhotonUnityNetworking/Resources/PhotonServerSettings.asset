@@ -45,6 +45,11 @@ MonoBehaviour:
   - RPC_DropTheChicken
   - Destroy
   - Instantiate
+  - MyChicken
+  - DropChicken
+  - GotChicken
+  - test
+  - test2
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
