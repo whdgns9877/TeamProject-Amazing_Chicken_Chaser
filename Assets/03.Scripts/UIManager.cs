@@ -28,11 +28,11 @@ public class UIManager : MonoBehaviourPunCallbacks
     [SerializeField] TMP_InputField InputField_RoomName     = null;  // 방 이름을 받을 인풋필드
     [SerializeField] GameObject     room                    = null;  // 방정보에 따라 만들어줄 방 프리팹
     [SerializeField] Toggle[]       togglesForMaxPlayer     = null;  // 최대 플레이어를 정해줄 토글들
+    [SerializeField] TMP_InputField curRoomListCount        = null;  // 현재 로비의 방 개수
 
     [Header("** 방 UI **")]
     [SerializeField] TextMeshProUGUI   Text_roomName    = null;    // 방 이름
     [SerializeField] GameObject        Panel_Room       = null;    // 방의 전체적인 패널
-    //[SerializeField] TextMeshProUGUI[] PlayerNickNames  = null;    // 플레이어들의 닉네임을 담을 배열
     [SerializeField] GameObject        Button_StartGame = null;    // 게임 시작 버튼
     [SerializeField] GameObject        Button_Ready     = null;    // 게임 레디 버튼
     [SerializeField] GameObject[]      Panel_PlayerSlot = null;    // 플레이어들이 들어올수 있는 슬롯
@@ -162,7 +162,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 룸이 삭제되는 경우
     // 룸의 IsOpen 값이 변화할 경우
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
+    {       
         // 방의 정보가 바뀌어 이 콜백함수가 실행되면
         // 원래 있던 방들을 전부 없애주고
         foreach (GameObject obj in GameObject.FindGameObjectsWithTag("ROOM"))
@@ -351,6 +351,7 @@ public class UIManager : MonoBehaviourPunCallbacks
                 }
                 else if (GetRoomTag(i) > 0)
                 {
+                    // 반대경우에는 닫힌이미지를 비활성해 열려있는것처럼 보이게 처리
                     Panel_PlayerSlot[i].transform.GetChild(4).gameObject.SetActive(false);
                 }
 

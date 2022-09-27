@@ -164,6 +164,16 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (!PV.IsMine)
             return;
+        //=====================================================================
+        // Player Pos Reset
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            transform.position = Vector3.zero;
+            transform.rotation = Quaternion.identity;
+            playerRigid.velocity = Vector3.zero;
+        }
+        //=====================================================================
+
 
         //=====================================================================
         // Player braking
