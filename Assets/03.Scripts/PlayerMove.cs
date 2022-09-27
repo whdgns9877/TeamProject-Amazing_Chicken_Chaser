@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
 using System.Runtime.ExceptionServices;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
@@ -44,12 +43,57 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
+    //============================================================
+    // 맵에 배치된 발판들과 관련된 변수
+    #region 발판 관련 변수
+    [Header("MapTypeInfo")]
+
+    [SerializeField] int jumpForceY;
+    [SerializeField] int jumpForceZ;
+
+    [SerializeField] int BoostForceZ;
+    [SerializeField] int BoostForceZ2;
+
+    [SerializeField] int jumpForceY2;
+    [SerializeField] int jumpForceZ2;
+
+
+    [SerializeField] int jumpForceY3;
+    [SerializeField] int jumpForceZ3;
+
+
+    [SerializeField] int jumpForceY4;
+    [SerializeField] int jumpForceZ4;
+
+
+    [SerializeField] int jumpForceY5;
+    [SerializeField] int jumpForceZ5;
+
+    [SerializeField] int jumpForceY6;
+    [SerializeField] int jumpForceZ6;
+
+    #endregion
+    //============================================================
+
+    //============================================================
+    #region 아이템 관련 변수
+    [SerializeField] bool missile = false;
+    [SerializeField] bool shield = false;
+    [SerializeField] bool mine = false;
+
+    [SerializeField] GameObject MissileObj;
+
+
+
+    #endregion
+    //============================================================
 
     //============================================================
     // 치킨과 관련된 변수 
 
     Transform myChicken = null;
     Animator ChickenAni = null;
+
 
     //============================================================
     // Network 동기화를 위한 함수 
@@ -79,7 +123,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 if (myChicken.gameObject.activeSelf)
                 {
                     ChickenAni = GetComponentInChildren<Animator>();
-                    ChickenAni.SetBool("Turn Head", ((bool)stream.ReceiveNext()));
+                    ChickenAni.SetBool("Turn Head", ((bool)stream.ReceiveNext())); 
                 }
             }
         }
@@ -102,9 +146,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     }
 
 
+
+
+
+
+
+
+
+
     void Start()
     {
         UIPlayerInfo.NickName(photonView.Controller.NickName);
+
     }
 
     private void Update()
@@ -157,7 +210,16 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //=====================================================================
 
-
+        //=====================================================================
+        #region 아이템 관련 스크립트
+        if(missile == true)
+        {
+            if(Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                Instantiate(MissileObj, transform.position, Quaternion.identity);
+            }
+        }
+        #endregion
     }
 
 
@@ -235,79 +297,31 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (collision.collider.tag == "Chicken")
         {
-            // If I have chicken
             if (myChicken.gameObject.activeSelf)
-                return;
+                return; 
 
             myChicken.gameObject.SetActive(true);
             ChickenAni = GetComponentInChildren<Animator>();
             ChickenAni.SetBool("Turn Head", true);
 
-            //Let ChickenSpawn deactivates chicken from chicken pool on the map.
-            PV.RPC("GotChicken", RpcTarget.MasterClient, collision.gameObject);
+            //Let GameManager to deactivate chicken from chicken pool on the map.
+            GameManager.Inst.Destroy(collision.gameObject);
 
         }
 
         if (collision.collider.tag == "Player")
         {
-            PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
-
-            // if I have chicken and opponent have chicken too 
-            if (myChicken.gameObject.activeSelf && collision.transform.Find("MyChicken").gameObject.activeSelf)
+            // if detected player's MyChicken is not activated, drop the chicken 
+            if (collision.transform.Find("MyChicken").gameObject.activeSelf)
                 return;
 
-            // if I don't have a chicken, opponent doesn't have chicken too 
-            else if (!myChicken.gameObject.activeSelf && !collision.transform.Find("MyChicken").gameObject.activeSelf)
-                return;
+            if (!PhotonNetwork.IsMasterClient)
+                return; 
 
-            else
-            {
-                // if opponent has chicken 
-                if (collision.transform.Find("MyChicken").gameObject.activeSelf)
-                {
-                    // deactive opponent chicken 
-                    colliPV.RPC("MyChicken", RpcTarget.All, false);
-
-                    // request master client to pool chicken and active
-                    colliPV.RPC("DropChicken", RpcTarget.MasterClient, collision.transform);
-                }
-
-                // if I have chicken
-                else if (myChicken.gameObject.activeSelf)
-                {
-                    // deactive my chicken 
-                    PV.RPC("MyChicken", RpcTarget.All, false);
-
-                    // request master client to active chicken 
-                    PV.RPC("DropChicken", RpcTarget.MasterClient, transform);
-                }
-            }
+                // deactive MyChicken
+                GameManager.Inst.Instantiate("Chicken", transform.position + Vector3.up * 3f + Vector3.forward * 1f, Quaternion.identity);
+            
         }
-    }
-
-
-    [PunRPC]
-    public void MyChicken(bool has)
-    {
-        myChicken.gameObject.SetActive(has);
-    }
-
-    [PunRPC]
-    public void DropChicken(Transform where)
-    {
-
-        Debug.Log("## 치킨 만들게!" + photonView.ViewID);
-
-        // Pool chicken and active
-        ChickenSpawn.Inst.Instantiate("Chicken", where.position + new Vector3(0f, 4f, 0f), Quaternion.identity);
-    }
-
-    [PunRPC]
-    public void GotChicken(GameObject Chicken)
-    {
-        Debug.Log("## 치킨 없앨게!" + photonView.ViewID);
-
-        ChickenSpawn.Inst.Destroy(Chicken);
     }
 
 
@@ -373,5 +387,47 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //===========================================================================
 
+    //===========================================================================
+    #region 발판 관련 함수
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
+        }
+        if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
+        }
+        if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
+        }
+        if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
+        }
+        if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
+        }
+        if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
+        }
+
+        if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
+        {
+            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
+        }
+        if (other.gameObject.tag == "Boost2") //부스트발판 밟았을때
+        {
+            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
+        }
+
+    }
+    #endregion
+    //===========================================================================
 
 }
+
