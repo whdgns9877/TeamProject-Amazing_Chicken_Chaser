@@ -21,6 +21,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     [SerializeField] WheelCollider[] wheelColliders = new WheelCollider[4]; // wheel collider
     [SerializeField] TrailRenderer[] trailrenderers = new TrailRenderer[4]; // wheel trailrenderer
 
+    float xAxis;
+    float zAxis;
+
+
     // 동기화에 사용되는 포톤뷰
     PhotonView PV;
 
@@ -160,10 +164,15 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     }
 
+    //==============================================      UPDATE      ===========================================
     private void Update()
     {
         if (!PV.IsMine)
             return;
+
+        //input keys 
+        xAxis = Input.GetAxis("Horizontal");
+        zAxis = Input.GetAxis("Vertical");
 
         //=====================================================================
         // Player braking
@@ -212,11 +221,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         #region 아이템 관련 스크립트
-        if(missile == true)
+        //if(missile == true)
         {
             if(Input.GetKeyDown(KeyCode.LeftControl))
             {
-                Instantiate(MissileObj, transform.position, Quaternion.identity);
+                //if (transform.Find("Missile").gameObject.activeSelf == true) //활성화 중이라면 반환
+                //return;
+                //Instantiate(MissileObj, transform.position, Quaternion.identity);
+                PhotonNetwork.Instantiate("Missile", transform.position, Quaternion.identity);
             }
         }
         #endregion
@@ -235,9 +247,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
-        //input keys 
-        float xAxis = Input.GetAxis("Horizontal");
-        float zAxis = Input.GetAxis("Vertical");
+        
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
@@ -348,6 +358,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     }
 
 
+
+
     [PunRPC]
     public void MyChicken(bool has)
     {
@@ -371,6 +383,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         ChickenSpawn.Inst.Destroy(Chicken);
     }
+
+
 
     //===========================================================================
     // function related to car movement 

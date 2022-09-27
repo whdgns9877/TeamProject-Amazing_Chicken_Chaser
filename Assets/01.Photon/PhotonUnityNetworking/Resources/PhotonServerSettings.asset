@@ -50,6 +50,11 @@ MonoBehaviour:
   - GotChicken
   - test
   - test2
+  - DestroyChicken
+  - Test_RPC
+  - Test_RPC0
+  - Test_RPC1
+  - Test_RPC2
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

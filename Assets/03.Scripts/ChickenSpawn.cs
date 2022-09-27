@@ -52,17 +52,19 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
         for (int i = 0; i < 4; i++)
         {
             PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, 0), Quaternion.identity);
+            
             Debug.Log("만들어라 치킨");
+
         }
     }
 
 
-    public void Destroy(GameObject gameObject)
+    public void Destroy(GameObject Chicken)
     {
         Debug.Log("## Destroy!");
 
         gameObject.SetActive(false);
-        ChickenList.Enqueue(gameObject);
+        ChickenList.Enqueue(Chicken);
     }
 
     public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)

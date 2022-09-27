@@ -9,6 +9,35 @@ using UnityEngine.UIElements;
 public class GameManager : MonoBehaviourPun
 {
 
+    //=========================================================
+    //singleton
+    #region Singleton_Not used
+    static GameManager instance = null;
+
+    public static GameManager Inst
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<GameManager>();
+
+                if (instance == null)
+                {
+                    instance = new GameObject("GameManager").AddComponent<GameManager>();
+                }
+            }
+            return instance;
+        }
+    }
+    #endregion 
+    //=========================================================
+
+
+
+
+
+
     void Awake()
     {
         // 서버에 잘 연결된 상태로 게임 씬에 들어오면 실행
@@ -20,7 +49,6 @@ public class GameManager : MonoBehaviourPun
             else
                 PhotonNetwork.Instantiate("Player Car", new Vector3(3, 0, -3), Quaternion.identity);
         }
-
     }
 
 }
