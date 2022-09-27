@@ -352,7 +352,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                     colliPV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to pool chicken and active
-                    colliPV.RPC("DropChicken", RpcTarget.AllViaServer, collision.transform);
+                    colliPV.RPC("DropChicken", RpcTarget.AllViaServer, collision.transform.position);
                 }
 
                 // if I have chicken
@@ -362,7 +362,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                     PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to active chicken 
-                    PV.RPC("DropChicken", RpcTarget.AllViaServer, transform);
+                    PV.RPC("DropChicken", RpcTarget.AllViaServer, transform.position);
                 }
             }
         }
@@ -378,13 +378,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     }
 
     [PunRPC]
-    public void DropChicken(Transform where)
+    public void DropChicken(Vector3 where)
     {
 
         Debug.Log("## 치킨 만들게!" + photonView.ViewID);
 
         // Pool chicken and active
-        ChickenSpawn.Inst.Instantiate("Chicken", where.position + new Vector3(0f, 4f, 0f), Quaternion.identity);
+        ChickenSpawn.Inst.Instantiate("Chicken", where + new Vector3(0f, 4f, 0f), Quaternion.identity);
     }
 
     [PunRPC]
