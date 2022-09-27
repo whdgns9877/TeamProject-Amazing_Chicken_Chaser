@@ -316,6 +316,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (collision.collider.tag == "Chicken")
         {
+            PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
+
             // If I have chicken
             if (myChicken.gameObject.activeSelf)
                 return;
@@ -325,7 +327,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             ChickenAni.SetBool("Turn Head", true);
 
             //Let ChickenSpawn deactivates chicken from chicken pool on the map.
-            PV.RPC("GotChicken", RpcTarget.MasterClient, collision.gameObject);
+            PV.RPC("DestroyChicken", RpcTarget.MasterClient, colliPV.ViewID);
             
         }
 
@@ -386,8 +388,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     }
 
     [PunRPC]
-    public void GotChicken(GameObject Chicken)
+    public void DestroyChicken(int ChickenID)
     {
+        GameObject Chicken = PhotonView.Find(ChickenID).gameObject;
+
         Debug.Log("## Ä¡Å² ¾ø¾Ù°Ô!" + photonView.ViewID);
 
         ChickenSpawn.Inst.Destroy(Chicken);
