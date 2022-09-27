@@ -52,23 +52,16 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
         for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount - 1; i++)
         {
-            PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, i + 2), Quaternion.identity);
-
-            Debug.Log("만들어라 치킨");
-
+            PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, 0), Quaternion.identity);
         }
     }
 
 
     public void Destroy(GameObject Chicken)
     {
-        Debug.Log("## Destroy!");
-
+        Debug.Log("# 치킨 없애!");
         Chicken.SetActive(false);
         ChickenList.Enqueue(Chicken);
-
-        Debug.Log("My queue count" + ChickenList.Count);
-
     }
 
 
@@ -79,7 +72,7 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
         if (ChickenList.Count > 0)
         {
             GameObject chicken = ChickenList.Dequeue();
-            chicken.transform.position = position;
+            chicken.transform.position = position + (Vector3.up * 4f);
             chicken.transform.rotation = rotation;
             chicken.SetActive(true);
 

@@ -9,7 +9,6 @@ public class PlayerCAM : MonoBehaviour
 
 
     Transform myTarget;
-    float myCAMTurn;
 
     // Start is called before the first frame update
     void Start()

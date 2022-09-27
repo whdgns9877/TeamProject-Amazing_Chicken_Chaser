@@ -55,6 +55,7 @@ MonoBehaviour:
   - Test_RPC0
   - Test_RPC1
   - Test_RPC2
+  - CreateChicken
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
