@@ -7,6 +7,7 @@ using System.Runtime.ExceptionServices;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
+using Cinemachine;
 
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
@@ -127,7 +128,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 if (myChicken.gameObject.activeSelf)
                 {
                     ChickenAni = GetComponentInChildren<Animator>();
-                    ChickenAni.SetBool("Turn Head", ((bool)stream.ReceiveNext())); 
+                    ChickenAni.SetBool("Turn Head", ((bool)stream.ReceiveNext()));
                 }
             }
         }
@@ -232,7 +233,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #region 아이템 관련 스크립트
         //if(missile == true)
         {
-            if(Input.GetKeyDown(KeyCode.LeftControl))
+            if (Input.GetKeyDown(KeyCode.LeftControl))
             {
                 //if (transform.Find("Missile").gameObject.activeSelf == true) //활성화 중이라면 반환
                 //return;
@@ -256,7 +257,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
-        
+
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
@@ -327,8 +328,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             ChickenAni.SetBool("Turn Head", true);
 
             //Let ChickenSpawn deactivates chicken from chicken pool on the map.
-            PV.RPC("DestroyChicken", RpcTarget.MasterClient, colliPV.ViewID);
-            
+            //PV.RPC("DestroyChicken", RpcTarget.AllViaServer, colliPV.ViewID);
+            ChickenSpawn.Inst.Destroy(collision.gameObject);
+
+
         }
 
         if (collision.collider.tag == "Player")
@@ -352,23 +355,22 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                     colliPV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to pool chicken and active
-                    colliPV.RPC("DropChicken", RpcTarget.AllViaServer, collision.transform.position);
+                    ChickenSpawn.Inst.Instantiate("Chicken", collision.gameObject.transform.position + Vector3.up * 4f, Quaternion.identity);
+
                 }
 
                 // if I have chicken
-                else if (myChicken.gameObject.activeSelf)
+               else if (myChicken.gameObject.activeSelf)
                 {
                     // deactive my chicken 
                     PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to active chicken 
-                    PV.RPC("DropChicken", RpcTarget.AllViaServer, transform.position);
+                    ChickenSpawn.Inst.Instantiate("Chicken", transform.position + new Vector3(0, 4f, 3f), Quaternion.identity);
                 }
             }
         }
     }
-
-
 
 
     [PunRPC]
@@ -376,28 +378,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         myChicken.gameObject.SetActive(has);
     }
-
-    [PunRPC]
-    public void DropChicken(Vector3 where)
-    {
-
-        Debug.Log("## 치킨 만들게!" + photonView.ViewID);
-
-        // Pool chicken and active
-        ChickenSpawn.Inst.Instantiate("Chicken", where + new Vector3(0f, 4f, 0f), Quaternion.identity);
-    }
-
-    [PunRPC]
-    public void DestroyChicken(int ChickenID)
-    {
-        GameObject Chicken = PhotonView.Find(ChickenID).gameObject;
-
-        Debug.Log("## 치킨 없앨게!" + photonView.ViewID);
-
-        ChickenSpawn.Inst.Destroy(Chicken);
-    }
-
-
 
     //===========================================================================
     // function related to car movement 
