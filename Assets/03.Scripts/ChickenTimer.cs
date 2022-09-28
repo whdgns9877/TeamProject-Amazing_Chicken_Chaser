@@ -92,9 +92,10 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
         Invoke("setTime", 1f);
         yield return new WaitForSeconds(1f);
         
-
+        // is game over? 
         while (isGameOver)
         {
+            // is game started? 
             gameStart = true;
 
             double timeLimit = 32f;
@@ -114,7 +115,5 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
             }
             yield return null;
         }
-
     }
-
 }

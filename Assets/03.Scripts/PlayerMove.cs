@@ -237,7 +237,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     private void FixedUpdate()
     {
         // 본인의 제어권 안쪽만 실행
-        // 
+        // if game is not started, do not move 
         if (!PV.IsMine || !ChickenTimer.Inst.GameStart)
             return;
 
