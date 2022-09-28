@@ -99,6 +99,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     Transform myChicken = null;
     Animator ChickenAni = null;
 
+    //============================================================
+    #region 플레이어 위치초기화 관련 변수
+    private bool canMove = true;
+    #endregion
+    //============================================================
 
     //============================================================
     // Network 동기화를 위한 함수 
@@ -161,7 +166,12 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     void Start()
     {
-        UIPlayerInfo.NickName(photonView.Controller.NickName);
+        UIPlayerInfo.NickName(PV.Controller.NickName);
+
+        if (PV.IsMine)
+            UIPlayerInfo.SetMinimapImageColor(Color.blue);
+        else
+            UIPlayerInfo.SetMinimapImageColor(Color.red);
     }
 
     //==============================================      UPDATE      ===========================================
@@ -169,13 +179,17 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (!PV.IsMine)
             return;
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+
+        if (canMove == false) return;
         //=====================================================================
         // Player Pos Reset
         if (Input.GetKeyDown(KeyCode.R))
         {
-            transform.position = Vector3.zero;
-            transform.rotation = Quaternion.identity;
-            playerRigid.velocity = Vector3.zero;
+            StartCoroutine(ResetPlayerPos());
         }
         //=====================================================================
 
@@ -366,7 +380,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                     PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to active chicken 
-                    ChickenSpawn.Inst.Instantiate("Chicken", transform.position + new Vector3(0, 4f, 3f), Quaternion.identity);
+                    ChickenSpawn.Inst.Instantiate("Chicken", transform.position + Vector3.up * 4f, Quaternion.identity);
                 }
             }
         }
@@ -483,5 +497,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //===========================================================================
 
+
+    //===========================================================================
+    // function related to player reset pos
+    IEnumerator ResetPlayerPos()
+    {
+        canMove = false;
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+        playerRigid.velocity = Vector3.zero;
+        yield return new WaitForSeconds(2f);
+        canMove = true;
+    }
+    //===========================================================================
 }
 

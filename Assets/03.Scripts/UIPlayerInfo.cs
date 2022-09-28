@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 public class UIPlayerInfo : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI txtNickName = null;
+    [SerializeField] TextMeshProUGUI txtNickName     = null;
+    [SerializeField] Image           ImageForMinimap = null;
 
 
 
@@ -15,6 +16,10 @@ public class UIPlayerInfo : MonoBehaviour
         txtNickName.text = name;
     }
 
+    public void SetMinimapImageColor(Color color)
+    {
+        ImageForMinimap.color = color;
+    }
 
 
     // Update is called once per frame
