@@ -156,6 +156,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (!PV.IsMine)
             return;
+
+        // if game is over, do nothing 
+        if (ChickenTimer.Inst.IsGameOver)
+            return;
+
         //=====================================================================
         // Player Pos Reset
         if (Input.GetKeyDown(KeyCode.R))
@@ -167,9 +172,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //=====================================================================
 
 
-        //input keys 
-        xAxis = Input.GetAxis("Horizontal");
-        zAxis = Input.GetAxis("Vertical");
+
 
         //=====================================================================
         // Player braking
@@ -236,9 +239,20 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     private void FixedUpdate()
     {
+        // if game over, stop move
+        if (ChickenTimer.Inst.IsGameOver)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                wheelColliders[i].motorTorque = 0f;
+                wheelColliders[i].brakeTorque = 100000f;
+            }
+            return;
+        }
+
         // 본인의 제어권 안쪽만 실행
         // if game is not started, do not move 
-        if (!PV.IsMine || !ChickenTimer.Inst.GameStart)
+        if (!PV.IsMine || !ChickenTimer.Inst.IsGameStart)
             return;
 
 
@@ -248,7 +262,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
-
+        //input keys 
+        xAxis = Input.GetAxis("Horizontal");
+        zAxis = Input.GetAxis("Vertical");
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);

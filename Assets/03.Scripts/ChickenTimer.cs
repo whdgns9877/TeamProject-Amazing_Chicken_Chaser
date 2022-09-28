@@ -43,10 +43,10 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     double startTime;            // start time
     double timepassed;
 
-    bool gameStart = false;
-    public bool GameStart { get { return gameStart; } }
+    bool isGameStart = false;
+    public bool IsGameStart { get { return isGameStart; } }
 
-    bool isGameOver = true;
+    bool isGameOver = false;
     public bool IsGameOver { get { return isGameOver; } }   
 
 
@@ -62,10 +62,8 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        StartCoroutine(CountDonw());
+        StartCoroutine(CountDown());
     }
-
-
 
     void setTime()
     {
@@ -74,11 +72,10 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
         startTime = (double)(curRoom.CustomProperties["StartTime"]);
     }
 
-
-    IEnumerator CountDonw()
+    IEnumerator CountDown()
     {
         timer.text = "Player Ready!!";
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -88,30 +85,26 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
             curRoom.SetCustomProperties(CustomValue); // set custom properties
         }
 
-        timer.text = "Start!!";
         Invoke("setTime", 1f);
+        timer.text = "Go!!!";
         yield return new WaitForSeconds(1f);
         
         // is game over? 
-        while (isGameOver)
+        while (!isGameOver)
         {
             // is game started? 
-            gameStart = true;
-
+            isGameStart = true;
             double timeLimit = 32f;
 
             // curret time - game start time 
             timepassed = PhotonNetwork.Time - startTime;
-
             timeLimit -= timepassed;
-
             timer.text = $" Chicken Time : {(int)timeLimit}";
 
             if (timeLimit <= 0)
             {
-                isGameOver = false;
-                gameStart = false;
-
+                isGameOver = true;
+                isGameStart = false;
             }
             yield return null;
         }
