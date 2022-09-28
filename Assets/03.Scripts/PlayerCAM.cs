@@ -9,13 +9,11 @@ public class PlayerCAM : MonoBehaviour
 
 
     Transform myTarget;
-    float myCAMTurn;
 
     // Start is called before the first frame update
     void Start()
     {
         myTarget = GameObject.FindGameObjectWithTag("Player").transform;
-
     }
 
     // Update is called once per frame
@@ -26,7 +24,6 @@ public class PlayerCAM : MonoBehaviour
 
         // look at player
         transform.LookAt(myTarget.position);
-
 
         // rotate camera
         transform.RotateAround(myTarget.position, myTarget.right, myCAMAngle);
