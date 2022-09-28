@@ -32,6 +32,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //닉네임 
     UIPlayerInfo UIPlayerInfo;
 
+
+
+
     //============================================================
     // 움직임과 관련된 변수
     #region 움직임과 관련된 변수
@@ -99,7 +102,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     Transform myChicken = null;
     Animator ChickenAni = null;
 
-
     //============================================================
     // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -110,7 +112,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             for (int i = 0; i < 4; i++)
             {
                 stream.SendNext(trailrenderers[i].emitting);
-               stream.SendNext(myChicken.gameObject.activeSelf);
+                stream.SendNext(myChicken.gameObject.activeSelf);
 
             }
         }
@@ -127,9 +129,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
     }
 
-
-
-
     //============================================================
 
     private void Awake()
@@ -142,11 +141,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         myChicken = transform.Find("MyChicken");
     }
-
-
-
-
-
 
 
 
@@ -235,17 +229,21 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             }
         }
         #endregion
+        //=====================================================================
     }
+
 
 
     private void FixedUpdate()
     {
         // 본인의 제어권 안쪽만 실행
-        if (!PV.IsMine)
+        // 
+        if (!PV.IsMine || !ChickenTimer.Inst.GameStart)
             return;
 
+
         //=====================================================================
-        //Player car movment 
+        // Player car movment 
         #region 플레이어 움직임에 대한 코드
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
@@ -308,6 +306,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //If get Chicken, active mychicken
     private void OnCollisionEnter(Collision collision)
     {
+
+
+        //===========================================================================
+        // Chicken detection
+        #region 치킨 충돌, 플레이어와 충돌 시 치킨 처리 관련 코드 
         if (collision.collider.tag == "Chicken")
         {
             PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
@@ -343,13 +346,20 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                     PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
 
                     // request master client to active chicken 
-                    //ChickenSpawn.Inst.Instantiate("Chicken", transform.position, Quaternion.identity);
                     PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
                 }
             }
         }
+        #endregion
+        //===========================================================================
+
+
+
     }
 
+    //===========================================================================
+    // Pun RPCs 
+    #region 치킨과 관련된 RPC
 
     [PunRPC]
     public void MyChicken(bool has)
@@ -363,8 +373,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         ChickenAni.SetBool("Turn Head", has);
     }
 
-
-
     [PunRPC]
     public void DestroyChicken(int ChickenID)
     {
@@ -372,12 +380,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         ChickenSpawn.Inst.Destroy(Chicken);
     }
 
-
     [PunRPC]
     public void CreateChicken(Vector3 where)
     {
         ChickenSpawn.Inst.Instantiate("Chicken", where, Quaternion.identity);
     }
+    #endregion
+    //===========================================================================
+
 
 
     //===========================================================================

@@ -5,6 +5,7 @@ using Photon.Pun;
 using Unity.VisualScripting;
 using ExitGames.Client.Photon;
 using UnityEngine.UIElements;
+using System;
 
 public class GameManager : MonoBehaviourPun
 {
@@ -34,6 +35,7 @@ public class GameManager : MonoBehaviourPun
     //=========================================================
 
 
+    public float GameTime;
 
 
 
@@ -50,5 +52,8 @@ public class GameManager : MonoBehaviourPun
                 PhotonNetwork.Instantiate("Player Car", new Vector3(3, 0, -3), Quaternion.identity);
         }
     }
+
+
+
 
 }

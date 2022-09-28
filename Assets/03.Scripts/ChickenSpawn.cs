@@ -59,7 +59,6 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
     public void Destroy(GameObject Chicken)
     {
-        Debug.Log("# 치킨 없애!");
         Chicken.SetActive(false);
         ChickenList.Enqueue(Chicken);
     }
@@ -67,8 +66,6 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
     public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)
     {
-        Debug.Log("## instantiate!");
-
         if (ChickenList.Count > 0)
         {
             GameObject chicken = ChickenList.Dequeue();
