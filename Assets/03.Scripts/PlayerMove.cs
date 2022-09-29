@@ -97,10 +97,17 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    // 치킨과 관련된 변수 
-
+    #region 치킨과 관련된 변수 
     Transform myChicken = null;
     Animator ChickenAni = null;
+    #endregion
+    //============================================================
+
+    //============================================================
+    #region 플레이어 위치 초기화를 위한 변수
+    private bool canMove = true;
+    #endregion
+    //============================================================
 
     //============================================================
     // Network 동기화를 위한 함수 
@@ -149,20 +156,23 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     void Start()
     {
         UIPlayerInfo.NickName(photonView.Controller.NickName);
-    }
 
+        if (PV.IsMine)
+            UIPlayerInfo.SetMinimapImageColor(Color.blue);
+        else
+            UIPlayerInfo.SetMinimapImageColor(Color.red);
+    }
+    
     //==============================================      UPDATE      ===========================================
     private void Update()
     {
-        if (!PV.IsMine)
+        if (!PV.IsMine || !canMove)
             return;
         //=====================================================================
         // Player Pos Reset
         if (Input.GetKeyDown(KeyCode.R))
         {
-            transform.position = Vector3.zero;
-            transform.rotation = Quaternion.identity;
-            playerRigid.velocity = Vector3.zero;
+            StartCoroutine(ResetPlayerPos());
         }
         //=====================================================================
 
@@ -494,5 +504,19 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //===========================================================================
 
+    //===========================================================================
+    // function related to player reset pos
+    IEnumerator ResetPlayerPos()
+    {
+        canMove = false;
+
+        transform.position = Vector3.up;
+        transform.rotation = Quaternion.identity;
+        playerRigid.velocity = Vector3.zero;
+
+        yield return new WaitForSeconds(3f);
+        canMove = true;
+    }
+    //===========================================================================
 }
 

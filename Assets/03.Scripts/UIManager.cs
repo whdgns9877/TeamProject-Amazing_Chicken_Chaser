@@ -61,7 +61,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     private WaitForSeconds delayUpdateTime = new WaitForSeconds(0.2f);
 
     // 장면 전화 효과에 쓰일 시간
-    private WaitForSeconds uiUpdateTime = new WaitForSeconds(0.1f);
+    private WaitForSeconds uiUpdateTime = new WaitForSeconds(0.05f);
     // 자기 자신의 레디상태
     private bool ready = false;
 
@@ -69,7 +69,11 @@ public class UIManager : MonoBehaviourPunCallbacks
 
     private bool enterRoomDone = true;
 
+    private bool createRoomDone = true;
+
     private string myRoomName = null;
+
+    RoomOptions myRo = null;
 
     // 현재 자신이 속해있는 방
     private Room curRoom = null;
@@ -244,17 +248,24 @@ public class UIManager : MonoBehaviourPunCallbacks
     {
         leftRoomDone = true;
         ResetMyRoom();
-        // UI들을 상황에 맞게 처리
-        Panel_Room.SetActive(false);
-        Panel_Login.SetActive(true);
-        Panel_Lobby.SetActive(true);
+        //// UI들을 상황에 맞게 처리
+        //Panel_Room.SetActive(false);
+        //Panel_Login.SetActive(true);
+        //Panel_Lobby.SetActive(true);
     }
 
     // 방에 참가하면 자동적으로 호출되는 콜백함수
     public override void OnJoinedRoom()
     {
         myRoomName = null;
-        enterRoomDone = true;
+        myRo = null;
+
+        if(enterRoomDone == false)
+            enterRoomDone = true;
+
+        if (createRoomDone == false)
+            createRoomDone = true;
+
         // 현재 방에 달려있는 태그를 Hashtable 형식인 curRoomProperties 라는 변수에 넣어준다
         curRoom = PhotonNetwork.CurrentRoom;
         // 현재 있는 방의 UI 의 Text에 현재 방의 text를 넣어준다
@@ -294,10 +305,10 @@ public class UIManager : MonoBehaviourPunCallbacks
         myCost -= 1000;
         Text_MyCostInRoom.text = "MyCost : " + myCost.ToString();
 
-        // 패널들의 UI들을 맞게 처리해준다
-        Panel_Login.SetActive(false);
-        Panel_Lobby.SetActive(false);
-        Panel_Room.SetActive(true);
+        //// 패널들의 UI들을 맞게 처리해준다
+        //Panel_Login.SetActive(false);
+        //Panel_Lobby.SetActive(false);
+        //Panel_Room.SetActive(true);
 
         // 현재 방의 태그 값들을 갱신해준다
         StartCoroutine(RoomUpdate());
@@ -388,9 +399,11 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 해당 클라이언트의 Properties를 비워준다
         ro.CleanupCacheOnLeave = true;
 
-        enterRoomDone = false;
+        createRoomDone = false;
         myRoomName = roomNameText;
-        PhotonNetwork.CreateRoom(roomNameText, ro); // 실제로 방을 만드는 함수
+        myRo = ro;
+        StartCoroutine(ChangeUIProcess());
+        //PhotonNetwork.CreateRoom(roomNameText, ro); // 실제로 방을 만드는 함수
     }
 
     public void OnLeaveRoomButtonClicked()
@@ -525,10 +538,34 @@ public class UIManager : MonoBehaviourPunCallbacks
         }
 
         if (leftRoomDone == false)
+        {
             PhotonNetwork.LeaveRoom();
+            yield return leftRoomDone = true;
+            // UI들을 상황에 맞게 처리
+            Panel_Room.SetActive(false);
+            Panel_Login.SetActive(true);
+            Panel_Lobby.SetActive(true);
+        }
 
         if (enterRoomDone == false)
+        {
             PhotonNetwork.JoinRoom(myRoomName, null);
+            yield return enterRoomDone = true;
+            // 패널들의 UI들을 맞게 처리해준다
+            Panel_Login.SetActive(false);
+            Panel_Lobby.SetActive(false);
+            Panel_Room.SetActive(true);
+        }
+
+        if(createRoomDone == false)
+        {
+            PhotonNetwork.CreateRoom(myRoomName, myRo); // 실제로 방을 만드는 함수
+            yield return createRoomDone = true;
+            // 패널들의 UI들을 맞게 처리해준다
+            Panel_Login.SetActive(false);
+            Panel_Lobby.SetActive(false);
+            Panel_Room.SetActive(true);
+        }
 
         while (fadeCount > 0) // 다시 알파값이 0 투명해질때 까지 반복
         {
