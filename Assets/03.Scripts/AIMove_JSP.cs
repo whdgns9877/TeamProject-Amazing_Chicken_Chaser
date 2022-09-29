@@ -26,7 +26,7 @@ public class AIMove_JSP : MonoBehaviour
 
     public LayerMask Players;
 
-    float closesTargetDistance = float.MaxValue;
+    //float closesTargetDistance = float.MaxValue;
     //============================================================================
 
     private void Awake()
