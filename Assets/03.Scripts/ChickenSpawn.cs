@@ -50,9 +50,33 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
         if (!PhotonNetwork.IsMasterClient)
             return;
 
+        List<int> chickenList = new List<int>();
+
+        int maxrange = this.transform.childCount;
+
         for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount - 1; i++)
         {
-            PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, 0), Quaternion.identity);
+            // create random number
+            int ranNum = Random.Range(0, maxrange);
+
+            // if ranNum is not in the list, add ranNum in the list 
+            if (chickenList.Contains(ranNum))
+            {
+                do
+                {
+                    ranNum = Random.Range(0, maxrange);
+                } while (chickenList.Contains(ranNum));
+
+                chickenList.Add(ranNum);
+            }
+
+            else
+            {
+                chickenList.Add(ranNum);
+            }
+
+            Vector3 chickenSpawnPos = this.transform.GetChild(ranNum).position;
+            PhotonNetwork.Instantiate("Chicken", chickenSpawnPos, Quaternion.identity);
         }
     }
 
