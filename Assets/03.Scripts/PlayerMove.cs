@@ -109,6 +109,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
+    private bool check = false;
+
     //============================================================
     // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -168,6 +170,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (!PV.IsMine || !canMove)
             return;
+        //=====================================================================
+        // Player GameOver
+        if (ChickenTimer.Inst.IsGameOver == false)
+        {
+            if (check == false)
+            {
+                CheckHasChicken();
+                check = true;
+            }
+        }
+        //=====================================================================
+
         //=====================================================================
         // Player Pos Reset
         if (Input.GetKeyDown(KeyCode.R))
@@ -516,6 +530,19 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         yield return new WaitForSeconds(3f);
         canMove = true;
+    }
+    //===========================================================================
+
+    //===========================================================================
+    // function Check my Chicken Onw when ChickenTimer is Finish
+    private void CheckHasChicken()
+    {
+        // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
+        if (!transform.GetChild(7).gameObject.activeInHierarchy)
+        {
+            PhotonNetwork.LeaveRoom();
+            PhotonNetwork.LoadLevel("StartScene");
+        }
     }
     //===========================================================================
 }

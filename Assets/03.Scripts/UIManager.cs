@@ -91,6 +91,11 @@ public class UIManager : MonoBehaviourPunCallbacks
     {
         // 초기 화면 세팅
         Screen.SetResolution(960, 540, false);
+
+        // 전송률 설정
+        PhotonNetwork.SendRate = 60;
+        PhotonNetwork.SerializationRate = 30;
+
         // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
         PhotonNetwork.AutomaticallySyncScene = true;
         // DAPPX를 위한 Cost
@@ -282,14 +287,13 @@ public class UIManager : MonoBehaviourPunCallbacks
                 // 해당 슬롯의 인덱스와 방옵션의 MaxPlayer를 비교하여 MaxPlayer가 넘어가는 슬롯은 닫아준다
                 {"0", PhotonNetwork.LocalPlayer.ActorNumber }, {"1", 0 },
                 {"2", 2 <= max ? 0 : -1 }, {"3", 3 <= max ? 0 : -1 }, {"4", 4 <= max ? 0 : -1 },
-                {"5", 5 <= max ? 0 : -1 }, {"6", 6 <= max ? 0 : -1 }, {"7", 7 <= max ? 0 : -1 },
-                {"RoomCost", curRoom.MaxPlayers*1000}
+                {"5", 5 <= max ? 0 : -1 }, {"RoomCost", curRoom.MaxPlayers*1000}
             });
         }
         else
         {
             // 방에 참가한 사람은 참여가능 슬롯이라면 자기번호를
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 6; i++)
             {
                 if (GetRoomTag(i) == 0)
                 {
@@ -469,7 +473,7 @@ public class UIManager : MonoBehaviourPunCallbacks
             }
 
             // 플레이어들 레디 조건 설정
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 6; i++)
             {
                 // 방장(마스터클라이언트)이 방설정을 해준다
                 if (PhotonNetwork.IsMasterClient)
@@ -583,7 +587,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     private void ResetMyRoom()
     {
         // 방을 나가면 다음방에 들어가기전 UI처리들을 초기화하여준다
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 6; i++)
         {
             for (int j = 1; j <= 5; j++)
             {
