@@ -47,7 +47,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     public bool IsGameStart { get { return isGameStart; } }
 
     bool isGameOver = false;
-    public bool IsGameOver { get { return isGameOver; } }   
+    public bool IsGameOver { get { return isGameOver; } }
 
 
 
@@ -63,6 +63,20 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     void Start()
     {
         StartCoroutine(CountDown());
+
+        if (IsGameOver)
+        {
+            // all player in the room
+            foreach (Player player in PhotonNetwork.PlayerList)
+            { 
+            
+            
+            
+            }
+
+
+        }
+
     }
 
     void setTime()
@@ -88,7 +102,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
         Invoke("setTime", 1f);
         timer.text = "Go!!!";
         yield return new WaitForSeconds(1f);
-        
+
         // is game over? 
         while (!isGameOver)
         {
