@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
 using Cinemachine;
+using TMPro;
 
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
@@ -32,6 +33,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //닉네임 
     UIPlayerInfo UIPlayerInfo;
 
+
+    GameObject VictoryText = null;
 
     //============================================================
     // 움직임과 관련된 변수
@@ -148,9 +151,29 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         myChicken = transform.Find("MyChicken");
 
-        ChickenAni = myChicken.GetComponent<Animator>();
+        VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
 
-        Debug.Log("게임 시작!!!");
+        MissileObj = Resources.Load<GameObject>("Missile");
+
+        // 자신의 태그를 바꿔주는 부분
+
+        if (PV.IsMine)
+        {
+            gameObject.tag = "Me";
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
+            {
+                transform.GetChild(i).gameObject.tag = "Me";
+            }
+        }
+        else
+        {
+            gameObject.tag = "Player";
+            gameObject.layer = LayerMask.NameToLayer("Player");
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
+            {
+                transform.GetChild(i).gameObject.tag = "Player";
+            }
+        }
     }
 
 
@@ -172,16 +195,38 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (!PV.IsMine || !canMove)
             return;
+
+        //=====================================================================
+        // Imsi Code for Siyeon
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            ChickenTimer.Inst.StopAllCoroutines();
+        }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            LeftGame();
+        }
+
+
+        //=====================================================================
+
+
         //=====================================================================
         // Player GameOver
-        if (ChickenTimer.Inst.IsGameOver == false)
+        if (ChickenTimer.Inst.IsGameOver == false && check == false)
         {
-            if (check == false)
-            {
-                CheckHasChicken();
-                check = true;
-            }
+            CheckHasChicken();
+            Invoke("CheckAliveAlone", 2f);
+            check = true;
         }
+
+        if (VictoryText.activeInHierarchy)
+        {
+            Invoke("LeftGame", 5f);
+        }
+
         //=====================================================================
 
         //=====================================================================
@@ -199,7 +244,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player braking
-        #region 플레이어 브레이크, 드리프트 관련된 코드 
+        #region 플레이어 브레이크와 관련된 코드 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -209,10 +254,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = BrakingForce;
             //start making skidmarks
             SkidMark(0, true);
-
-            // play eating animation
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", true);
-
         }
 
         // release brakes 
@@ -224,9 +265,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = 0f;
             //start making skidmarks
             SkidMark(0, false);
-
-            // stop eating animation
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", false);
         }
 
         // drift key "shift"
@@ -234,9 +272,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(0.1f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
-
-            // play running animation during drift
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", true);
         }
 
         // drift key "shift"
@@ -244,10 +279,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(5f);          // increase wheel stiffness to stop drifting
             SkidMark(2, false); // skidmark off
-
-
-            // stop running animation 
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", false);
         }
 
         // if wheel is off ground, no skidmark
@@ -256,14 +287,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //=====================================================================
 
-
-        // if Forward Left & rear right wheel is off the ground 
-        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
-
-        else
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
-
+        //=====================================================================
+        #region 아이템 관련 스크립트
+        // 미사일 발사
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
+            myMissile.AddComponent<Missile>();
+            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+        }
+        #endregion
+        //=====================================================================
     }
 
 
@@ -281,6 +316,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #region 플레이어 움직임에 대한 코드
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
+
+
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
@@ -339,6 +376,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     private void OnCollisionEnter(Collision collision)
     {
 
+
         //===========================================================================
         // Chicken detection
         #region 치킨 충돌, 플레이어와 충돌 시 치킨 처리 관련 코드 
@@ -351,7 +389,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 return;
 
             PV.RPC("MyChicken", RpcTarget.AllViaServer, true);
-            
 
             //Let ChickenSpawn deactivates chicken from chicken pool on the map.
             PV.RPC("DestroyChicken", RpcTarget.AllViaServer, colliPV.ViewID);
@@ -385,9 +422,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //===========================================================================
 
+
+
     }
-
-
 
     //===========================================================================
     // Pun RPCs 
@@ -397,21 +434,15 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     public void MyChicken(bool has)
     {
         myChicken.gameObject.SetActive(has);
-    }
 
-    // play chicken animation
-    [PunRPC]
-    public void ChickenPadak(string dosomething, bool doing)
-    {
-        // if I have no chicken, return
-        if (!myChicken.gameObject.activeSelf)
+        if (!has)
             return;
 
-        ChickenAni.SetBool($"{dosomething}", doing);
+        ChickenAni = GetComponentInChildren<Animator>();
+        ChickenAni.SetBool("Turn Head", has);
     }
 
-
-        [PunRPC]
+    [PunRPC]
     public void DestroyChicken(int ChickenID)
     {
         GameObject Chicken = PhotonView.Find(ChickenID).gameObject;
@@ -528,6 +559,19 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
 
+        // 미사일 충돌 관련 부분
+        if (!PV.IsMine)
+            return;
+        //=======================================
+        // 미사일 충돌(아이템 충돌)
+        if (other.gameObject.tag == "Bomb")
+        {
+            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
+            {
+                playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
+            }
+        }
+
     }
     #endregion
     //===========================================================================
@@ -554,16 +598,21 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
         if (!transform.GetChild(7).gameObject.activeInHierarchy)
         {
-            PhotonNetwork.LeaveRoom();
-            PhotonNetwork.LoadLevel("StartScene");
+            LeftGame();
         }
     }
+
+    private void CheckAliveAlone()
+    {
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+            VictoryText.SetActive(true);
+    }
+
+    private void LeftGame()
+    {
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel("StartScene");
+    }
     //===========================================================================
-
-
 }
-    
-
-    
-
 

@@ -19,6 +19,9 @@ TagManager:
   - Boost
   - Boost2
   - PlayerSpawnPos
+  - Missile
+  - Bomb
+  - Me
   layers:
   - Default
   - TransparentFX
