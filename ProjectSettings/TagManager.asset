@@ -18,6 +18,7 @@ TagManager:
   - Jump6
   - Boost
   - Boost2
+  - PlayerSpawnPos
   layers:
   - Default
   - TransparentFX
