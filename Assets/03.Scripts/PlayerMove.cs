@@ -149,6 +149,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         UIPlayerInfo = GetComponentInChildren<UIPlayerInfo>();
 
         myChicken = transform.Find("MyChicken");
+
+        Debug.Log("게임 시작!!!");
     }
 
 
