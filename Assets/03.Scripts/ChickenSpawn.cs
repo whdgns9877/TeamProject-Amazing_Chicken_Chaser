@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using System.Runtime.InteropServices.WindowsRuntime;
+
 
 public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 {
@@ -37,6 +37,7 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
     Queue<GameObject> ChickenList;
 
+
     //=========================================================
     void Awake()
     {
@@ -50,12 +51,34 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
         if (!PhotonNetwork.IsMasterClient)
             return;
 
+
+        List<int> chickenList = new List<int>();
+
         for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount - 1; i++)
         {
-            PhotonNetwork.Instantiate("Chicken", new Vector3(i + 2, 0, 0), Quaternion.identity);
+            // create random number
+            int ranNum = Random.Range(0, 7);
+
+            // if ranNum is not in the list, add ranNum in the list 
+            if (chickenList.Contains(ranNum))
+            {
+                do
+                {
+                    ranNum = Random.Range(0, 7);
+                } while (chickenList.Contains(ranNum));
+
+                chickenList.Add(ranNum);
+            }
+
+            else
+            {
+                chickenList.Add(ranNum);
+            }
+
+            Vector3 chickenSpawnPos = this.transform.GetChild(ranNum).position;
+            PhotonNetwork.Instantiate("Chicken", chickenSpawnPos, Quaternion.identity);
         }
     }
-
 
     public void Destroy(GameObject Chicken)
     {
