@@ -98,7 +98,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
             // is game started? 
             gameStart = true;
 
-            double timeLimit = 32f;
+            double timeLimit = 3200f;
 
             // curret time - game start time 
             timepassed = PhotonNetwork.Time - startTime;

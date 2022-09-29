@@ -56,6 +56,10 @@ MonoBehaviour:
   - Test_RPC1
   - Test_RPC2
   - CreateChicken
+  - CreateMissile
+  - OnEnable
+  - DestroyMissile
+  - ChickenPadak
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

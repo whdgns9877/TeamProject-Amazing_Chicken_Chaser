@@ -33,8 +33,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     UIPlayerInfo UIPlayerInfo;
 
 
-
-
     //============================================================
     // 움직임과 관련된 변수
     #region 움직임과 관련된 변수
@@ -150,6 +148,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         myChicken = transform.Find("MyChicken");
 
+        ChickenAni = myChicken.GetComponent<Animator>();
+
         Debug.Log("게임 시작!!!");
     }
 
@@ -166,7 +166,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         else
             UIPlayerInfo.SetMinimapImageColor(Color.red);
     }
-    
+
     //==============================================      UPDATE      ===========================================
     private void Update()
     {
@@ -199,7 +199,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player braking
-        #region 플레이어 브레이크와 관련된 코드 
+        #region 플레이어 브레이크, 드리프트 관련된 코드 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -209,6 +209,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = BrakingForce;
             //start making skidmarks
             SkidMark(0, true);
+
+            // play eating animation
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", true);
+
         }
 
         // release brakes 
@@ -220,6 +224,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = 0f;
             //start making skidmarks
             SkidMark(0, false);
+
+            // stop eating animation
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", false);
         }
 
         // drift key "shift"
@@ -227,6 +234,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(0.1f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
+
+            // play running animation during drift
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", true);
         }
 
         // drift key "shift"
@@ -234,6 +244,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(5f);          // increase wheel stiffness to stop drifting
             SkidMark(2, false); // skidmark off
+
+
+            // stop running animation 
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", false);
         }
 
         // if wheel is off ground, no skidmark
@@ -242,20 +256,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //=====================================================================
 
-        //=====================================================================
-        #region 아이템 관련 스크립트
-        //if(missile == true)
-        {
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                //if (transform.Find("Missile").gameObject.activeSelf == true) //활성화 중이라면 반환
-                //return;
-                //Instantiate(MissileObj, transform.position, Quaternion.identity);
-                PhotonNetwork.Instantiate("Missile", transform.position, Quaternion.identity);
-            }
-        }
-        #endregion
-        //=====================================================================
+
+        // if Forward Left & rear right wheel is off the ground 
+        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
+
+        else
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
+
     }
 
 
@@ -273,8 +281,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #region 플레이어 움직임에 대한 코드
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
-
-
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
@@ -333,7 +339,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     private void OnCollisionEnter(Collision collision)
     {
 
-
         //===========================================================================
         // Chicken detection
         #region 치킨 충돌, 플레이어와 충돌 시 치킨 처리 관련 코드 
@@ -346,6 +351,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 return;
 
             PV.RPC("MyChicken", RpcTarget.AllViaServer, true);
+            
 
             //Let ChickenSpawn deactivates chicken from chicken pool on the map.
             PV.RPC("DestroyChicken", RpcTarget.AllViaServer, colliPV.ViewID);
@@ -379,9 +385,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //===========================================================================
 
-
-
     }
+
+
 
     //===========================================================================
     // Pun RPCs 
@@ -391,15 +397,21 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     public void MyChicken(bool has)
     {
         myChicken.gameObject.SetActive(has);
-
-        if (!has)
-            return;
-
-        ChickenAni = GetComponentInChildren<Animator>();
-        ChickenAni.SetBool("Turn Head", has);
     }
 
+    // play chicken animation
     [PunRPC]
+    public void ChickenPadak(string dosomething, bool doing)
+    {
+        // if I have no chicken, return
+        if (!myChicken.gameObject.activeSelf)
+            return;
+
+        ChickenAni.SetBool($"{dosomething}", doing);
+    }
+
+
+        [PunRPC]
     public void DestroyChicken(int ChickenID)
     {
         GameObject Chicken = PhotonView.Find(ChickenID).gameObject;
@@ -547,5 +559,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
     }
     //===========================================================================
+
+
 }
+    
+
+    
+
 
