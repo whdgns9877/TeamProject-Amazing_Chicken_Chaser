@@ -1,12 +1,9 @@
-using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Chicken_JSP : MonoBehaviourPun
+public class Chicken_JSP : MonoBehaviour
 {
-    Transform myChicken = null;
-    Animator ChickenAni = null;
 
 
 

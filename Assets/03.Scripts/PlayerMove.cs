@@ -13,9 +13,9 @@ using TMPro;
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
-    [SerializeField] public float Acceleration = 1000f;       // ï¿½Úµï¿½ï¿½ï¿½ ï¿½Óµï¿½
-    [SerializeField] public float BrakingForce = 1000f;      // ï¿½ê·¹ï¿½ï¿½Å© 
-    [SerializeField] public float MaxTurnAngle = 45f;        // È¸ï¿½ï¿½ ï¿½ï¿½
+    [SerializeField] public float Acceleration = 1000f;       // ÀÚµ¿Â÷ ¼Óµµ
+    [SerializeField] public float BrakingForce = 1000f;      // ºê·¹ÀÌÅ© 
+    [SerializeField] public float MaxTurnAngle = 45f;        // È¸Àü °¢
     [SerializeField] public float MaxSpeed = 100f;
 
     [Header("Wheel Info")]
@@ -27,34 +27,34 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     float zAxis;
 
 
-    // ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
+    // µ¿±âÈ­¿¡ »ç¿ëµÇ´Â Æ÷Åæºä
     PhotonView PV;
 
-    //ï¿½Ð³ï¿½ï¿½ï¿½ 
+    //´Ð³×ÀÓ 
     UIPlayerInfo UIPlayerInfo;
 
 
     GameObject VictoryText = null;
 
     //============================================================
-    // ï¿½ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
-    #region ï¿½ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
-    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Rigidbody 
+    // ¿òÁ÷ÀÓ°ú °ü·ÃµÈ º¯¼ö
+    #region ¿òÁ÷ÀÓ°ú °ü·ÃµÈ º¯¼ö
+    // ÇÃ·¹ÀÌ¾î Rigidbody 
     Rigidbody playerRigid;
-    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß½ï¿½ 
+    // ÇÃ·¹ÀÌ¾î ¹«°Ô Áß½É 
     public GameObject mycg;
 
-    // ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½
+    // ÇöÀç ¼Óµµ
     float currSpeed;
 
-    //ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ sideslipe 
+    //ÇÃ·¹ÀÌ¾î sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
     #endregion
     //============================================================
 
     //============================================================
-    // ï¿½Ê¿ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½Çµï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
-    #region ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ¸Ê¿¡ ¹èÄ¡µÈ ¹ßÆÇµé°ú °ü·ÃµÈ º¯¼ö
+    #region ¹ßÆÇ °ü·Ã º¯¼ö
     [Header("MapTypeInfo")]
 
     [SerializeField] int jumpForceY;
@@ -85,7 +85,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    #region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    #region ¾ÆÀÌÅÛ °ü·Ã º¯¼ö
     [SerializeField] bool missile = false;
     [SerializeField] bool shield = false;
     [SerializeField] bool mine = false;
@@ -98,14 +98,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    #region Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½ 
+    #region Ä¡Å²°ú °ü·ÃµÈ º¯¼ö 
     Transform myChicken = null;
     Animator ChickenAni = null;
     #endregion
     //============================================================
 
     //============================================================
-    #region ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ä¡ ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    #region ÇÃ·¹ÀÌ¾î À§Ä¡ ÃÊ±âÈ­¸¦ À§ÇÑ º¯¼ö
     private bool canMove = true;
     #endregion
     //============================================================
@@ -113,7 +113,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     private bool check = false;
 
     //============================================================
-    // Network ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ 
+    // Network µ¿±âÈ­¸¦ À§ÇÑ ÇÔ¼ö 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -143,7 +143,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     private void Awake()
     {
-        // ï¿½ï¿½ï¿½ï¿½ä¸¦ Ä³ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½ (GetComponentï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½)
+        // Æ÷Åæºä¸¦ Ä³½ÌÇÏ¿© °¡Á®¿Â´Ù (GetComponent·Î °¡Á®¿À´Â°Í »ý°¢ÇÏ¸é µÊ)
         PV = photonView;
         playerRigid = GetComponent<Rigidbody>();
 
@@ -155,12 +155,12 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         MissileObj = Resources.Load<GameObject>("Missile");
 
-        // ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½Â±×¸ï¿½ ï¿½Ù²ï¿½ï¿½Ö´ï¿½ ï¿½Îºï¿½
+        // ÀÚ½ÅÀÇ ÅÂ±×¸¦ ¹Ù²ãÁÖ´Â ºÎºÐ
 
         if (PV.IsMine)
         {
             gameObject.tag = "Me";
-            for (int i = 0; i < 7; i++) //ï¿½Ú½Äµéµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Â±×¸ï¿½ ï¿½Ù²Û´ï¿½(Ä¡Å²ï¿½ï¿½ 7ï¿½ï¿½Â°ï¿½Ï±ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½)
+            for (int i = 0; i < 7; i++) //ÀÚ½Äµéµµ ÀüºÎ ³ª·Î ÅÂ±×¸¦ ¹Ù²Û´Ù(Ä¡Å²ÀÌ 7¹øÂ°´Ï±î ±× Àü±îÁö ½Ï ´Ù)
             {
                 transform.GetChild(i).gameObject.tag = "Me";
             }
@@ -169,7 +169,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             gameObject.tag = "Player";
             gameObject.layer = LayerMask.NameToLayer("Player");
-            for (int i = 0; i < 7; i++) //ï¿½Ú½Äµéµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Â±×¸ï¿½ ï¿½Ù²Û´ï¿½(Ä¡Å²ï¿½ï¿½ 7ï¿½ï¿½Â°ï¿½Ï±ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½)
+            for (int i = 0; i < 7; i++) //ÀÚ½Äµéµµ ÀüºÎ ³ª·Î ÅÂ±×¸¦ ¹Ù²Û´Ù(Ä¡Å²ÀÌ 7¹øÂ°´Ï±î ±× Àü±îÁö ½Ï ´Ù)
             {
                 transform.GetChild(i).gameObject.tag = "Player";
             }
@@ -195,6 +195,24 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (!PV.IsMine || !canMove)
             return;
+
+        //=====================================================================
+        // Imsi Code for Siyeon
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            ChickenTimer.Inst.StopAllCoroutines();
+        }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            LeftGame();
+        }
+
+
+        //=====================================================================
+
+
         //=====================================================================
         // Player GameOver
         if (ChickenTimer.Inst.IsGameOver == false && check == false)
@@ -226,7 +244,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player braking
-        #region ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ê·¹ï¿½ï¿½Å©, ï¿½å¸®ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Úµï¿½ 
+        #region ÇÃ·¹ÀÌ¾î ºê·¹ÀÌÅ©¿Í °ü·ÃµÈ ÄÚµå 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -236,10 +254,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = BrakingForce;
             //start making skidmarks
             SkidMark(0, true);
-
-            // play eating animation
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", true);
-
         }
 
         // release brakes 
@@ -251,9 +265,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = 0f;
             //start making skidmarks
             SkidMark(0, false);
-
-            // stop eating animation
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", false);
         }
 
         // drift key "shift"
@@ -261,9 +272,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(0.1f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
-
-            // play running animation during drift
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", true);
         }
 
         // drift key "shift"
@@ -271,10 +279,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(5f);          // increase wheel stiffness to stop drifting
             SkidMark(2, false); // skidmark off
-
-
-            // stop running animation 
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", false);
         }
 
         // if wheel is off ground, no skidmark
@@ -284,8 +288,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //=====================================================================
 
         //=====================================================================
-        #region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®
-        // ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½ß»ï¿½
+        #region ¾ÆÀÌÅÛ °ü·Ã ½ºÅ©¸³Æ®
+        // ¹Ì»çÀÏ ¹ß»ç
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
@@ -295,21 +299,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         #endregion
         //=====================================================================
-
-        // if Forward Left & rear right wheel is off the ground 
-        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
-
-        else
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
-
     }
 
 
 
     private void FixedUpdate()
     {
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ê¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+        // º»ÀÎÀÇ Á¦¾î±Ç ¾ÈÂÊ¸¸ ½ÇÇà
         // if game is not started, do not move 
         if (!PV.IsMine || !ChickenTimer.Inst.GameStart)
             return;
@@ -317,9 +313,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player car movment 
-        #region ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½
+        #region ÇÃ·¹ÀÌ¾î ¿òÁ÷ÀÓ¿¡ ´ëÇÑ ÄÚµå
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
+
+
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
@@ -327,21 +325,21 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //if has horizontal key input, Steer wheels 
         if (xAxis != 0f)
         {
-            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+            // Àü¹æ ÈÙ ¿òÁ÷ÀÓ 
             wheelColliders[0].steerAngle = xAxis * MaxTurnAngle;    // front left wheel 
             wheelColliders[1].steerAngle = xAxis * MaxTurnAngle;    // front right wheel
         }
 
         else
         {
-            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+            // Àü¹æ ÈÙ ¿òÁ÷ÀÓ 
             wheelColliders[0].steerAngle = 0f;    // front left wheel 
             wheelColliders[1].steerAngle = 0f;    // front right wheel
         }
 
         if (zAxis != 0f && currSpeed <= MaxSpeed)
         {
-            // ï¿½ï¿½Å©ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ 
+            // ÅäÅ©¸¦ ÁÖ´Â ÈÙ 
             // FWD 
             wheelColliders[0].motorTorque = zAxis * Acceleration;
             wheelColliders[1].motorTorque = zAxis * Acceleration;
@@ -365,7 +363,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //set all the wheelmash position & rotation as same as wheelCollider
         for (int i = 0; i < wheelColliders.Length; i++)
         {
-            // wheel colliderï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ wheel meshï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Öµï¿½ï¿½ï¿½ ï¿½ï¿½ 
+            // wheel collider¿¡ ¸ÂÃç wheel mesh¸¦ ¿òÁ÷ÀÏ ¼ö ÀÖµµ·Ï ÇÔ 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
         }
         #endregion
@@ -378,9 +376,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     private void OnCollisionEnter(Collision collision)
     {
 
+
         //===========================================================================
         // Chicken detection
-        #region Ä¡Å² ï¿½æµ¹, ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ ï¿½æµ¹ ï¿½ï¿½ Ä¡Å² Ã³ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ 
+        #region Ä¡Å² Ãæµ¹, ÇÃ·¹ÀÌ¾î¿Í Ãæµ¹ ½Ã Ä¡Å² Ã³¸® °ü·Ã ÄÚµå 
         if (collision.collider.tag == "Chicken")
         {
             PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
@@ -390,7 +389,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 return;
 
             PV.RPC("MyChicken", RpcTarget.AllViaServer, true);
-            
 
             //Let ChickenSpawn deactivates chicken from chicken pool on the map.
             PV.RPC("DestroyChicken", RpcTarget.AllViaServer, colliPV.ViewID);
@@ -424,33 +422,27 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //===========================================================================
 
+
+
     }
-
-
 
     //===========================================================================
     // Pun RPCs 
-    #region Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ RPC
+    #region Ä¡Å²°ú °ü·ÃµÈ RPC
 
     [PunRPC]
     public void MyChicken(bool has)
     {
         myChicken.gameObject.SetActive(has);
-    }
 
-    // play chicken animation
-    [PunRPC]
-    public void ChickenPadak(string dosomething, bool doing)
-    {
-        // if I have no chicken, return
-        if (!myChicken.gameObject.activeSelf)
+        if (!has)
             return;
 
-        ChickenAni.SetBool($"{dosomething}", doing);
+        ChickenAni = GetComponentInChildren<Animator>();
+        ChickenAni.SetBool("Turn Head", has);
     }
 
-
-        [PunRPC]
+    [PunRPC]
     public void DestroyChicken(int ChickenID)
     {
         GameObject Chicken = PhotonView.Find(ChickenID).gameObject;
@@ -469,7 +461,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function related to car movement 
-    #region ï¿½Úµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ 
+    #region ÀÚµ¿Â÷ ¿òÁ÷ÀÓ¿¡ °üÇÑ ÇÔ¼öµé 
 
     // to move wheelmash as wheelCollider moves  
     void UpdateWheelPos(WheelCollider collider, Transform transform)
@@ -530,48 +522,48 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
-    #region ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+    #region ¹ßÆÇ °ü·Ã ÇÔ¼ö
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Jump") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Jump") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
         }
-        if (other.gameObject.tag == "Jump2") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Jump2") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
         }
-        if (other.gameObject.tag == "Jump3") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Jump3") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
         }
-        if (other.gameObject.tag == "Jump4") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Jump4") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
         }
-        if (other.gameObject.tag == "Jump5") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Jump5") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
         }
-        if (other.gameObject.tag == "Jump6") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Jump6") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
         }
 
-        if (other.gameObject.tag == "Boost") //ï¿½Î½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Boost") //ºÎ½ºÆ®¹ßÆÇ ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
         }
-        if (other.gameObject.tag == "Boost2") //ï¿½Î½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (other.gameObject.tag == "Boost2") //ºÎ½ºÆ®¹ßÆÇ ¹â¾ÒÀ»¶§
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
 
-        // ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½
+        // ¹Ì»çÀÏ Ãæµ¹ °ü·Ã ºÎºÐ
         if (!PV.IsMine)
             return;
         //=======================================
-        // ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½æµ¹(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½æµ¹)
+        // ¹Ì»çÀÏ Ãæµ¹(¾ÆÀÌÅÛ Ãæµ¹)
         if (other.gameObject.tag == "Bomb")
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
@@ -603,7 +595,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     // function Check my Chicken Onw when ChickenTimer is Finish
     private void CheckHasChicken()
     {
-        // ï¿½Ø´ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½é¼­ ï¿½ï¿½Å¸Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½ï¿½ï¿½
+        // ÇØ´ç ÇÔ¼ö°¡ ½ÇÇàµÇ¾úÀ»¶§ Ä¡Å²À» °®°íÀÖÁö¾ÊÀ¸¸é ¹æÀ» ³ª°¡¸é¼­ ½ºÅ¸Æ®¾ÀÀ¸·Î µ¹¾Æ°£´Ù
         if (!transform.GetChild(7).gameObject.activeInHierarchy)
         {
             LeftGame();
@@ -622,11 +614,5 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         PhotonNetwork.LoadLevel("StartScene");
     }
     //===========================================================================
-
-
 }
-    
-
-    
-
 
