@@ -95,11 +95,15 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 전송률 설정
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 30;
-
-        // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
-        PhotonNetwork.AutomaticallySyncScene = true;
+        Invoke("DelaySync", 2f);
         // DAPPX를 위한 Cost
         myCost = 10000;
+    }
+
+    private void DelaySync()
+    {
+        // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
+        PhotonNetwork.AutomaticallySyncScene = true;
     }
 
     private void Start()

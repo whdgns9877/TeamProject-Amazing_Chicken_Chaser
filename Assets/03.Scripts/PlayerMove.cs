@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
 using Cinemachine;
+using TMPro;
 
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
@@ -33,7 +34,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     UIPlayerInfo UIPlayerInfo;
 
 
-
+    GameObject VictoryText = null;
 
     //============================================================
     // 움직임과 관련된 변수
@@ -150,7 +151,29 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         myChicken = transform.Find("MyChicken");
 
-        Debug.Log("게임 시작!!!");
+        VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+
+        MissileObj = Resources.Load<GameObject>("Missile");
+
+        // 자신의 태그를 바꿔주는 부분
+
+        if (PV.IsMine)
+        {
+            gameObject.tag = "Me";
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
+            {
+                transform.GetChild(i).gameObject.tag = "Me";
+            }
+        }
+        else
+        {
+            gameObject.tag = "Player";
+            gameObject.layer = LayerMask.NameToLayer("Player");
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
+            {
+                transform.GetChild(i).gameObject.tag = "Player";
+            }
+        }
     }
 
 
@@ -174,14 +197,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             return;
         //=====================================================================
         // Player GameOver
-        if (ChickenTimer.Inst.IsGameOver == false)
+        if (ChickenTimer.Inst.IsGameOver == false && check == false)
         {
-            if (check == false)
-            {
-                CheckHasChicken();
-                check = true;
-            }
+            CheckHasChicken();
+            Invoke("CheckAliveAlone", 2f);
+            check = true;
         }
+
+        if (VictoryText.activeInHierarchy)
+        {
+            Invoke("LeftGame", 5f);
+        }
+
         //=====================================================================
 
         //=====================================================================
@@ -244,15 +271,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         #region 아이템 관련 스크립트
-        //if(missile == true)
+        // 미사일 발사
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                //if (transform.Find("Missile").gameObject.activeSelf == true) //활성화 중이라면 반환
-                //return;
-                //Instantiate(MissileObj, transform.position, Quaternion.identity);
-                PhotonNetwork.Instantiate("Missile", transform.position, Quaternion.identity);
-            }
+            GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
+            myMissile.AddComponent<Missile>();
+            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
         }
         #endregion
         //=====================================================================
@@ -516,6 +541,19 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
 
+        // 미사일 충돌 관련 부분
+        if (!PV.IsMine)
+            return;
+        //=======================================
+        // 미사일 충돌(아이템 충돌)
+        if (other.gameObject.tag == "Bomb")
+        {
+            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
+            {
+                playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
+            }
+        }
+
     }
     #endregion
     //===========================================================================
@@ -542,9 +580,20 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
         if (!transform.GetChild(7).gameObject.activeInHierarchy)
         {
-            PhotonNetwork.LeaveRoom();
-            PhotonNetwork.LoadLevel("StartScene");
+            LeftGame();
         }
+    }
+
+    private void CheckAliveAlone()
+    {
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+            VictoryText.SetActive(true);
+    }
+
+    private void LeftGame()
+    {
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel("StartScene");
     }
     //===========================================================================
 }
