@@ -18,10 +18,13 @@ TagManager:
   - Jump6
   - Boost
   - Boost2
+<<<<<<< HEAD
   - Me
   - Enemy
   - Missile
   - Bomb
+=======
+>>>>>>> 1ed9c9b0673d4d2198759fe19ee23431cbf69fe0
   layers:
   - Default
   - TransparentFX

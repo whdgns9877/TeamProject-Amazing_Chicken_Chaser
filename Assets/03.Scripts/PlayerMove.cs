@@ -240,6 +240,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         #region 아이템 관련 스크립트
+<<<<<<< HEAD
         //if(missile == true)
         {
             if(Input.GetKeyDown(KeyCode.LeftControl))
@@ -258,6 +259,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             else
             {
                 //transform.GetComponentInChildren<MeshCollider>().enabled = true;
+=======
+        if(missile == true)
+        {
+            if(Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                Instantiate(MissileObj, transform.position, Quaternion.identity);
+>>>>>>> 1ed9c9b0673d4d2198759fe19ee23431cbf69fe0
             }
         }
         #endregion
@@ -427,6 +435,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
+<<<<<<< HEAD
     #region 충돌 관련 함수
     private void OnTriggerEnter(Collider other)
     {
@@ -447,6 +456,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=======================================
         #region 발판 충돌
+=======
+    #region 발판 관련 함수
+    private void OnTriggerEnter(Collider other)
+    {
+>>>>>>> 1ed9c9b0673d4d2198759fe19ee23431cbf69fe0
         if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
@@ -480,6 +494,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
+<<<<<<< HEAD
         #endregion
         //=======================================
     }
@@ -489,6 +504,12 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
 
 
+=======
+
+    }
+    #endregion
+    //===========================================================================
+>>>>>>> 1ed9c9b0673d4d2198759fe19ee23431cbf69fe0
 
 }
 
