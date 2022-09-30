@@ -151,6 +151,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         myChicken = transform.Find("MyChicken");
 
+        ChickenAni = myChicken.GetComponent<Animator>();
+
         VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
 
         MissileObj = Resources.Load<GameObject>("Missile");
@@ -254,6 +256,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = BrakingForce;
             //start making skidmarks
             SkidMark(0, true);
+
+            // play eating animation
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", true);
         }
 
         // release brakes 
@@ -265,6 +270,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             wheelColliders[3].brakeTorque = 0f;
             //start making skidmarks
             SkidMark(0, false);
+
+            // stop eating animation
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", false);
         }
 
         // drift key "shift"
@@ -272,6 +280,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(0.1f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
+
+            // play running animation during drift
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", true);
         }
 
         // drift key "shift"
@@ -279,6 +290,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Drift(5f);          // increase wheel stiffness to stop drifting
             SkidMark(2, false); // skidmark off
+
+            // stop running animation 
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Run", false);
         }
 
         // if wheel is off ground, no skidmark
@@ -299,6 +313,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         #endregion
         //=====================================================================
+
+
+        // if Forward Left & rear right wheel is off the ground 
+        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
+
+        else
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
     }
 
 
@@ -434,12 +456,17 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     public void MyChicken(bool has)
     {
         myChicken.gameObject.SetActive(has);
+    }
 
-        if (!has)
+    // play chicken animation
+    [PunRPC]
+    public void ChickenPadak(string dosomething, bool doing)
+    {
+        // if I have no chicken, return
+        if (!myChicken.gameObject.activeSelf)
             return;
 
-        ChickenAni = GetComponentInChildren<Animator>();
-        ChickenAni.SetBool("Turn Head", has);
+        ChickenAni.SetBool($"{dosomething}", doing);
     }
 
     [PunRPC]
