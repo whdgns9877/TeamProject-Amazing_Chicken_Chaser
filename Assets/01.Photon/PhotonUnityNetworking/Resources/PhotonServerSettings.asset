@@ -57,6 +57,7 @@ MonoBehaviour:
   - Test_RPC2
   - CreateChicken
   - OnEnable
+  - ChickenPadak
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
