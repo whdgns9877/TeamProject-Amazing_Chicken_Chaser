@@ -8,6 +8,20 @@ TagManager:
   - Ground
   - Chicken
   - FriedChicken
+  - ROOM
+  - Roop
+  - Jump
+  - Jump2
+  - Jump3
+  - Jump4
+  - Jump5
+  - Jump6
+  - Boost
+  - Boost2
+  - Me
+  - Enemy
+  - Missile
+  - Bomb
   layers:
   - Default
   - TransparentFX
@@ -16,7 +30,7 @@ TagManager:
   - Water
   - UI
   - Chicken
-  - 
+  - Enemy
   - 
   - 
   - 

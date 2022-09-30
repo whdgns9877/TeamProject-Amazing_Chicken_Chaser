@@ -32,7 +32,6 @@ public class UIManager : MonoBehaviourPunCallbacks
     [Header("** 방 UI **")]
     [SerializeField] TextMeshProUGUI   Text_roomName    = null;    // 방 이름
     [SerializeField] GameObject        Panel_Room       = null;    // 방의 전체적인 패널
-    //[SerializeField] TextMeshProUGUI[] PlayerNickNames  = null;    // 플레이어들의 닉네임을 담을 배열
     [SerializeField] GameObject        Button_StartGame = null;    // 게임 시작 버튼
     [SerializeField] GameObject        Button_Ready     = null;    // 게임 레디 버튼
     [SerializeField] GameObject[]      Panel_PlayerSlot = null;    // 플레이어들이 들어올수 있는 슬롯

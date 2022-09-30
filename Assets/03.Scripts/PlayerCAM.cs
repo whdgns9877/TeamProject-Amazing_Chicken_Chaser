@@ -14,7 +14,7 @@ public class PlayerCAM : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        myTarget = GameObject.FindGameObjectWithTag("Player").transform;
+        myTarget = GameObject.FindGameObjectWithTag("Me").transform;
 
     }
 

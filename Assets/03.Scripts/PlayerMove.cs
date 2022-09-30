@@ -21,6 +21,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     [SerializeField] WheelCollider[] wheelColliders = new WheelCollider[4]; // wheel collider
     [SerializeField] TrailRenderer[] trailrenderers = new TrailRenderer[4]; // wheel trailrenderer
 
+    //미사일 관련 변수
+    MissilePool missilePool;
+    [SerializeField] public bool Me = false;
+
+    float xAxis;
+    float zAxis;
+
     // 동기화에 사용되는 포톤뷰
     PhotonView PV;
 
@@ -43,6 +50,50 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
+    //============================================================
+    // 맵에 배치된 발판들과 관련된 변수
+    #region 발판 관련 변수
+    [Header("MapTypeInfo")]
+
+    [SerializeField] int jumpForceY;
+    [SerializeField] int jumpForceZ;
+
+    [SerializeField] int BoostForceZ;
+    [SerializeField] int BoostForceZ2;
+
+    [SerializeField] int jumpForceY2;
+    [SerializeField] int jumpForceZ2;
+
+
+    [SerializeField] int jumpForceY3;
+    [SerializeField] int jumpForceZ3;
+
+
+    [SerializeField] int jumpForceY4;
+    [SerializeField] int jumpForceZ4;
+
+
+    [SerializeField] int jumpForceY5;
+    [SerializeField] int jumpForceZ5;
+
+    [SerializeField] int jumpForceY6;
+    [SerializeField] int jumpForceZ6;
+
+    #endregion
+    //============================================================
+
+    //============================================================
+    #region 아이템 관련 변수
+    [SerializeField] bool missile = false;
+    [SerializeField] bool shield = false;
+    [SerializeField] bool mine = false;
+
+    [SerializeField] GameObject MissileObj;
+
+
+
+    #endregion
+    //============================================================
 
     //============================================================
     // 치킨과 관련된 변수 
@@ -94,20 +145,36 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         // 포톤뷰를 캐싱하여 가져온다 (GetComponent로 가져오는것 생각하면 됨)
         PV = photonView;
+        missilePool = FindObjectOfType<MissilePool>().GetComponent<MissilePool>();
         playerRigid = GetComponent<Rigidbody>();
 
         UIPlayerInfo = GetComponentInChildren<UIPlayerInfo>();
 
         myChicken = transform.Find("MyChicken");
+
+        MissileObj = Resources.Load<GameObject>("Missile");
+
+
+        //===============     차가 나라면 나는 나만의 태그를 가질 것이여     ==================
+        if (PV.IsMine)
+        {
+            gameObject.tag = "Me";
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
+            {
+                transform.GetChild(i).gameObject.tag = "Me";
+            }
+        }
+        else
+        {
+            gameObject.tag = "Player";
+            gameObject.layer = LayerMask.NameToLayer("Player");
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
+            {
+                transform.GetChild(i).gameObject.tag = "Player";
+                gameObject.layer = LayerMask.NameToLayer("Enemy");
+            }
+        }
     }
-
-
-
-
-
-
-
-
 
 
     void Start()
@@ -116,10 +183,15 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     }
 
+    //==============================================      UPDATE      ===========================================
     private void Update()
     {
         if (!PV.IsMine)
             return;
+
+        //input keys 
+        xAxis = Input.GetAxis("Horizontal");
+        zAxis = Input.GetAxis("Vertical");
 
         //=====================================================================
         // Player braking
@@ -166,7 +238,29 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #endregion
         //=====================================================================
 
-
+        //=====================================================================
+        #region 아이템 관련 스크립트
+        //if(missile == true)
+        {
+            if(Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                //if (transform.Find("Missile").gameObject.activeSelf == true) //활성화 중이라면 반환
+                //return;
+                //Instantiate(MissileObj, transform.position, Quaternion.identity);
+                //Debug.Log(missilePool);
+                //missilePool.OrderInst(transform, PV.ViewID);
+                //transform.GetComponentInChildren<MeshCollider>().enabled = false;
+                GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
+                myMissile.AddComponent<Missile>();
+                myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+                myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+            }
+            else
+            {
+                //transform.GetComponentInChildren<MeshCollider>().enabled = true;
+            }
+        }
+        #endregion
     }
 
 
@@ -182,9 +276,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
-        //input keys 
-        float xAxis = Input.GetAxis("Horizontal");
-        float zAxis = Input.GetAxis("Vertical");
+        
 
         // currentspeed of car 
         currSpeed = (float)(playerRigid.velocity.magnitude * 3.6f);
@@ -272,9 +364,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     }
 
 
-
-
-
     //===========================================================================
     // function related to car movement 
     #region 자동차 움직임에 관한 함수들 
@@ -337,5 +426,69 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //===========================================================================
 
+    //===========================================================================
+    #region 충돌 관련 함수
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!PV.IsMine)
+            return;
+        //=======================================
+        #region 미사일 충돌(아이템 충돌)
+        if(other.gameObject.tag == "Bomb")
+        {
+            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
+            {
+                Debug.Log("미사일충돌!!");
+                playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
+            }
+        }
+        #endregion
+
+
+        //=======================================
+        #region 발판 충돌
+        if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
+        }
+        if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
+        }
+        if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
+        }
+        if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
+        }
+        if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
+        }
+        if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
+        {
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
+        }
+
+        if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
+        {
+            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
+        }
+        if (other.gameObject.tag == "Boost2") //부스트발판 밟았을때
+        {
+            GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
+        }
+        #endregion
+        //=======================================
+    }
+    #endregion
+    //===========================================================================
+
+
+
+
 
 }
+
