@@ -1979,7 +1979,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Acceleration: 1500
+  Acceleration: 1100
   BrakingForce: 10000
   MaxTurnAngle: 45
   MaxSpeed: 110

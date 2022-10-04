@@ -47,8 +47,9 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     public bool GameStart { get { return gameStart; } }
 
     bool isGameOver = true;
-    public bool IsGameOver { get { return isGameOver; } }   
+    public bool IsGameOver { get { return isGameOver; } }
 
+    static int round = 1;
 
 
     // 현재 자신이 속해있는 방
@@ -63,6 +64,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     void Start()
     {
         StartCoroutine(CountDown());
+        round++;
     }
 
 
@@ -77,7 +79,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
 
     IEnumerator CountDown()
     {
-        timer.text = "Player Ready!!";
+        timer.text = $"$$$ Round {round} !! $$$ \n Player Ready!!";
         yield return new WaitForSeconds(2f);
 
         if (PhotonNetwork.IsMasterClient)

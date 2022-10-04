@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UI;
 using Photon.Pun;
 using System.Runtime.ExceptionServices;
 using UnityEngine.UIElements;
@@ -9,6 +10,8 @@ using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
 using Cinemachine;
 using TMPro;
+using Color = UnityEngine.Color;
+
 
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
@@ -34,7 +37,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     UIPlayerInfo UIPlayerInfo;
 
 
-    GameObject VictoryText = null;
+    //GameObject VictoryText = null;
+    GameObject GGText = null;
+    TextMeshProUGUI GameOvertext;
 
     //============================================================
     // 움직임과 관련된 변수
@@ -110,7 +115,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
-    private bool check = false;
+    bool check = false;
 
     //============================================================
     // Network 동기화를 위한 함수 
@@ -153,7 +158,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         ChickenAni = myChicken.GetComponent<Animator>();
 
-        VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+        //VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+        GGText = GameObject.Find("Canvas").transform.GetChild(2).gameObject;
+        GameOvertext = GGText.GetComponent<TextMeshProUGUI>();
 
         MissileObj = Resources.Load<GameObject>("Missile");
 
@@ -198,9 +205,12 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         if (!PV.IsMine || !canMove)
             return;
 
+
+        Debug.Log("is checked? " + check);
+
         //=====================================================================
         // Imsi Code for Siyeon
-
+        #region Temp key for test
         if (Input.GetKeyDown(KeyCode.Z))
         {
             ChickenTimer.Inst.StopAllCoroutines();
@@ -211,7 +221,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             LeftGame();
         }
 
-
+        #endregion
         //=====================================================================
 
 
@@ -219,14 +229,25 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // Player GameOver
         if (ChickenTimer.Inst.IsGameOver == false && check == false)
         {
+            Debug.Log("game is over!");
+
+            // check if I have chicken 
             CheckHasChicken();
-            Invoke("CheckAliveAlone", 2f);
+
             check = true;
         }
 
-        if (VictoryText.activeInHierarchy)
+        // checked chicken and only one player left 
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1 && check)
         {
-            Invoke("LeftGame", 5f);
+            StartCoroutine(GoodGame("You Win!!", Color.green, 5f));
+        }
+
+
+        // checked chicken and more than one player left
+        if (check && PhotonNetwork.CurrentRoom.PlayerCount >= 2)
+        {
+            Invoke("NextRound", 4f);        
         }
 
         //=====================================================================
@@ -240,13 +261,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //=====================================================================
 
 
-        //input keys 
-        xAxis = Input.GetAxis("Horizontal");
-        zAxis = Input.GetAxis("Vertical");
 
         //=====================================================================
         // Player braking
-        #region 플레이어 브레이크와 관련된 코드 
+        #region 플레이어 움직임, 브레이크와 관련된 코드 
+
+        //input keys 
+        xAxis = Input.GetAxis("Horizontal");
+        zAxis = Input.GetAxis("Vertical");
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -298,6 +320,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // if wheel is off ground, no skidmark
         EraseSkidMark();
 
+
+        // if Forward Left & rear right wheel is off the ground 
+        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
+
+        else
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
+
         #endregion
         //=====================================================================
 
@@ -315,12 +345,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //=====================================================================
 
 
-        // if Forward Left & rear right wheel is off the ground 
-        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
 
-        else
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
     }
 
 
@@ -622,24 +647,57 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     // function Check my Chicken Onw when ChickenTimer is Finish
     private void CheckHasChicken()
     {
+        Debug.Log("Check chicken!");
+
         // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
         if (!transform.GetChild(7).gameObject.activeInHierarchy)
         {
-            LeftGame();
+            Debug.Log("I'm loser!");
+
+            StartCoroutine(GoodGame("You Missed Chicken!", Color.red, 2f));
+        }
+
+
+        // 치킨을 가지고 있으면 다음 라운드로 넘어간다. 
+        if (transform.GetChild(7).gameObject.activeInHierarchy)
+        {
+            GGText.SetActive(true);
+            GameOvertext.faceColor = Color.yellow;
+            GameOvertext.text = "Lucky! You Got Chicken!";
         }
     }
 
-    private void CheckAliveAlone()
-    {
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-            VictoryText.SetActive(true);
-    }
 
+
+    // 방을 나가는 함수
     private void LeftGame()
     {
         PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel("StartScene");
     }
+
+    void NextRound()
+    {
+        PhotonNetwork.LoadLevel("GameScene");
+    }
+
+
+    // 게임 종료 시 winner/loser text 출력 후 씬 전환 함수 
+    IEnumerator GoodGame(string text, Color color, float wait)
+    {
+        // set active GG text 
+        GGText.SetActive(true);
+
+        GameOvertext.text = text;
+        GameOvertext.faceColor = color;
+        yield return new WaitForSeconds(wait);
+
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel("StartScene");
+
+        yield return null;
+    }
+
     //===========================================================================
 }
 
