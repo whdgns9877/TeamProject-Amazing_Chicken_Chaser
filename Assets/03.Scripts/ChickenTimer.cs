@@ -62,7 +62,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        StartCoroutine(CountDonw());
+        StartCoroutine(CountDown());
     }
 
 
@@ -75,7 +75,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     }
 
 
-    IEnumerator CountDonw()
+    IEnumerator CountDown()
     {
         timer.text = "Player Ready!!";
         yield return new WaitForSeconds(2f);

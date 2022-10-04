@@ -278,7 +278,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // drift key "shift"
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            Drift(0.1f);        // decrease wheel stiffness for drifting
+            Drift(0.5f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
 
             // play running animation during drift
