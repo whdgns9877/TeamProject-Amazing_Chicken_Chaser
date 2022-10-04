@@ -87,7 +87,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
     #region 아이템 관련 변수
     [SerializeField] bool missile = false;
-    [SerializeField] bool shield = false;
+    [SerializeField] public bool shield = false;
     [SerializeField] bool mine = false;
 
     [SerializeField] GameObject MissileObj;
@@ -311,6 +311,27 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
             myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
         }
+
+        //방어막 생성
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            PV.RPC("ShieldActive", RpcTarget.AllViaServer);
+            shield = true;
+
+        }
+
+        
+
+
+        // 부스터
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            transform.Find("Booster").gameObject.SetActive(true);
+            //transform.Find("Booster").transform.Find("Left").GetComponent<ParticleSystem>().Play();
+            ///transform.Find("Booster").transform.Find("Right").GetComponent<ParticleSystem>().Play();
+        }
+
+
         #endregion
         //=====================================================================
 
@@ -418,7 +439,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         if (collision.collider.tag == "Player")
         {
-            PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
+            //PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
 
             // if I have chicken and opponent have chicken too 
             if (myChicken.gameObject.activeSelf && collision.transform.Find("MyChicken").gameObject.activeSelf)
@@ -549,7 +570,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
-    #region 발판 관련 함수
+    #region TriggerEnter 부분 - 발판, 미사일 충돌
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
@@ -591,11 +612,20 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             return;
         //=======================================
         // 미사일 충돌(아이템 충돌)
-        if (other.gameObject.tag == "Bomb")
+        if (other.gameObject.tag == "Bomb" && shield == false)
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
             {
                 playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
+            }
+            // if I have chicken
+            if (myChicken.gameObject.activeSelf)
+            {
+                // deactive my chicken 
+                PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
+
+                // request master client to active chicken 
+                PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
             }
         }
 
@@ -641,5 +671,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         PhotonNetwork.LoadLevel("StartScene");
     }
     //===========================================================================
+
+
+    //===========================================================================
+    /// <summary>
+    /// 아이템 함수들의 총집합입니다
+    /// </summary>
+    #region 아이템 함수
+    [PunRPC]
+    void ShieldActive()
+    {
+        transform.GetChild(9).gameObject.SetActive(true);
+    }
+    #endregion
 }
 

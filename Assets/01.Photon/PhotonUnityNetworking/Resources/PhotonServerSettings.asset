@@ -58,6 +58,8 @@ MonoBehaviour:
   - CreateChicken
   - OnEnable
   - ChickenPadak
+  - RPCDurTime
+  - ShieldActive
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
