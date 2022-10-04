@@ -240,7 +240,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // checked chicken and only one player left 
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1 && check)
         {
-            StartCoroutine(GoodGame("You Win!!", Color.green, 5f));
+            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 5f));
         }
 
 
@@ -654,7 +654,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             Debug.Log("I'm loser!");
 
-            StartCoroutine(GoodGame("You Missed Chicken!", Color.red, 2f));
+            StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
         }
 
 
@@ -683,7 +683,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
 
     // 게임 종료 시 winner/loser text 출력 후 씬 전환 함수 
-    IEnumerator GoodGame(string text, Color color, float wait)
+    IEnumerator GoodGame(string text, string scene, Color color, float wait)
     {
         // set active GG text 
         GGText.SetActive(true);
@@ -693,7 +693,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         yield return new WaitForSeconds(wait);
 
         PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LoadLevel("StartScene");
+        PhotonNetwork.LoadLevel(scene);
 
         yield return null;
     }
