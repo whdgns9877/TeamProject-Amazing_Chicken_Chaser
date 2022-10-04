@@ -16,8 +16,8 @@ public class UIManager : MonoBehaviourPunCallbacks
     [SerializeField] GameObject      Panel_Notice        = null;  // 현재 알림 상태를 띄울 패널
 
     [Header("** 로그인 UI **")]
-    [SerializeField] TMP_InputField InputField_NickName = null;  // 닉네임을 입력받을 InputField
-    [SerializeField] Button         Button_JoinLobby    = null;  // 로비 접속 버튼
+    [SerializeField] Button          Button_JoinLobby    = null;  // 로비 접속 버튼
+    [SerializeField] TextMeshProUGUI Text_UserName       = null;  // 유저 이름
 
     [Header("** 로비 UI **")]
     [SerializeField] GameObject      Panel_Login             = null;  // 로그인 패널
@@ -80,8 +80,6 @@ public class UIManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region 입장 정보
-    // 닉네임에 쓰일 InputField
-    private string nickNameInputField = "";
 
     // 로그인 상태 변수
     private bool isLogin = false;
@@ -95,15 +93,21 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 전송률 설정
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 30;
+
+        // 게임 시작시 Osiris에 연결요청
+        ZeraAPIHandler.Inst.GetUserProfile();
+        ZeraAPIHandler.Inst.GetSessionID();
+
         Invoke("DelaySync", 2f);
-        // DAPPX를 위한 Cost
-        myCost = 10000;
     }
 
     private void DelaySync()
     {
         // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
         PhotonNetwork.AutomaticallySyncScene = true;
+        ZeraAPIHandler.Inst.GetMyZeraBalance();
+        // 2초뒤에 접속 버튼을 활성화 시켜준다
+        Button_JoinLobby.interactable = true;
     }
 
     private void Start()
@@ -120,24 +124,19 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 네트워크 상태가 마스터 서버에 연결되어있지 않다면
         if (PhotonNetwork.NetworkClientState != ClientState.ConnectedToMasterServer)
         {
-            // 두 UI의 상호작용을 막는다
-            InputField_NickName.interactable = false;
+            //UI의 상호작용을 막는다
             Button_JoinLobby.interactable = false;
         }
         // 네트워크 상태가 마스터 서버에 연결된 상태라면
         else
         {
-            // InputField에 입력한 텍스트가 비워져있으면
-            if (string.IsNullOrEmpty(nickNameInputField))
+            if (isLogin == true)
                 // 접속 Button의 상호작용을 막는다
                 Button_JoinLobby.interactable = false;
             // InputField에 입력한 텍스트가 무엇인가 존재한다면(입력한게 있다면)
             else
                 // 접속 Button의 상호작용을 활성화 시킨다
                 Button_JoinLobby.interactable = true;
-
-            // InputField는 상호작용 가능하게
-            InputField_NickName.interactable = true;
         }
 
         if (!Panel_CreateRoom.activeInHierarchy)
@@ -157,11 +156,11 @@ public class UIManager : MonoBehaviourPunCallbacks
     public override void OnDisconnected(DisconnectCause cause)
     {
         Text_ConnectionInfo.text = "마스터 서버에서 끊어짐...";
+        Text_UserName.text = "";
         // 접속이 끊어진 상태에서는 로비 패널을 비활성화하고
         if (Panel_Lobby.activeInHierarchy)
             Panel_Lobby.SetActive(false);
-        // 닉네임을 입력받는 InputField와 입장 Button을 활성화 시켜준다
-        InputField_NickName.interactable = true;
+        // 입장 Button을 활성화 시켜준다
         Button_JoinLobby.interactable = true;
 
         // 임의로 본인이 접속을 끊든 서버 불안정으로 끊기든
@@ -172,12 +171,13 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 로비에 연결 완료시 호출되는 함수
     public override void OnJoinedLobby()
     {
+        PhotonNetwork.LocalPlayer.NickName = ZeraAPIHandler.Inst.resGetUserProfile.userProfile.username;
         // 로비에서 표시할 텍스트 들을 띄워줌
         Text_ConnectionInfo.text = "로비 접속 완료!";
+        Text_UserName.text = PhotonNetwork.LocalPlayer.NickName;
         Text_MyCost.text = "MyCost : " + myCost.ToString();
         // 로비에 접속 완료시 로그인 패널은 비활성화 로비 패널은 활성화 해준다
         Panel_Lobby.SetActive(true);
-        InputField_NickName.interactable = false;
         // 로비 접속시 우선 방 정보를 지워줌
         _roomList.Clear();
     }
@@ -325,17 +325,6 @@ public class UIManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region UI에 등록하는 함수들
-    // 이름 입력 컨트롤(Input Field)
-    public void OnValueChanged(string inStr)
-    {
-        if (string.IsNullOrEmpty(inStr))
-            Button_JoinLobby.interactable = false;
-        else
-            Button_JoinLobby.interactable = true;
-
-        PhotonNetwork.LocalPlayer.NickName = inStr;
-        nickNameInputField = inStr;
-    }
 
     // 방 생성할때 입력 컨트롤
     public void OnvalueChangedCreateRoom(string inStr)
@@ -351,15 +340,33 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 로비 연결 버튼에 쓰일 함수
     public void OnClick_JoinLobby()
     {
-        // 아직 네트워크가 마스터 서버에 연결된 상태가 아니라면 처리하지 않게
-        if (PhotonNetwork.NetworkClientState != ClientState.ConnectedToMasterServer || string.IsNullOrEmpty(nickNameInputField))
-            return;
 
+        StartCoroutine(WaitConnectOsiris());
+    }
+
+    IEnumerator WaitConnectOsiris()
+    {
+        if (ZeraAPIHandler.Inst.ConnectOdin == false)
+        {
+            Panel_Notice.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text =
+                "Osiris에 연결 되어 있지 않습니다.\n연결 후 다시 접속해 주세요";
+            Panel_Notice.SetActive(true);
+            yield break;
+        }
+
+        // 아직 네트워크가 마스터 서버에 연결된 상태가 아니라면 처리하지 않게
+        if (PhotonNetwork.NetworkClientState != ClientState.ConnectedToMasterServer)
+            yield break;
+
+        // DAPPX를 위한 Cost
+        myCost = ZeraAPIHandler.Inst.resBalanceInfo.data.balance;
+        Debug.Log("내 제라 : " + ZeraAPIHandler.Inst.resBalanceInfo.data.balance);
         Text_ConnectionInfo.text = "접속 시도 중 ...";
-        InputField_NickName.interactable = false;
         Button_JoinLobby.interactable = false;
         PhotonNetwork.JoinLobby();
         isLogin = true;
+
+        yield return null;
     }
 
     // 접속 끊기 버튼에 쓰일 함수
