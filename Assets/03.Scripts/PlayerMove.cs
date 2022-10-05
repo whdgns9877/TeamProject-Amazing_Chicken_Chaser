@@ -197,9 +197,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             UIPlayerInfo.SetMinimapImageColor(Color.blue);
         else
             UIPlayerInfo.SetMinimapImageColor(Color.red);
-
-        Debug.Log("my ID " + PV.ViewID);
-
     }
 
     //==============================================      UPDATE      ===========================================
@@ -226,15 +223,16 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
 
         //=====================================================================
-        // Player GameOver
-        if (ChickenTimer.Inst.IsGameOver == false && check == false)
+        // after game over, game manager check player chicken 
+        if (GameManager.Inst.CheckChicken && check == false)
         {
             Debug.Log("game is over!");
 
+
             // check if I have chicken 
             StartCoroutine(CheckHasChicken());
-
             check = true;
+
         }
 
 
@@ -631,50 +629,62 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function Check my Chicken Onw when ChickenTimer is Finish
+    #region 치킨을 가지고 있는지 확인하고 방을 내보내는 함수 
     IEnumerator CheckHasChicken()
     {
-        Debug.Log("Check chicken!");
-
-
-
-        // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
-        if (!transform.GetChild(7).gameObject.activeInHierarchy)
+        // doAgain == false == no one got chicken
+        if (GameManager.Inst.DoAgain)
         {
-            Debug.Log("I'm loser!");
-
-            StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
-        }
-
-
-        // 치킨을 가지고 있으면 다음 라운드로 넘어간다. 
-        if (transform.GetChild(7).gameObject.activeInHierarchy)
-        {
-            GGText.SetActive(true);
-            GameOvertext.faceColor = Color.yellow;
-            GameOvertext.text = "Lucky! You Got Chicken!";
-        }
-
-        yield return new WaitForSeconds(5f);
-
-        // checked chicken and only one player left 
-        if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
-        {
-            Debug.Log("이겼나?" + winner);
-
-            winner = true;
-            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
-        }
-
-
-        yield return new WaitForSeconds(2f);
-
-        if (check && !winner && PhotonNetwork.CurrentRoom.PlayerCount >= 2)
-        {
-            Debug.Log("이겼나?" + winner);
             PhotonNetwork.AutomaticallySyncScene = true;
+            
+            GGText.SetActive(true);
+            GameOvertext.faceColor = Color.blue;
+            GameOvertext.text = "All Chickens ran away.. \n Let's try again!!";
+
+
+            yield return new WaitForSeconds(2f);
             PhotonNetwork.LoadLevel("GameScene");
+
+            Debug.Log("Do again!");
+            yield return null;
         }
-        yield return null;
+
+        else
+        {
+            Debug.Log("go next!");
+            // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
+            if (!transform.GetChild(7).gameObject.activeInHierarchy)
+            {
+                StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
+            }
+
+            // 치킨을 가지고 있으면 다음 라운드로 넘어간다. 
+            if (transform.GetChild(7).gameObject.activeInHierarchy)
+            {
+                GGText.SetActive(true);
+                GameOvertext.faceColor = Color.yellow;
+                GameOvertext.text = "Lucky! You Got Chicken!";
+            }
+
+            yield return new WaitForSeconds(5f);
+
+            // checked chicken and only one player left 
+            if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
+            {
+                winner = true;
+                StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
+            }
+
+
+            yield return new WaitForSeconds(2f);
+
+            if (check && !winner && PhotonNetwork.CurrentRoom.PlayerCount >= 2)
+            {
+                PhotonNetwork.AutomaticallySyncScene = true;
+                PhotonNetwork.LoadLevel("GameScene");
+            }
+            yield return null;
+        }
     }
 
 
@@ -706,6 +716,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         yield return null;
     }
 
+    #endregion
     //===========================================================================
 }
 

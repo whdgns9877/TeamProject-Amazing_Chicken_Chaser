@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using ExitGames.Client.Photon;
 using UnityEngine.UIElements;
 using System;
+using Photon.Pun.Demo.Cockpit;
 
 public class GameManager : MonoBehaviourPun
 {
@@ -36,12 +37,17 @@ public class GameManager : MonoBehaviourPun
     //=========================================================
 
 
-
-    Player[] players = PhotonNetwork.PlayerList;
-
     public float GameTime;
 
     private Room curRoom;
+
+
+    bool doAgain = false;
+    bool checkChicken = false;
+    public bool CheckChicken { get { return checkChicken; } }
+
+    public bool DoAgain { get { return doAgain; } }
+
 
     void Awake()
     {
@@ -65,5 +71,26 @@ public class GameManager : MonoBehaviourPun
                 }
             }
         }
+    }
+
+
+
+
+    private void Update()
+    {
+        //if game is over 
+        if (!ChickenTimer.Inst.IsGameOver && !checkChicken)
+        {
+            // count chicken in Queue, 
+            if (ChickenSpawn.Inst.MyChickenLiet.Count == 0)
+            {
+                Debug.Log("No one has chicek!");
+                doAgain = true;
+            }
+
+            
+            checkChicken = true;
+        }
+
     }
 }

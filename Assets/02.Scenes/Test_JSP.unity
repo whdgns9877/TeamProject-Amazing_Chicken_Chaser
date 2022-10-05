@@ -349,6 +349,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2463372520759025929, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3879721677636549107, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: speed
       value: 
@@ -356,6 +360,14 @@ PrefabInstance:
     - target: {fileID: 3879721677636549107, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: stiffness
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3879721677636549107, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: Acceleration
+      value: 800
+      objectReference: {fileID: 0}
+    - target: {fileID: 3879721677636549107, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: BrakingForce
+      value: 50000
       objectReference: {fileID: 0}
     - target: {fileID: 3879721677636549107, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: MyextremumSlip
@@ -375,19 +387,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4289787643578607964, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 9.78
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424200332, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_Name
       value: Test Car
+      objectReference: {fileID: 0}
+    - target: {fileID: 4773342266424200332, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424200907, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: sceneViewId
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201008, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4773342266424201008, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201008, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_ForwardFriction.m_ExtremumSlip
@@ -402,8 +422,12 @@ PrefabInstance:
       value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201009, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4773342266424201009, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201009, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_ForwardFriction.m_ExtremumSlip
@@ -418,8 +442,12 @@ PrefabInstance:
       value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201011, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4773342266424201011, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201011, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_ForwardFriction.m_ExtremumSlip
@@ -434,8 +462,12 @@ PrefabInstance:
       value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201022, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4773342266424201022, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201022, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_ForwardFriction.m_ExtremumSlip
@@ -455,15 +487,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201157, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0
+      value: -3.364
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201157, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.208
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201157, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 3.48
       objectReference: {fileID: 0}
     - target: {fileID: 4773342266424201157, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
       propertyPath: m_LocalRotation.w
@@ -585,7 +617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   myCAMDistance: 8
   myCAMAngle: 22
-  myTarget: {fileID: 1187447622}
+  myTarget: {fileID: 0}
 --- !u!1 &848882969
 GameObject:
   m_ObjectHideFlags: 0
@@ -721,11 +753,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 848882969}
   m_CullTransparentMesh: 1
---- !u!4 &1187447622 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4773342266424201157, guid: d1cdec4f5f8b2f3439e755aa9cb7c568, type: 3}
-  m_PrefabInstance: {fileID: 300208575}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1208496941
 GameObject:
   m_ObjectHideFlags: 0
