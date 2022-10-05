@@ -89,6 +89,5 @@ public class GameManager : MonoBehaviourPun
             }
             checkChicken = true;
         }
-
     }
 }
