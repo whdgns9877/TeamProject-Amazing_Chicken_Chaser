@@ -116,7 +116,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     bool check = false;
-
+    bool winner = false;
     //============================================================
     // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -197,6 +197,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             UIPlayerInfo.SetMinimapImageColor(Color.blue);
         else
             UIPlayerInfo.SetMinimapImageColor(Color.red);
+
+        Debug.Log("my ID " + PV.ViewID);
+
     }
 
     //==============================================      UPDATE      ===========================================
@@ -204,9 +207,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if (!PV.IsMine || !canMove)
             return;
-
-
-        Debug.Log("is checked? " + check);
 
         //=====================================================================
         // Imsi Code for Siyeon
@@ -232,23 +232,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             Debug.Log("game is over!");
 
             // check if I have chicken 
-            CheckHasChicken();
+            StartCoroutine(CheckHasChicken());
 
             check = true;
         }
 
-        // checked chicken and only one player left 
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1 && check)
-        {
-            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 5f));
-        }
-
-
-        // checked chicken and more than one player left
-        if (check && PhotonNetwork.CurrentRoom.PlayerCount >= 2)
-        {
-            Invoke("NextRound", 4f);        
-        }
 
         //=====================================================================
 
@@ -259,8 +247,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             StartCoroutine(ResetPlayerPos());
         }
         //=====================================================================
-
-
 
         //=====================================================================
         // Player braking
@@ -645,9 +631,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function Check my Chicken Onw when ChickenTimer is Finish
-    private void CheckHasChicken()
+    IEnumerator CheckHasChicken()
     {
         Debug.Log("Check chicken!");
+
+
 
         // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
         if (!transform.GetChild(7).gameObject.activeInHierarchy)
@@ -665,7 +653,31 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             GameOvertext.faceColor = Color.yellow;
             GameOvertext.text = "Lucky! You Got Chicken!";
         }
+
+        yield return new WaitForSeconds(5f);
+
+        // checked chicken and only one player left 
+        if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        {
+            Debug.Log("이겼나?" + winner);
+
+            winner = true;
+            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
+        }
+
+
+        yield return new WaitForSeconds(2f);
+
+        if (check && !winner && PhotonNetwork.CurrentRoom.PlayerCount >= 2)
+        {
+            Debug.Log("이겼나?" + winner);
+            PhotonNetwork.AutomaticallySyncScene = true;
+            PhotonNetwork.LoadLevel("GameScene");
+        }
+        yield return null;
     }
+
+
 
 
 
@@ -676,10 +688,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         PhotonNetwork.LoadLevel("StartScene");
     }
 
-    void NextRound()
-    {
-        PhotonNetwork.LoadLevel("GameScene");
-    }
 
 
     // 게임 종료 시 winner/loser text 출력 후 씬 전환 함수 
