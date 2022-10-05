@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     [Header("** 로그인 UI **")]
     [SerializeField] Button          Button_JoinLobby    = null;  // 로비 접속 버튼
     [SerializeField] TextMeshProUGUI Text_UserName       = null;  // 유저 이름
+    [SerializeField] GameObject      Panel_WaitConnect   = null;  // 접속시 로딩화면처럼 띄울 패널
 
     [Header("** 로비 UI **")]
     [SerializeField] GameObject      Panel_Login             = null;  // 로그인 패널
@@ -29,12 +30,12 @@ public class UIManager : MonoBehaviourPunCallbacks
     [SerializeField] TMP_InputField  InputField_RoomName     = null;  // 방 이름을 받을 인풋필드
     [SerializeField] GameObject      room                    = null;  // 방정보에 따라 만들어줄 방 프리팹
     [SerializeField] Toggle[]        togglesForMaxPlayer     = null;  // 최대 플레이어를 정해줄 토글들
-    [SerializeField] TextMeshProUGUI Text_MyCost             = null;  // 나의 코스트
+    [SerializeField] TextMeshProUGUI Text_MyZera             = null;  // 나의 코스트
 
     [Header("** 방 UI **")]
     [SerializeField] TextMeshProUGUI   Text_roomName           = null;    // 방 이름
     [SerializeField] TextMeshProUGUI   Text_RoomCost           = null;    // 방 코스트
-    [SerializeField] TextMeshProUGUI   Text_MyCostInRoom       = null;    // 방 안에서의 나의 코스트
+    [SerializeField] TextMeshProUGUI   Text_MyZeraInRoom       = null;    // 방 안에서의 나의 코스트
     [SerializeField] GameObject        Panel_Room              = null;    // 방의 전체적인 패널
     [SerializeField] GameObject        Button_StartGame        = null;    // 게임 시작 버튼
     [SerializeField] GameObject        Button_Ready            = null;    // 게임 레디 버튼
@@ -49,7 +50,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     List<RoomInfo> _roomList = new List<RoomInfo>();
 
     // 방 입장과 게임에 쓰일 코스트
-    private int myCost = 0;
+    private int myZera = 0;
 
     // 방 타이틀에 쓰일 string
     private string roomNameText = "";
@@ -83,6 +84,9 @@ public class UIManager : MonoBehaviourPunCallbacks
 
     // 로그인 상태 변수
     private bool isLogin = false;
+
+    // My Betting Id
+    private string myBettingID = "";
     #endregion
 
     private void Awake()
@@ -93,21 +97,37 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 전송률 설정
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 30;
-
-        // 게임 시작시 Osiris에 연결요청
-        ZeraAPIHandler.Inst.GetUserProfile();
-        ZeraAPIHandler.Inst.GetSessionID();
-
-        Invoke("DelaySync", 2f);
-    }
-
-    private void DelaySync()
-    {
         // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
         PhotonNetwork.AutomaticallySyncScene = true;
+
+        // API연결 자동으로 실행
+        StartCoroutine(ConnectAPI());
+    }
+
+    IEnumerator ConnectAPI()
+    {
+        yield return StartCoroutine(RequestAPI());
+        // 기본적으로 API에 연결되어 정보를 받아왔을때 아래 내용들을 실행한다
+
         ZeraAPIHandler.Inst.GetMyZeraBalance();
-        // 2초뒤에 접속 버튼을 활성화 시켜준다
+
+        yield return new WaitForSeconds(3f);
+
         Button_JoinLobby.interactable = true;
+        yield return null;
+    }
+
+    IEnumerator RequestAPI()
+    {
+        while (ZeraAPIHandler.Inst.getSessionID == false
+            && ZeraAPIHandler.Inst.getUserProfile == false)
+        {
+            // API 에서 필요한 정보들을 받아온다
+            ZeraAPIHandler.Inst.GetUserProfile();
+            ZeraAPIHandler.Inst.GetSessionID();
+            ZeraAPIHandler.Inst.GetBettingSettings();
+            yield return null;
+        }
     }
 
     private void Start()
@@ -127,17 +147,8 @@ public class UIManager : MonoBehaviourPunCallbacks
             //UI의 상호작용을 막는다
             Button_JoinLobby.interactable = false;
         }
-        // 네트워크 상태가 마스터 서버에 연결된 상태라면
         else
-        {
-            if (isLogin == true)
-                // 접속 Button의 상호작용을 막는다
-                Button_JoinLobby.interactable = false;
-            // InputField에 입력한 텍스트가 무엇인가 존재한다면(입력한게 있다면)
-            else
-                // 접속 Button의 상호작용을 활성화 시킨다
-                Button_JoinLobby.interactable = true;
-        }
+            Button_JoinLobby.interactable = true;
 
         if (!Panel_CreateRoom.activeInHierarchy)
             InputField_RoomName.text = null;
@@ -171,11 +182,14 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 로비에 연결 완료시 호출되는 함수
     public override void OnJoinedLobby()
     {
+        // 사용할 닉네임을 API상의 본인의 UserName으로 받고 베팅 아이디 또한 받아둔다
         PhotonNetwork.LocalPlayer.NickName = ZeraAPIHandler.Inst.resGetUserProfile.userProfile.username;
+        myBettingID = ZeraAPIHandler.Inst.resSettings.data.bets[0]._id;
+
         // 로비에서 표시할 텍스트 들을 띄워줌
         Text_ConnectionInfo.text = "로비 접속 완료!";
         Text_UserName.text = PhotonNetwork.LocalPlayer.NickName;
-        Text_MyCost.text = "MyCost : " + myCost.ToString();
+        Text_MyZera.text = "MyZera : " + myZera.ToString();
         // 로비에 접속 완료시 로그인 패널은 비활성화 로비 패널은 활성화 해준다
         Panel_Lobby.SetActive(true);
         // 로비 접속시 우선 방 정보를 지워줌
@@ -223,7 +237,7 @@ public class UIManager : MonoBehaviourPunCallbacks
             roomData.maxPlayer = roomInfo.MaxPlayers;
             roomData.playerCount = roomInfo.PlayerCount;
             roomData.isOpen = roomInfo.IsOpen;
-            roomData.roomCost = roomInfo.MaxPlayers * 1000;
+            roomData.roomCost = roomInfo.MaxPlayers * 5;
             roomData.UpdateInfo();
 
             // 해당 방의 인원이 꽉차있으면 버튼클릭을 막아 접속할수 없게한다
@@ -256,11 +270,8 @@ public class UIManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         leftRoomDone = true;
+        ZeraAPIHandler.Inst.selectedBettingID = "";
         ResetMyRoom();
-        //// UI들을 상황에 맞게 처리
-        //Panel_Room.SetActive(false);
-        //Panel_Login.SetActive(true);
-        //Panel_Lobby.SetActive(true);
     }
 
     // 방에 참가하면 자동적으로 호출되는 콜백함수
@@ -274,6 +285,10 @@ public class UIManager : MonoBehaviourPunCallbacks
 
         if (createRoomDone == false)
             createRoomDone = true;
+
+        ZeraAPIHandler.Inst.selectedBettingID = myBettingID;
+
+        Debug.Log(ZeraAPIHandler.Inst.selectedBettingID);
 
         // 현재 방에 달려있는 태그를 Hashtable 형식인 curRoomProperties 라는 변수에 넣어준다
         curRoom = PhotonNetwork.CurrentRoom;
@@ -291,7 +306,7 @@ public class UIManager : MonoBehaviourPunCallbacks
                 // 해당 슬롯의 인덱스와 방옵션의 MaxPlayer를 비교하여 MaxPlayer가 넘어가는 슬롯은 닫아준다
                 {"0", PhotonNetwork.LocalPlayer.ActorNumber }, {"1", 0 },
                 {"2", 2 <= max ? 0 : -1 }, {"3", 3 <= max ? 0 : -1 }, {"4", 4 <= max ? 0 : -1 },
-                {"5", 5 <= max ? 0 : -1 }, {"RoomCost", curRoom.MaxPlayers*1000}
+                {"5", 5 <= max ? 0 : -1 }, {"RoomCost", curRoom.MaxPlayers * 5}
             });
         }
         else
@@ -310,13 +325,7 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 방에 참가하면 준비상태를 false로
         SetLocalTag("IsReady", false);
 
-        myCost -= 1000;
-        Text_MyCostInRoom.text = "MyCost : " + myCost.ToString();
-
-        //// 패널들의 UI들을 맞게 처리해준다
-        //Panel_Login.SetActive(false);
-        //Panel_Lobby.SetActive(false);
-        //Panel_Room.SetActive(true);
+        Text_MyZeraInRoom.text = "MyZera : " + myZera.ToString();
 
         // 현재 방의 태그 값들을 갱신해준다
         StartCoroutine(RoomUpdate());
@@ -340,13 +349,13 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 로비 연결 버튼에 쓰일 함수
     public void OnClick_JoinLobby()
     {
-
         StartCoroutine(WaitConnectOsiris());
     }
 
     IEnumerator WaitConnectOsiris()
     {
-        if (ZeraAPIHandler.Inst.ConnectOdin == false)
+        if (ZeraAPIHandler.Inst.getUserProfile == false 
+            || ZeraAPIHandler.Inst.getSessionID == false)
         {
             Panel_Notice.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text =
                 "Osiris에 연결 되어 있지 않습니다.\n연결 후 다시 접속해 주세요";
@@ -357,16 +366,26 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 아직 네트워크가 마스터 서버에 연결된 상태가 아니라면 처리하지 않게
         if (PhotonNetwork.NetworkClientState != ClientState.ConnectedToMasterServer)
             yield break;
-
         // DAPPX를 위한 Cost
-        myCost = ZeraAPIHandler.Inst.resBalanceInfo.data.balance;
-        Debug.Log("내 제라 : " + ZeraAPIHandler.Inst.resBalanceInfo.data.balance);
+        myZera = ZeraAPIHandler.Inst.resBalanceInfo.data.balance;
         Text_ConnectionInfo.text = "접속 시도 중 ...";
         Button_JoinLobby.interactable = false;
+
+        // 로딩 패널4초동안 실행하는것을 기다린다
+        yield return StartCoroutine(WaitForGetUserInfo());
+
         PhotonNetwork.JoinLobby();
         isLogin = true;
 
         yield return null;
+    }
+
+    // 4초동안 로딩패널을 띄워준후 비활성화
+    IEnumerator WaitForGetUserInfo()
+    {
+        Panel_WaitConnect.SetActive(true);
+        yield return new WaitForSeconds(4f);
+        Panel_WaitConnect.SetActive(false);
     }
 
     // 접속 끊기 버튼에 쓰일 함수
@@ -418,15 +437,13 @@ public class UIManager : MonoBehaviourPunCallbacks
         myRoomName = roomNameText;
         myRo = ro;
         StartCoroutine(ChangeUIProcess());
-        //PhotonNetwork.CreateRoom(roomNameText, ro); // 실제로 방을 만드는 함수
     }
 
     public void OnLeaveRoomButtonClicked()
     {
         leftRoomDone = false;
         StartCoroutine(ChangeUIProcess());
-        myCost += 1000;
-        Text_MyCost.text = myCost.ToString();
+        Text_MyZera.text = myZera.ToString();
     }
 
     // 준비 버튼을 눌렀을때 실행되는 함수

@@ -37,11 +37,14 @@ public class ZeraAPIHandler : MonoBehaviour
 	}
 
 	public Res_GetUserProfile resGetUserProfile = null;
-	public Res_GetSessionID resGetSessionID = null;
-	public Res_BalanceInfo resBalanceInfo = null;
-	public Res_Settings resSettings = null;
+	public Res_GetSessionID	  resGetSessionID   = null;
+	public Res_BalanceInfo    resBalanceInfo    = null;
+	public Res_Settings       resSettings       = null;
 
-	public bool ConnectOdin = false;
+	public string selectedBettingID = null;
+
+	public bool getUserProfile = false;
+	public bool getSessionID = false;
 
 	//-----------------------------------------------------------------------------------------------------
 	//
@@ -59,10 +62,11 @@ public class ZeraAPIHandler : MonoBehaviour
 			if (response != null)
 			{
 				resGetUserProfile = response;
-				ConnectOdin = true;
+				getUserProfile = true;
+				Debug.Log("유저 정보 받아옴!");
 			}
 			else
-				ConnectOdin = false;
+				getUserProfile = false;
 
 		});
 	}
@@ -81,7 +85,13 @@ public class ZeraAPIHandler : MonoBehaviour
 			if (response != null)
 			{
 				resGetSessionID = response;
-			}
+				Debug.Log("세션 아이디 받아옴!");
+				getSessionID = true;
+            }
+            else
+            {
+				getSessionID = false;
+            }
 		});
 	}
 
@@ -98,19 +108,59 @@ public class ZeraAPIHandler : MonoBehaviour
 			if (response != null)
 			{
 				resBalanceInfo = response;
+				Debug.Log("내 제라 정보 받아옴!");
 			}
 		});
 	}
 
-	//-----------------------------------------------------------------------------------------------------
+	// Get Betting Setting Information
+	public void GetBettingSettings()
+	{
+		StartCoroutine(processRequestSettings());
+	}
+	IEnumerator processRequestSettings()
+	{
+		yield return requestSettings((response) =>
+		{
+			if (response != null)
+			{
+				resSettings = response;
+				Debug.Log("베팅 세팅 정보 받아옴!");
+			}
+		});
+	}
+
+    // ZERA Betting
+    public void BettingZera()
+    {
+        StartCoroutine(processRequestBetting_Zera());
+    }
+    IEnumerator processRequestBetting_Zera()
+    {
+        ResBettingPlaceBet resBettingPlaceBet = null;
+        ReqBettingPlaceBet reqBettingPlaceBet = new ReqBettingPlaceBet();
+        reqBettingPlaceBet.players_session_id = new string[] { resGetSessionID.sessionId };
+        reqBettingPlaceBet.bet_id = selectedBettingID;// resSettings.data.bets[0]._id;
+        yield return requestCoinPlaceBet(reqBettingPlaceBet, (response) =>
+        {
+            if (response != null)
+            {
+                resBettingPlaceBet = response;
+				Debug.Log("베팅 완료!");
+            }
+        });
+    }
+
+
+    //-----------------------------------------------------------------------------------------------------
 
 
 
-	/// To get user’s information.This is also used to authenticate if session-id is valid or not.
-	/// This can determine if the Odin is currently running or not. 
-	///	If Odin is not running, the API  is not accesible as well.
-	///	Inform the User to run the Osiris and Connect to Odin via Meta wallet.
-	delegate void resCallback_GetUserInfo(Res_GetUserProfile response);
+    /// To get user’s information.This is also used to authenticate if session-id is valid or not.
+    /// This can determine if the Odin is currently running or not. 
+    ///	If Odin is not running, the API  is not accesible as well.
+    ///	Inform the User to run the Osiris and Connect to Odin via Meta wallet.
+    delegate void resCallback_GetUserInfo(Res_GetUserProfile response);
 	IEnumerator requestGetUserInfo(resCallback_GetUserInfo callback)
 	{
 		// get user profile
@@ -142,6 +192,41 @@ public class ZeraAPIHandler : MonoBehaviour
 		www.SetRequestHeader("api-key", API_KEY);
 		yield return www.SendWebRequest();
 		Res_BalanceInfo res = JsonUtility.FromJson<Res_BalanceInfo>(www.downloadHandler.text);
+		callback(res);
+	}
+
+	// To get game’s general and bet settings
+	delegate void resCallback_Settings(Res_Settings response);
+	IEnumerator requestSettings(resCallback_Settings callback)
+	{
+		string url = getBaseURL() + "/v1/betting/settings";
+
+		UnityWebRequest www = UnityWebRequest.Get(url);
+		www.SetRequestHeader("api-key", API_KEY);
+		yield return www.SendWebRequest();
+		Res_Settings res = JsonUtility.FromJson<Res_Settings>(www.downloadHandler.text);
+		callback(res);
+	}
+
+	// Request Method : POST 
+	// Body Type : json
+	delegate void resCallback_BettingPlaceBet(ResBettingPlaceBet response);
+	IEnumerator requestCoinPlaceBet(ReqBettingPlaceBet req, resCallback_BettingPlaceBet callback)
+	{
+		string url = getBaseURL() + "/v1/betting/" + "zera" + "/place-bet";
+
+		string reqJsonData = JsonUtility.ToJson(req);
+		Debug.Log(reqJsonData);
+
+
+		UnityWebRequest www = UnityWebRequest.Post(url, reqJsonData);
+		byte[] buff = System.Text.Encoding.UTF8.GetBytes(reqJsonData);
+		www.uploadHandler = new UploadHandlerRaw(buff);
+		www.SetRequestHeader("api-key", API_KEY);
+		www.SetRequestHeader("Content-Type", "application/json");
+		yield return www.SendWebRequest();
+
+		ResBettingPlaceBet res = JsonUtility.FromJson<ResBettingPlaceBet>(www.downloadHandler.text);
 		callback(res);
 	}
 }
