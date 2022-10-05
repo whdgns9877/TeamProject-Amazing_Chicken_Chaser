@@ -659,9 +659,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // checked chicken and only one player left 
         if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
         {
-            Debug.Log("�̰峪?" + winner);
 
             winner = true;
+            Debug.Log("�̰峪?" + winner);
+            ZeraAPIHandler.Inst.DeclareWinner();
             StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
         }
 

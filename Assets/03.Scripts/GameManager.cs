@@ -45,6 +45,17 @@ public class GameManager : MonoBehaviourPun
 
     void Awake()
     {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // 게임씬 이동후 마스터가 베팅을한다
+            ZeraAPIHandler.Inst.BettingZera();
+        }
+        else
+        {
+            // 나머지 클라이언트들은 2초뒤에 베팅아이디를 받아온다
+            Invoke(nameof(GetGameBetID), 2f);
+        }
+
         // 서버에 잘 연결된 상태로 게임 씬에 들어오면 실행
         if (PhotonNetwork.IsConnected)
         {
@@ -65,5 +76,11 @@ public class GameManager : MonoBehaviourPun
                 }
             }
         }
+    }
+
+    void GetGameBetID()
+    {
+        Debug.Log("제가 받아올 겜 벳 아이디는 : " + (string)curRoom.CustomProperties["gameBetID"]);
+        ZeraAPIHandler.Inst.gameBetID = (string)curRoom.CustomProperties["gameBetID"];
     }
 }

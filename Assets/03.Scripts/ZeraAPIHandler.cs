@@ -1,8 +1,10 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Photon.Pun;
 
-public class ZeraAPIHandler : MonoBehaviour
+public class ZeraAPIHandler : MonoBehaviourPun
 {
 	static ZeraAPIHandler instance = null;
 
@@ -14,12 +16,11 @@ public class ZeraAPIHandler : MonoBehaviour
             {
 				instance = FindObjectOfType<ZeraAPIHandler>();
 
-				if(instance == null)
-                {
+				if (instance == null)
+				{
 					instance = new GameObject("ZeraAPIHandler").AddComponent<ZeraAPIHandler>();
-                }
+				}
             }
-			DontDestroyOnLoad(instance);
 			return instance;
         }
     }
@@ -40,16 +41,27 @@ public class ZeraAPIHandler : MonoBehaviour
 	public Res_GetSessionID	  resGetSessionID   = null;
 	public Res_BalanceInfo    resBalanceInfo    = null;
 	public Res_Settings       resSettings       = null;
+	public ResBettingPlaceBet resBettingPlaceBet = null;
 
 	public string selectedBettingID = null;
+
+	public string gameBetID = null;
 
 	public bool getUserProfile = false;
 	public bool getSessionID = false;
 
-	//-----------------------------------------------------------------------------------------------------
-	//
-	// Get UserInfo
-	public void GetUserProfile()
+    public List<string> allPlayersSessionID = new List<string>();
+
+    private void Awake()
+    {
+		if(instance != null)
+			DontDestroyOnLoad(instance);
+	}
+
+    //-----------------------------------------------------------------------------------------------------
+    //
+    // Get UserInfo
+    public void GetUserProfile()
 	{
 		StartCoroutine(processRequestGetUserInfo());
 	}
@@ -113,7 +125,7 @@ public class ZeraAPIHandler : MonoBehaviour
 		});
 	}
 
-	// Get Betting Setting Information
+    // Get Betting Setting Information
 	public void GetBettingSettings()
 	{
 		StartCoroutine(processRequestSettings());
@@ -125,6 +137,7 @@ public class ZeraAPIHandler : MonoBehaviour
 			if (response != null)
 			{
 				resSettings = response;
+				selectedBettingID = resSettings.data.bets[0]._id;
 				Debug.Log("베팅 세팅 정보 받아옴!");
 			}
 		});
@@ -137,30 +150,62 @@ public class ZeraAPIHandler : MonoBehaviour
     }
     IEnumerator processRequestBetting_Zera()
     {
-        ResBettingPlaceBet resBettingPlaceBet = null;
         ReqBettingPlaceBet reqBettingPlaceBet = new ReqBettingPlaceBet();
-        reqBettingPlaceBet.players_session_id = new string[] { resGetSessionID.sessionId };
+
+		reqBettingPlaceBet.players_session_id = new string[PhotonNetwork.CurrentRoom.PlayerCount];
+		for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; i++)
+        {
+			Debug.Log( (i + 1) + "번째 플레이어 세션 아이디 " + allPlayersSessionID[i]);
+			reqBettingPlaceBet.players_session_id[i] = allPlayersSessionID[i];
+		}
+
         reqBettingPlaceBet.bet_id = selectedBettingID;// resSettings.data.bets[0]._id;
         yield return requestCoinPlaceBet(reqBettingPlaceBet, (response) =>
         {
             if (response != null)
             {
-                resBettingPlaceBet = response;
+				Debug.Log("베팅 시작!");
+				resBettingPlaceBet = response;
+				gameBetID = resBettingPlaceBet.data.betting_id;
+				PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "gameBetID", gameBetID } });
+				Debug.Log("gameBetID : " + gameBetID);
 				Debug.Log("베팅 완료!");
             }
         });
     }
 
+	// ZERA Betting Winner
+	public void DeclareWinner()
+	{
+		StartCoroutine(processRequestBetting_Zera_DeclareWinner());
+	}
+	IEnumerator processRequestBetting_Zera_DeclareWinner()
+	{
+		ResBettingDeclareWinner resBettingDeclareWinner = null;
+		ReqBettingDeclareWinner reqBettingDeclareWinner = new ReqBettingDeclareWinner();
+		reqBettingDeclareWinner.betting_id = gameBetID;
+		reqBettingDeclareWinner.winner_player_id = resGetUserProfile.userProfile._id;
+		yield return requestCoinDeclareWinner(reqBettingDeclareWinner, (response) =>
+		{
+			if (response != null)
+			{
+				Debug.Log("## CoinDeclareWinner : " + response.message);
+				resBettingDeclareWinner = response;
+				Debug.Log("내가 얻는 돈 : " + resBettingDeclareWinner.data.amount_won);
+				Debug.Log("내가 승자라서 돈가져갈게요");
+			}
+		});
+	}
 
-    //-----------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------
 
 
 
-    /// To get user’s information.This is also used to authenticate if session-id is valid or not.
-    /// This can determine if the Odin is currently running or not. 
-    ///	If Odin is not running, the API  is not accesible as well.
-    ///	Inform the User to run the Osiris and Connect to Odin via Meta wallet.
-    delegate void resCallback_GetUserInfo(Res_GetUserProfile response);
+	/// To get user’s information.This is also used to authenticate if session-id is valid or not.
+	/// This can determine if the Odin is currently running or not. 
+	///	If Odin is not running, the API  is not accesible as well.
+	///	Inform the User to run the Osiris and Connect to Odin via Meta wallet.
+	delegate void resCallback_GetUserInfo(Res_GetUserProfile response);
 	IEnumerator requestGetUserInfo(resCallback_GetUserInfo callback)
 	{
 		// get user profile
@@ -216,8 +261,6 @@ public class ZeraAPIHandler : MonoBehaviour
 		string url = getBaseURL() + "/v1/betting/" + "zera" + "/place-bet";
 
 		string reqJsonData = JsonUtility.ToJson(req);
-		Debug.Log(reqJsonData);
-
 
 		UnityWebRequest www = UnityWebRequest.Post(url, reqJsonData);
 		byte[] buff = System.Text.Encoding.UTF8.GetBytes(reqJsonData);
@@ -227,6 +270,28 @@ public class ZeraAPIHandler : MonoBehaviour
 		yield return www.SendWebRequest();
 
 		ResBettingPlaceBet res = JsonUtility.FromJson<ResBettingPlaceBet>(www.downloadHandler.text);
+		callback(res);
+	}
+
+	//
+	// Request Method : POST 
+	// Body Type : json
+	delegate void resCallback_BettingDeclareWinner(ResBettingDeclareWinner response);
+	IEnumerator requestCoinDeclareWinner(ReqBettingDeclareWinner req, resCallback_BettingDeclareWinner callback)
+	{
+		string url = getBaseURL() + "/v1/betting/" + "zera" + "/declare-winner";
+
+		string reqJsonData = JsonUtility.ToJson(req);
+
+
+		UnityWebRequest www = UnityWebRequest.Post(url, reqJsonData);
+		byte[] buff = System.Text.Encoding.UTF8.GetBytes(reqJsonData);
+		www.uploadHandler = new UploadHandlerRaw(buff);
+		www.SetRequestHeader("api-key", API_KEY);
+		www.SetRequestHeader("Content-Type", "application/json");
+		yield return www.SendWebRequest();
+
+		ResBettingDeclareWinner res = JsonUtility.FromJson<ResBettingDeclareWinner>(www.downloadHandler.text);
 		callback(res);
 	}
 }
