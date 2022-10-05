@@ -1917,12 +1917,12 @@ GameObject:
   m_Component:
   - component: {fileID: 4773342266424201157}
   - component: {fileID: 4773342266424200963}
-  - component: {fileID: 4773342266424200906}
   - component: {fileID: 4773342266424200907}
   - component: {fileID: 4773342266424200950}
   - component: {fileID: 4773342266424200905}
+  - component: {fileID: 3879721677636549107}
   m_Layer: 3
-  m_Name: Player Car
+  m_Name: Test Car
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1967,56 +1967,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &4773342266424200906
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4773342266424200332}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Acceleration: 1100
-  BrakingForce: 10000
-  MaxTurnAngle: 45
-  MaxSpeed: 110
-  wheelMeshes:
-  - {fileID: 4773342266424200333}
-  - {fileID: 4773342266424200331}
-  - {fileID: 4773342266424200425}
-  - {fileID: 4773342266424200429}
-  wheelColliders:
-  - {fileID: 4773342266424201008}
-  - {fileID: 4773342266424201022}
-  - {fileID: 4773342266424201009}
-  - {fileID: 4773342266424201011}
-  trailrenderers:
-  - {fileID: 4773342266424200971}
-  - {fileID: 4773342266424200970}
-  - {fileID: 4773342266424200968}
-  - {fileID: 4773342266424200973}
-  mycg: {fileID: 4773342266424200420}
-  jumpForceY: 1700000
-  jumpForceZ: -2000000
-  BoostForceZ: 10000
-  BoostForceZ2: 5000000
-  jumpForceY2: 1800000
-  jumpForceZ2: -1000000
-  jumpForceY3: 1500000
-  jumpForceZ3: 2000000
-  jumpForceY4: 2000000
-  jumpForceZ4: 2000000
-  jumpForceY5: 900000
-  jumpForceZ5: 100000
-  jumpForceY6: 2000000
-  jumpForceZ6: 0
-  missile: 0
-  shield: 0
-  mine: 0
-  MissileObj: {fileID: 0}
 --- !u!114 &4773342266424200907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2036,7 +1986,6 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 4773342266424200906}
   - {fileID: 4773342266424200950}
   - {fileID: 4773342266424200905}
   - {fileID: 4773342266424200908}
@@ -2082,6 +2031,40 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &3879721677636549107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4773342266424200332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f2ba4e75c37a774f8803adba7bf7b82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Acceleration: 1000
+  BrakingForce: 1000
+  MaxTurnAngle: 45
+  MaxSpeed: 100
+  stiffness: 0
+  wheelMeshes:
+  - {fileID: 4773342266424200333}
+  - {fileID: 4773342266424200331}
+  - {fileID: 4773342266424200425}
+  - {fileID: 4773342266424200429}
+  wheelColliders:
+  - {fileID: 4773342266424201008}
+  - {fileID: 4773342266424201022}
+  - {fileID: 4773342266424201009}
+  - {fileID: 4773342266424201011}
+  trailrenderers:
+  - {fileID: 4773342266424200971}
+  - {fileID: 4773342266424200970}
+  - {fileID: 4773342266424200968}
+  - {fileID: 4773342266424200973}
+  speed: {fileID: 0}
+  mycg: {fileID: 4773342266424200420}
 --- !u!1 &4773342266424200333
 GameObject:
   m_ObjectHideFlags: 0

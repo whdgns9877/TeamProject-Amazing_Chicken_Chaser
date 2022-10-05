@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UI;
 using Photon.Pun;
 using System.Runtime.ExceptionServices;
 using UnityEngine.UIElements;
@@ -9,6 +10,8 @@ using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
 using Cinemachine;
 using TMPro;
+using Color = UnityEngine.Color;
+
 
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
@@ -34,7 +37,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     UIPlayerInfo UIPlayerInfo;
 
 
-    GameObject VictoryText = null;
+    //GameObject VictoryText = null;
+    GameObject GGText = null;
+    TextMeshProUGUI GameOvertext;
 
     //============================================================
     // 움직임과 관련된 변수
@@ -110,8 +115,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
-    private bool check = false;
-
+    bool check = false;
+    bool winner = false;
     //============================================================
     // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -153,7 +158,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         ChickenAni = myChicken.GetComponent<Animator>();
 
-        VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+        //VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+        GGText = GameObject.Find("Canvas").transform.GetChild(2).gameObject;
+        GameOvertext = GGText.GetComponent<TextMeshProUGUI>();
 
         MissileObj = Resources.Load<GameObject>("Missile");
 
@@ -190,6 +197,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             UIPlayerInfo.SetMinimapImageColor(Color.blue);
         else
             UIPlayerInfo.SetMinimapImageColor(Color.red);
+
+        Debug.Log("my ID " + PV.ViewID);
+
     }
 
     //==============================================      UPDATE      ===========================================
@@ -200,7 +210,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Imsi Code for Siyeon
-
+        #region Temp key for test
         if (Input.GetKeyDown(KeyCode.Z))
         {
             ChickenTimer.Inst.StopAllCoroutines();
@@ -211,7 +221,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             LeftGame();
         }
 
-
+        #endregion
         //=====================================================================
 
 
@@ -219,15 +229,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // Player GameOver
         if (ChickenTimer.Inst.IsGameOver == false && check == false)
         {
-            CheckHasChicken();
-            Invoke("CheckAliveAlone", 2f);
+            Debug.Log("game is over!");
+
+            // check if I have chicken 
+            StartCoroutine(CheckHasChicken());
+
             check = true;
         }
 
-        if (VictoryText.activeInHierarchy)
-        {
-            Invoke("LeftGame", 5f);
-        }
 
         //=====================================================================
 
@@ -239,14 +248,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         //=====================================================================
 
+        //=====================================================================
+        // Player braking
+        #region 플레이어 움직임, 브레이크와 관련된 코드 
 
         //input keys 
         xAxis = Input.GetAxis("Horizontal");
         zAxis = Input.GetAxis("Vertical");
-
-        //=====================================================================
-        // Player braking
-        #region 플레이어 브레이크와 관련된 코드 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -278,7 +286,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // drift key "shift"
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            Drift(0.1f);        // decrease wheel stiffness for drifting
+            Drift(0.5f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
 
             // play running animation during drift
@@ -298,6 +306,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // if wheel is off ground, no skidmark
         EraseSkidMark();
 
+
+        // if Forward Left & rear right wheel is off the ground 
+        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
+
+        else
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
+
         #endregion
         //=====================================================================
 
@@ -315,12 +331,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //=====================================================================
 
 
-        // if Forward Left & rear right wheel is off the ground 
-        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
 
-        else
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
     }
 
 
@@ -620,26 +631,81 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function Check my Chicken Onw when ChickenTimer is Finish
-    private void CheckHasChicken()
+    IEnumerator CheckHasChicken()
     {
+        Debug.Log("Check chicken!");
+
+
+
         // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
         if (!transform.GetChild(7).gameObject.activeInHierarchy)
         {
-            LeftGame();
+            Debug.Log("I'm loser!");
+
+            StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
         }
+
+
+        // 치킨을 가지고 있으면 다음 라운드로 넘어간다. 
+        if (transform.GetChild(7).gameObject.activeInHierarchy)
+        {
+            GGText.SetActive(true);
+            GameOvertext.faceColor = Color.yellow;
+            GameOvertext.text = "Lucky! You Got Chicken!";
+        }
+
+        yield return new WaitForSeconds(5f);
+
+        // checked chicken and only one player left 
+        if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        {
+            Debug.Log("이겼나?" + winner);
+
+            winner = true;
+            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
+        }
+
+
+        yield return new WaitForSeconds(2f);
+
+        if (check && !winner && PhotonNetwork.CurrentRoom.PlayerCount >= 2)
+        {
+            Debug.Log("이겼나?" + winner);
+            PhotonNetwork.AutomaticallySyncScene = true;
+            PhotonNetwork.LoadLevel("GameScene");
+        }
+        yield return null;
     }
 
-    private void CheckAliveAlone()
-    {
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-            VictoryText.SetActive(true);
-    }
 
+
+
+
+    // 방을 나가는 함수
     private void LeftGame()
     {
         PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel("StartScene");
     }
+
+
+
+    // 게임 종료 시 winner/loser text 출력 후 씬 전환 함수 
+    IEnumerator GoodGame(string text, string scene, Color color, float wait)
+    {
+        // set active GG text 
+        GGText.SetActive(true);
+
+        GameOvertext.text = text;
+        GameOvertext.faceColor = color;
+        yield return new WaitForSeconds(wait);
+
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel(scene);
+
+        yield return null;
+    }
+
     //===========================================================================
 }
 
