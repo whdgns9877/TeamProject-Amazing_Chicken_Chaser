@@ -1364,9 +1364,12 @@ GameObject:
   m_Component:
   - component: {fileID: 4733823625758809064}
   - component: {fileID: 4718874268145690440}
-  - component: {fileID: 3638006458695220918}
+  - component: {fileID: 233540439889657447}
+  - component: {fileID: 3116662700856494654}
+  - component: {fileID: 3513887991087336712}
+  - component: {fileID: 3209430093822215131}
   m_Layer: 3
-  m_Name: PlayerCar_Red
+  m_Name: PlayerCar_3
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1411,7 +1414,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3638006458695220918
+--- !u!114 &233540439889657447
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1420,10 +1423,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4736175966511873322}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f2ba4e75c37a774f8803adba7bf7b82, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Acceleration: 800
+  Acceleration: 1000
   BrakingForce: 50000
   MaxTurnAngle: 45
   MaxSpeed: 100
@@ -1442,8 +1445,86 @@ MonoBehaviour:
   - {fileID: 1102591246447382724}
   - {fileID: 1819943071453384189}
   - {fileID: 7707883694379665899}
-  speed: {fileID: 0}
   mycg: {fileID: 8630923066722149172}
+  jumpForceY: 0
+  jumpForceZ: 0
+  BoostForceZ: 0
+  BoostForceZ2: 0
+  jumpForceY2: 0
+  jumpForceZ2: 0
+  jumpForceY3: 0
+  jumpForceZ3: 0
+  jumpForceY4: 0
+  jumpForceZ4: 0
+  jumpForceY5: 0
+  jumpForceZ5: 0
+  jumpForceY6: 0
+  jumpForceZ6: 0
+  missile: 0
+  shield: 0
+  mine: 0
+  MissileObj: {fileID: 0}
+--- !u!114 &3116662700856494654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4736175966511873322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: 233540439889657447}
+  - {fileID: 3513887991087336712}
+  - {fileID: 3209430093822215131}
+  - {fileID: 5991581839300203143}
+  - {fileID: 7848174919404189269}
+  - {fileID: 4537424162914361578}
+  - {fileID: 5809928646074578890}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &3513887991087336712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4736175966511873322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
+--- !u!114 &3209430093822215131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4736175966511873322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 0
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!1 &4736187070817008410
 GameObject:
   m_ObjectHideFlags: 0

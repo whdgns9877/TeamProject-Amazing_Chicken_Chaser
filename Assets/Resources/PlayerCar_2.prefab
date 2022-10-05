@@ -1228,7 +1228,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3661287634579839625
 Transform:
   m_ObjectHideFlags: 0
@@ -2527,12 +2527,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3661502850257556829}
   - component: {fileID: 3658558741968055723}
-  - component: {fileID: 3658558741968055716}
   - component: {fileID: 1171606719672549781}
   - component: {fileID: 3009075349760285863}
   - component: {fileID: 8745709817157218231}
+  - component: {fileID: 8548899187858965070}
   m_Layer: 3
-  m_Name: PlayerCar_Grey
+  m_Name: PlayerCar_2
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2577,39 +2577,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3658558741968055716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3658558741968055717}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f2ba4e75c37a774f8803adba7bf7b82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Acceleration: 1000
-  BrakingForce: 50000
-  MaxTurnAngle: 45
-  MaxSpeed: 100
-  wheelMeshes:
-  - {fileID: 3658419148835166529}
-  - {fileID: 3657911606959934499}
-  - {fileID: 3658829124453957249}
-  - {fileID: 3658965070606164737}
-  wheelColliders:
-  - {fileID: 5959171842843474020}
-  - {fileID: 5959171841656860486}
-  - {fileID: 5959171843216948040}
-  - {fileID: 5959171843634745978}
-  trailrenderers:
-  - {fileID: 5959171842510715906}
-  - {fileID: 5959171843247241753}
-  - {fileID: 5959171841785796628}
-  - {fileID: 5959171841519130718}
-  speed: {fileID: 0}
-  mycg: {fileID: 5959171842707323186}
 --- !u!114 &1171606719672549781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2631,6 +2598,11 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 3009075349760285863}
   - {fileID: 8745709817157218231}
+  - {fileID: 8548899187858965070}
+  - {fileID: 5174877077413959411}
+  - {fileID: 137230292669106947}
+  - {fileID: 2250833406521387412}
+  - {fileID: 8161019944671671902}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -2666,6 +2638,56 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &8548899187858965070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3658558741968055717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Acceleration: 1000
+  BrakingForce: 50000
+  MaxTurnAngle: 45
+  MaxSpeed: 100
+  wheelMeshes:
+  - {fileID: 3658419148835166529}
+  - {fileID: 3657911606959934499}
+  - {fileID: 3658829124453957249}
+  - {fileID: 3658965070606164737}
+  wheelColliders:
+  - {fileID: 5959171842843474020}
+  - {fileID: 5959171841656860486}
+  - {fileID: 5959171843216948040}
+  - {fileID: 5959171843634745978}
+  trailrenderers:
+  - {fileID: 5959171842510715906}
+  - {fileID: 5959171843247241753}
+  - {fileID: 5959171841785796628}
+  - {fileID: 5959171841519130718}
+  mycg: {fileID: 5959171842707323186}
+  jumpForceY: 0
+  jumpForceZ: 0
+  BoostForceZ: 0
+  BoostForceZ2: 0
+  jumpForceY2: 0
+  jumpForceZ2: 0
+  jumpForceY3: 0
+  jumpForceZ3: 0
+  jumpForceY4: 0
+  jumpForceZ4: 0
+  jumpForceY5: 0
+  jumpForceZ5: 0
+  jumpForceY6: 0
+  jumpForceZ6: 0
+  missile: 0
+  shield: 0
+  mine: 0
+  MissileObj: {fileID: 0}
 --- !u!1 &3658629534788140909
 GameObject:
   m_ObjectHideFlags: 0
@@ -2683,7 +2705,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3661253951786875531
 Transform:
   m_ObjectHideFlags: 0
@@ -4441,6 +4463,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5959171841519130717}
   - component: {fileID: 5959171841519130718}
+  - component: {fileID: 137230292669106947}
   m_Layer: 0
   m_Name: FRSM
   m_TagString: Untagged
@@ -4562,6 +4585,22 @@ TrailRenderer:
   m_MinVertexDistance: 0.1
   m_Autodestruct: 0
   m_Emitting: 0
+--- !u!114 &137230292669106947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5959171841519130719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!1 &5959171841656860480
 GameObject:
   m_ObjectHideFlags: 0
@@ -4634,6 +4673,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5959171841785796629}
   - component: {fileID: 5959171841785796628}
+  - component: {fileID: 5174877077413959411}
   m_Layer: 0
   m_Name: FLSM
   m_TagString: Untagged
@@ -4755,6 +4795,22 @@ TrailRenderer:
   m_MinVertexDistance: 0.1
   m_Autodestruct: 0
   m_Emitting: 0
+--- !u!114 &5174877077413959411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5959171841785796630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!1 &5959171842348774210
 GameObject:
   m_ObjectHideFlags: 0
@@ -4835,6 +4891,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5959171842510715907}
   - component: {fileID: 5959171842510715906}
+  - component: {fileID: 2250833406521387412}
   m_Layer: 0
   m_Name: RLSM
   m_TagString: Untagged
@@ -4956,6 +5013,22 @@ TrailRenderer:
   m_MinVertexDistance: 0.1
   m_Autodestruct: 0
   m_Emitting: 0
+--- !u!114 &2250833406521387412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5959171842510715964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!1 &5959171842680503799
 GameObject:
   m_ObjectHideFlags: 0
@@ -5156,6 +5229,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5959171843247241754}
   - component: {fileID: 5959171843247241753}
+  - component: {fileID: 8161019944671671902}
   m_Layer: 0
   m_Name: RRSM
   m_TagString: Untagged
@@ -5277,6 +5351,22 @@ TrailRenderer:
   m_MinVertexDistance: 0.1
   m_Autodestruct: 0
   m_Emitting: 0
+--- !u!114 &8161019944671671902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5959171843247241755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!1 &5959171843634745979
 GameObject:
   m_ObjectHideFlags: 0

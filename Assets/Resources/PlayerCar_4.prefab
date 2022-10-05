@@ -1351,9 +1351,9 @@ GameObject:
   - component: {fileID: 640832017792703847}
   - component: {fileID: 640832017792703846}
   - component: {fileID: 640832017792703845}
-  - component: {fileID: 640832017792703844}
+  - component: {fileID: 3515328978917454627}
   m_Layer: 3
-  m_Name: PlayerCar_White
+  m_Name: PlayerCar_4
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1419,6 +1419,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 640832017792703846}
   - {fileID: 640832017792703845}
+  - {fileID: 3515328978917454627}
   - {fileID: 1464319867491970453}
   - {fileID: 1464319867679240990}
   - {fileID: 1464319868097565682}
@@ -1458,7 +1459,7 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
---- !u!114 &640832017792703844
+--- !u!114 &3515328978917454627
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1467,7 +1468,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 640832017793015375}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f2ba4e75c37a774f8803adba7bf7b82, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Acceleration: 1000
@@ -1489,8 +1490,25 @@ MonoBehaviour:
   - {fileID: 1464319868178188237}
   - {fileID: 1464319867491970452}
   - {fileID: 1464319867679240989}
-  speed: {fileID: 0}
   mycg: {fileID: 1464319867636936829}
+  jumpForceY: 0
+  jumpForceZ: 0
+  BoostForceZ: 0
+  BoostForceZ2: 0
+  jumpForceY2: 0
+  jumpForceZ2: 0
+  jumpForceY3: 0
+  jumpForceZ3: 0
+  jumpForceY4: 0
+  jumpForceZ4: 0
+  jumpForceY5: 0
+  jumpForceZ5: 0
+  jumpForceY6: 0
+  jumpForceZ6: 0
+  missile: 0
+  shield: 0
+  mine: 0
+  MissileObj: {fileID: 0}
 --- !u!1 &640832017793017021
 GameObject:
   m_ObjectHideFlags: 0

@@ -1921,8 +1921,9 @@ GameObject:
   - component: {fileID: 4773342266424200907}
   - component: {fileID: 4773342266424200950}
   - component: {fileID: 4773342266424200905}
+  - component: {fileID: -180071509741757255}
   m_Layer: 3
-  m_Name: Player Car
+  m_Name: PlayerCar_0
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1974,7 +1975,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4773342266424200332}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
   m_Name: 
@@ -2082,6 +2083,39 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &-180071509741757255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4773342266424200332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f2ba4e75c37a774f8803adba7bf7b82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Acceleration: 1000
+  BrakingForce: 50000
+  MaxTurnAngle: 45
+  MaxSpeed: 100
+  wheelMeshes:
+  - {fileID: 4773342266424200333}
+  - {fileID: 4773342266424200331}
+  - {fileID: 4773342266424200425}
+  - {fileID: 4773342266424200429}
+  wheelColliders:
+  - {fileID: 4773342266424201008}
+  - {fileID: 4773342266424201022}
+  - {fileID: 4773342266424201009}
+  - {fileID: 4773342266424201011}
+  trailrenderers:
+  - {fileID: 4773342266424200971}
+  - {fileID: 4773342266424200970}
+  - {fileID: 4773342266424200968}
+  - {fileID: 4773342266424200973}
+  speed: {fileID: 0}
+  mycg: {fileID: 4773342266424200420}
 --- !u!1 &4773342266424200333
 GameObject:
   m_ObjectHideFlags: 0
@@ -4293,7 +4327,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.8
     m_AsymptoteValue: 0.5
-    m_Stiffness: 1
+    m_Stiffness: 2
   m_SidewaysFriction:
     m_ExtremumSlip: 0.2
     m_ExtremumValue: 1
@@ -4994,7 +5028,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.8
     m_AsymptoteValue: 0.5
-    m_Stiffness: 1
+    m_Stiffness: 2
   m_SidewaysFriction:
     m_ExtremumSlip: 0.2
     m_ExtremumValue: 1

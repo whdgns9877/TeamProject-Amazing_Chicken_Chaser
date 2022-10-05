@@ -9,7 +9,7 @@ public class TestCar : MonoBehaviour
 {
     [Header("Car Info")]
     [SerializeField] public float Acceleration = 1000f;       // 자동차 속도
-    [SerializeField] public float BrakingForce = 1000f;      // 브레이크 
+    [SerializeField] public float BrakingForce = 50000f;      // 브레이크 
     [SerializeField] public float MaxTurnAngle = 45f;        // 회전 각
     [SerializeField] public float MaxSpeed = 100f;
 
