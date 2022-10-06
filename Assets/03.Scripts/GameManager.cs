@@ -78,7 +78,9 @@ public class GameManager : MonoBehaviourPun
                 // 현재 룸에 있는 플레이어의 액터넘버와 로컬 플레이어의 액터 넘버가 같을 경우 플레이어 생성 
                 if (PhotonNetwork.PlayerList[i].ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
+                    PhotonNetwork.Instantiate($"PlayerCar_", playerSpawnPosArr[i].transform.position, Quaternion.identity);
                     PhotonNetwork.Instantiate($"PlayerCar_{i}", playerSpawnPosArr[i].transform.position, Quaternion.identity);
+
                     break;
                 }
             }
