@@ -1944,8 +1944,8 @@ Transform:
   - {fileID: 4773342266424200248}
   - {fileID: 4773342266424200251}
   - {fileID: 4773342266424200249}
-  - {fileID: 4773342266424200254}
   - {fileID: 4773342266424200230}
+  - {fileID: 4773342266424200254}
   - {fileID: 8707864920575236040}
   - {fileID: 2460173278072841223}
   m_Father: {fileID: 0}
@@ -2047,6 +2047,7 @@ MonoBehaviour:
   BrakingForce: 1000
   MaxTurnAngle: 45
   MaxSpeed: 100
+  stiffness: 0
   wheelMeshes:
   - {fileID: 4773342266424200333}
   - {fileID: 4773342266424200331}
@@ -4005,7 +4006,7 @@ Transform:
   - {fileID: 4773342266424201164}
   - {fileID: 4773342266424200227}
   m_Father: {fileID: 4773342266424201157}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4773342266424200419
 GameObject:
@@ -5079,7 +5080,7 @@ Transform:
   - {fileID: 4773342266424201165}
   - {fileID: 4773342266424200228}
   m_Father: {fileID: 4773342266424201157}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4773342266424200443
 GameObject:

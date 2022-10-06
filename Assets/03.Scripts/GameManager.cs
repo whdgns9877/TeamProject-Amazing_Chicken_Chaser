@@ -7,7 +7,6 @@ using Unity.VisualScripting;
 using ExitGames.Client.Photon;
 using UnityEngine.UIElements;
 using System;
-using Photon.Pun.Demo.Cockpit;
 
 public class GameManager : MonoBehaviourPun
 {
@@ -37,76 +36,51 @@ public class GameManager : MonoBehaviourPun
     //=========================================================
 
 
+
+    Player[] players = PhotonNetwork.PlayerList;
+
     public float GameTime;
 
     private Room curRoom;
-
-
-    bool doAgain = false;
-    bool checkChicken = false;
-    public bool CheckChicken { get { return checkChicken; } }
-
-    public bool DoAgain { get { return doAgain; } }
-
 
     void Awake()
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            // ï¿½ï¿½ï¿½Ó¾ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
+            // °ÔÀÓ¾À ÀÌµ¿ÈÄ ¸¶½ºÅÍ°¡ º£ÆÃÀ»ÇÑ´Ù
             ZeraAPIHandler.Inst.BettingZera();
         }
         else
         {
-            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ 2ï¿½ÊµÚ¿ï¿½ ï¿½ï¿½ï¿½Ã¾ï¿½ï¿½Ìµï¿½ ï¿½Þ¾Æ¿Â´ï¿½
+            // ³ª¸ÓÁö Å¬¶óÀÌ¾ðÆ®µéÀº 2ÃÊµÚ¿¡ º£ÆÃ¾ÆÀÌµð¸¦ ¹Þ¾Æ¿Â´Ù
             Invoke(nameof(GetGameBetID), 2f);
         }
 
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        // ¼­¹ö¿¡ Àß ¿¬°áµÈ »óÅÂ·Î °ÔÀÓ ¾À¿¡ µé¾î¿À¸é ½ÇÇà
         if (PhotonNetwork.IsConnected)
         {
-            // ï¿½ï¿½ï¿½Ó¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½à¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ Ä¡Å²ï¿½ï¿½ È¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
-            // ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½Ï±â¶§ï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½É¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
+            // °ÔÀÓ¾À¿¡¼­´Â ¸¸¾à¿¡ ¸¶½ºÅÍ°¡ Ä¡Å²À» È¹µæÇÏÁö ¸øÇØ ¹æÀ» ¶°³ª¾ß ÇÒ °æ¿ì
+            // ¸ðµç Å¬¶óÀÌ¾ðÆ®µéÀÌ °°ÀÌ ÀÌµ¿ÇÏ±â¶§¹®¿¡ ÇØ´ç ¿É¼ÇÀ» Ãë¼ÒÇÑ´Ù
             PhotonNetwork.AutomaticallySyncScene = false;
             curRoom = PhotonNetwork.CurrentRoom;
 
-            // ï¿½Ã·ï¿½ï¿½Ì¾î¸¶ï¿½ï¿½ ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ô¹ï¿½È£ï¿½ï¿½ ï¿½ï¿½ï¿½Í³Ñ¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
-            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ ï¿½ï¿½Å­ ï¿½Ýºï¿½ 
+            // ÇÃ·¹ÀÌ¾î¸¶´Ù ÀÚ½ÅÀÇ ½½·Ô¹øÈ£¿Í ¾×ÅÍ³Ñ¹ö¸¦ ºñ±³ÇÏ¿© ÇØ´ç À§Ä¡¿¡ º»ÀÎÀÇ Â÷¸¦ »ý¼ºÇÑ´Ù
+            // ÇöÀç ¹æÀÇ ÇÃ·¹ÀÌ¾î ¼ö ¸¸Å­ ¹Ýº¹ 
             for (int i = 0; i < curRoom.PlayerCount; i++)
             {
-                // ï¿½ï¿½ï¿½ï¿½ ï¿½ë¿¡ ï¿½Ö´ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í³Ñ¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ 
+                // ÇöÀç ·ë¿¡ ÀÖ´Â ÇÃ·¹ÀÌ¾îÀÇ ¾×ÅÍ³Ñ¹ö¿Í ·ÎÄÃ ÇÃ·¹ÀÌ¾îÀÇ ¾×ÅÍ ³Ñ¹ö°¡ °°À» °æ¿ì ÇÃ·¹ÀÌ¾î »ý¼º 
                 if (PhotonNetwork.PlayerList[i].ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
-                    PhotonNetwork.Instantiate($"PlayerCar_{i}", playerSpawnPosArr[i].transform.position, Quaternion.identity);
+                    PhotonNetwork.Instantiate("Player Car", playerSpawnPosArr[i].transform.position, Quaternion.identity);
                     break;
                 }
             }
         }
     }
 
-
-
-
-    private void Update()
-    {
-        //if game is over 
-        if (!ChickenTimer.Inst.IsGameOver && !checkChicken)
-        {
-            // count chicken in Queue, 
-            if (ChickenSpawn.Inst.MyChickenLiet.Count == 0)
-            {
-                Debug.Log("No one has chicek!");
-                doAgain = true;
-            }
-            checkChicken = true;
-        }
-
-
-    }
-    
     void GetGameBetID()
     {
-        Debug.Log("ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ï¿½ : " + (string)curRoom.CustomProperties["gameBetID"]);
+        Debug.Log("Á¦°¡ ¹Þ¾Æ¿Ã °× ºª ¾ÆÀÌµð´Â : " + (string)curRoom.CustomProperties["gameBetID"]);
         ZeraAPIHandler.Inst.gameBetID = (string)curRoom.CustomProperties["gameBetID"];
     }
 }

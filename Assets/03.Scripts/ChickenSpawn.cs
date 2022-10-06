@@ -29,11 +29,13 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
     //=========================================================
 
 
+
+
+
     //=========================================================
     //Chicken pooling에 관한 변수
 
     Queue<GameObject> ChickenList;
-    public Queue<GameObject> MyChickenLiet { get { return ChickenList; } }
 
     int round = 1;
 
@@ -82,6 +84,7 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
             Vector3 chickenSpawnPos = this.transform.GetChild(ranNum).position;
             PhotonNetwork.Instantiate("Chicken", chickenSpawnPos, Quaternion.identity);
+
         }
     }
 
