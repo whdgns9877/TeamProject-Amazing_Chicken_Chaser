@@ -1468,7 +1468,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 640832017793015375}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 255d14fb3712b2e4a9a3e52dc50eaeb4, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Acceleration: 1000
@@ -1491,6 +1491,9 @@ MonoBehaviour:
   - {fileID: 1464319867491970452}
   - {fileID: 1464319867679240989}
   mycg: {fileID: 1464319867636936829}
+  currSpeed: 0
+  currAccel: 0
+  currBackAccel: 0
   jumpForceY: 0
   jumpForceZ: 0
   BoostForceZ: 0
@@ -1507,8 +1510,9 @@ MonoBehaviour:
   jumpForceZ6: 0
   missile: 0
   shield: 0
+  booster: 0
+  banana: 0
   mine: 0
-  MissileObj: {fileID: 0}
 --- !u!1 &640832017793017021
 GameObject:
   m_ObjectHideFlags: 0
