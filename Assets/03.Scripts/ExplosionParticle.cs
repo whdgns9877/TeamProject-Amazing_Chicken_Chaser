@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class ExplosionParticle : MonoBehaviour
 {
+    [SerializeField] float destroyTime;
     // Start is called before the first frame update
     private void OnEnable()
     {
-        Destroy(gameObject, 1f);
+        Destroy(gameObject, destroyTime);
     }
 }

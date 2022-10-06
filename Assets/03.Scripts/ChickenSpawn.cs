@@ -37,8 +37,9 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
     Queue<GameObject> ChickenList;
 
-    int round = 1;
+    public Queue<GameObject> MyChickenList { get { return ChickenList; } }
 
+    int round = 1;
     //=========================================================
     void Awake()
     {
