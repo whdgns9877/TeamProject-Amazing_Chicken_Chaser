@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -16,9 +16,9 @@ using Color = UnityEngine.Color;
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
-    [SerializeField] public float Acceleration = 1000f;       // �ڵ��� �ӵ�
-    [SerializeField] public float BrakingForce = 50000f;      // �극��ũ 
-    [SerializeField] public float MaxTurnAngle = 45f;        // ȸ�� ��
+    [SerializeField] public float Acceleration = 1000f;       // ????? ???
+    [SerializeField] public float BrakingForce = 50000f;      // ?극??? 
+    [SerializeField] public float MaxTurnAngle = 45f;        // ??? ??
     [SerializeField] public float MaxSpeed = 100f;
 
     [Header("Wheel Info")]
@@ -30,10 +30,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     float zAxis;
 
 
-    // ����ȭ�� ���Ǵ� �����
+    // ??????? ????? ?????
     PhotonView PV;
 
-    //�г��� 
+    //?г??? 
     UIPlayerInfo UIPlayerInfo;
 
 
@@ -42,24 +42,24 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     TextMeshProUGUI GameOvertext;
 
     //============================================================
-    // �����Ӱ� ���õ� ����
-    #region �����Ӱ� ���õ� ����
-    // �÷��̾� Rigidbody 
+    // ??????? ????? ????
+    #region ??????? ????? ????
+    // ?÷???? Rigidbody 
     Rigidbody playerRigid;
-    // �÷��̾� ���� �߽� 
+    // ?÷???? ???? ??? 
     public GameObject mycg;
 
-    // ���� �ӵ�
+    // ???? ???
     float currSpeed;
 
-    //�÷��̾� sideslipe 
+    //?÷???? sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
     #endregion
     //============================================================
 
     //============================================================
-    // �ʿ� ��ġ�� ���ǵ�� ���õ� ����
-    #region ���� ���� ����
+    // ??? ????? ?????? ????? ????
+    #region ???? ???? ????
     [Header("MapTypeInfo")]
 
     [SerializeField] int jumpForceY;
@@ -90,7 +90,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    #region ������ ���� ����
+    #region ?????? ???? ????
     [SerializeField] bool missile = false;
     [SerializeField] bool shield = false;
     [SerializeField] bool mine = false;
@@ -103,14 +103,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    #region ġŲ�� ���õ� ���� 
+    #region ???? ????? ???? 
     Transform myChicken = null;
     Animator ChickenAni = null;
     #endregion
     //============================================================
 
     //============================================================
-    #region �÷��̾� ��ġ �ʱ�ȭ�� ���� ����
+    #region ?÷???? ??? ?????? ???? ????
     private bool canMove = true;
     #endregion
     //============================================================
@@ -118,7 +118,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     bool check = false;
     bool winner = false;
     //============================================================
-    // Network ����ȭ�� ���� �Լ� 
+    // Network ??????? ???? ??? 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -148,7 +148,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     private void Awake()
     {
-        // ����並 ĳ���Ͽ� �����´� (GetComponent�� �������°� �����ϸ� ��)
+        // ????? ĳ????? ?????´? (GetComponent?? ???????°? ??????? ??)
         PV = photonView;
         playerRigid = GetComponent<Rigidbody>();
 
@@ -164,12 +164,12 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         MissileObj = Resources.Load<GameObject>("Missile");
 
-        // �ڽ��� �±׸� �ٲ��ִ� �κ�
+        // ????? ?±?? ?????? ?κ?
 
         if (PV.IsMine)
         {
             gameObject.tag = "Me";
-            for (int i = 0; i < 7; i++) //�ڽĵ鵵 ���� ���� �±׸� �ٲ۴�(ġŲ�� 7��°�ϱ� �� ������ �� ��)
+            for (int i = 0; i < 7; i++) //???? ???? ???? ?±?? ????(???? 7??°??? ?? ?????? ?? ??)
             {
                 transform.GetChild(i).gameObject.tag = "Me";
             }
@@ -178,7 +178,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             gameObject.tag = "Player";
             gameObject.layer = LayerMask.NameToLayer("Player");
-            for (int i = 0; i < 7; i++) //�ڽĵ鵵 ���� ���� �±׸� �ٲ۴�(ġŲ�� 7��°�ϱ� �� ������ �� ��)
+            for (int i = 0; i < 7; i++) //???? ???? ???? ?±?? ????(???? 7??°??? ?? ?????? ?? ??)
             {
                 transform.GetChild(i).gameObject.tag = "Player";
             }
@@ -248,7 +248,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player braking
-        #region �÷��̾� ������, �극��ũ�� ���õ� �ڵ� 
+        #region ?÷???? ??????, ?극????? ????? ??? 
 
         //input keys 
         xAxis = Input.GetAxis("Horizontal");
@@ -316,8 +316,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //=====================================================================
 
         //=====================================================================
-        #region ������ ���� ��ũ��Ʈ
-        // �̻��� �߻�
+        #region ?????? ???? ??????
+        // ????? ???
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
@@ -336,7 +336,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     private void FixedUpdate()
     {
-        // ������ ����� ���ʸ� ����
+        // ?????? ????? ????? ????
         // if game is not started, do not move 
         if (!PV.IsMine || !ChickenTimer.Inst.GameStart)
             return;
@@ -344,7 +344,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player car movment 
-        #region �÷��̾� �����ӿ� ���� �ڵ�
+        #region ?÷???? ??????? ???? ???
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
@@ -356,21 +356,21 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //if has horizontal key input, Steer wheels 
         if (xAxis != 0f)
         {
-            // ���� �� ������ 
+            // ???? ?? ?????? 
             wheelColliders[0].steerAngle = xAxis * MaxTurnAngle;    // front left wheel 
             wheelColliders[1].steerAngle = xAxis * MaxTurnAngle;    // front right wheel
         }
 
         else
         {
-            // ���� �� ������ 
+            // ???? ?? ?????? 
             wheelColliders[0].steerAngle = 0f;    // front left wheel 
             wheelColliders[1].steerAngle = 0f;    // front right wheel
         }
 
         if (zAxis != 0f && currSpeed <= MaxSpeed)
         {
-            // ��ũ�� �ִ� �� 
+            // ????? ??? ?? 
             // FWD 
             wheelColliders[0].motorTorque = zAxis * Acceleration;
             wheelColliders[1].motorTorque = zAxis * Acceleration;
@@ -394,7 +394,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //set all the wheelmash position & rotation as same as wheelCollider
         for (int i = 0; i < wheelColliders.Length; i++)
         {
-            // wheel collider�� ���� wheel mesh�� ������ �� �ֵ��� �� 
+            // wheel collider?? ???? wheel mesh?? ?????? ?? ????? ?? 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
         }
         #endregion
@@ -410,7 +410,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //===========================================================================
         // Chicken detection
-        #region ġŲ �浹, �÷��̾�� �浹 �� ġŲ ó�� ���� �ڵ� 
+        #region ?? ?浹, ?÷????? ?浹 ?? ?? ??? ???? ??? 
         if (collision.collider.tag == "Chicken")
         {
             PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
@@ -459,7 +459,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // Pun RPCs 
-    #region ġŲ�� ���õ� RPC
+    #region ???? ????? RPC
 
     [PunRPC]
     public void MyChicken(bool has)
@@ -497,7 +497,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function related to car movement 
-    #region �ڵ��� �����ӿ� ���� �Լ��� 
+    #region ????? ??????? ???? ????? 
 
     // to move wheelmash as wheelCollider moves  
     void UpdateWheelPos(WheelCollider collider, Transform transform)
@@ -558,48 +558,48 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
-    #region ���� ���� �Լ�
+    #region ???? ???? ???
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Jump") //�������Ǵ� �������
+        if (other.gameObject.tag == "Jump") //????????? ???????
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
         }
-        if (other.gameObject.tag == "Jump2") //�������Ǵ� �������
+        if (other.gameObject.tag == "Jump2") //????????? ???????
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
         }
-        if (other.gameObject.tag == "Jump3") //�������Ǵ� �������
+        if (other.gameObject.tag == "Jump3") //????????? ???????
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
         }
-        if (other.gameObject.tag == "Jump4") //�������Ǵ� �������
+        if (other.gameObject.tag == "Jump4") //????????? ???????
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
         }
-        if (other.gameObject.tag == "Jump5") //�������Ǵ� �������
+        if (other.gameObject.tag == "Jump5") //????????? ???????
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
         }
-        if (other.gameObject.tag == "Jump6") //�������Ǵ� �������
+        if (other.gameObject.tag == "Jump6") //????????? ???????
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
         }
 
-        if (other.gameObject.tag == "Boost") //�ν�Ʈ���� �������
+        if (other.gameObject.tag == "Boost") //?ν?????? ???????
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
         }
-        if (other.gameObject.tag == "Boost2") //�ν�Ʈ���� �������
+        if (other.gameObject.tag == "Boost2") //?ν?????? ???????
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
 
-        // �̻��� �浹 ���� �κ�
+        // ????? ?浹 ???? ?κ?
         if (!PV.IsMine)
             return;
         //=======================================
-        // �̻��� �浹(������ �浹)
+        // ????? ?浹(?????? ?浹)
         if (other.gameObject.tag == "Bomb")
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
@@ -629,7 +629,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function Check my Chicken Onw when ChickenTimer is Finish
-    #region ġŲ�� ������ �ִ��� Ȯ���ϰ� ���� �������� �Լ� 
+    #region ???? ?????? ????? ?????? ???? ???????? ??? 
     IEnumerator CheckHasChicken()
     {
         // doAgain == false == no one got chicken
@@ -652,13 +652,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         else
         {
             Debug.Log("go next!");
-            // �ش� �Լ��� ����Ǿ����� ġŲ�� �������������� ���� �����鼭 ��ŸƮ������ ���ư���
+            // ??? ????? ?????????? ???? ?????????????? ???? ?????? ?????????? ???????
             if (!transform.GetChild(7).gameObject.activeInHierarchy)
             {
                 StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
             }
 
-            // ġŲ�� ������ ������ ���� ����� �Ѿ��. 
+            // ???? ?????? ?????? ???? ????? ?????. 
             if (transform.GetChild(7).gameObject.activeInHierarchy)
             {
                 GGText.SetActive(true);
@@ -672,7 +672,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
             {
             winner = true;
-            Debug.Log("�̰峪?" + winner);
+            Debug.Log("????" + winner);
             ZeraAPIHandler.Inst.DeclareWinner();
             StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
             }
@@ -693,7 +693,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
 
 
-    // ���� ������ �Լ�
+    // ???? ?????? ???
     private void LeftGame()
     {
         PhotonNetwork.LeaveRoom();
@@ -702,7 +702,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
 
 
-    // ���� ���� �� winner/loser text ��� �� �� ��ȯ �Լ� 
+    // ???? ???? ?? winner/loser text ??? ?? ?? ??? ??? 
     IEnumerator GoodGame(string text, string scene, Color color, float wait)
     {
         // set active GG text 
