@@ -189,10 +189,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         jumpForceY6 = 2000000;
 
-
-
-
-
         // 자신의 태그를 바꿔주는 부분
 
         if (PV.IsMine)
@@ -589,11 +585,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
+    #region 발판 관련 함수
     private void OnTriggerEnter(Collider other)
     {
-        //=======================================
-        // 발판 관련 부분 
-        #region jumps in the map 
         if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
@@ -616,7 +610,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
         {
-            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, 0);
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, 0f);
         }
 
         if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
@@ -627,41 +621,27 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
-        #endregion
-        //=======================================
 
-        //=======================================
-        // 미사일 관련 부분 
-
+        // 미사일 충돌 관련 부분
         if (!PV.IsMine)
             return;
-
-        // attacked by missile
-        if (other.gameObject.tag == "Bomb" && shield == false)
+        //=======================================
+        // 미사일 충돌(아이템 충돌)
+        if (other.gameObject.tag == "Bomb")
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
             {
                 playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
             }
-            // if I have chicken
-            if (myChicken.gameObject.activeSelf)
-            {
-                // deactive my chicken 
-                PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
-
-                // request master client to active chicken 
-                PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
-            }
         }
 
-        // stepped on banana
-        if (other.gameObject.tag == "Banana")
+        if (other.gameObject.CompareTag("Banana"))
         {
             Drift(-10f);
             StartCoroutine(BananaSliding());
         }
-
     }
+    #endregion
     //===========================================================================
 
     //===========================================================================
@@ -745,12 +725,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
     }
 
+
+
+
+
     // 방을 나가는 함수
     private void LeftGame()
     {
         PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel("StartScene");
     }
+
+
 
     // 게임 종료 시 winner/loser text 출력 후 씬 전환 함수 
     IEnumerator GoodGame(string text, string scene, Color color, float wait)
@@ -767,6 +753,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         yield return null;
     }
+
+    //===========================================================================
 
     //===========================================================================
     /// <summary>
