@@ -35,8 +35,6 @@ public class GameManager : MonoBehaviourPun
     #endregion
     //=========================================================
 
-
-
     Player[] players = PhotonNetwork.PlayerList;
 
     public float GameTime;

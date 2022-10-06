@@ -96,8 +96,6 @@ public class UIManager : MonoBehaviourPunCallbacks
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 30;
 
-        canLogin = false;
-
         //if(ZeraAPIHandler.Inst.getUserProfile == false || ZeraAPIHandler.Inst.getSessionID == false)
         StartCoroutine(ConnectAPI());
     }
@@ -130,6 +128,8 @@ public class UIManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Text_ConnectionInfo.text = "마스터 서버에 연결 완료!";
+        if (canLogin == true)
+            PhotonNetwork.JoinLobby();
     }
 
     // 마스터 서버와 연결이 끊어졌을 때 호출
@@ -322,6 +322,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     {
         Text_ConnectionInfo.text = "연결 끊어짐 ...";
         PhotonNetwork.Disconnect();
+        StartCoroutine(ConnectAPI());
     }
 
     // 방 생성패널 버튼에 달아줄 함수
@@ -409,7 +410,8 @@ public class UIManager : MonoBehaviourPunCallbacks
 
     IEnumerator ConnectAPI()
     {
-        Panel_WaitConnect.GetComponentInChildren<TextMeshProUGUI>().text = "게임 불러오는중 . . .";
+        canLogin = false;
+        Panel_WaitConnect.GetComponentInChildren<TextMeshProUGUI>().text = "로 딩 중 . . .";
         StartCoroutine(ActiveWaitPanel());
         yield return StartCoroutine(RequestAPI());
         // 기본적으로 API에 연결되어 정보를 받아왔을때 아래 내용들을 실행한다
@@ -646,6 +648,8 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 방안의 플레이어들의 수만큼 반복문을 돌아
         for (int i = 0; i < curRoom.PlayerCount; i++)
         {
+            if (GetPlayer(i) == null)
+                continue;
             // 해당 플레이어의 준비상태 태그 IsReady가 true라면 카운트를 올려
             if ((bool)GetPlayer(i).CustomProperties["IsReady"])
                 readyCnt++;
