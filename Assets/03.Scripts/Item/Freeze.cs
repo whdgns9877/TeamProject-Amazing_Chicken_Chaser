@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
-public class Missile : MonoBehaviourPun
+public class Freeze : MonoBehaviourPun
 {
     [SerializeField] float aliveTime;
 
@@ -19,8 +19,6 @@ public class Missile : MonoBehaviourPun
     {
         aliveTime = 5f; //유지시간
     }
-
-
     private void OnDisable()
     {
         aliveTime = 5f;
@@ -36,12 +34,21 @@ public class Missile : MonoBehaviourPun
         transform.Translate(Vector3.forward, Space.Self);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnParticleCollision(GameObject other)
     {
-        if(other.gameObject.tag == "Player" || other.gameObject.tag == "Ground" || other.gameObject.tag == "Building")
+        if (other.gameObject.tag == "Player" || other.gameObject.tag == "Ground" || other.gameObject.tag == "Building")
         {
-            PhotonNetwork.Instantiate("hitEffect", transform.position, Quaternion.identity);
+            PhotonNetwork.Instantiate("FreezeExplosion", transform.position, Quaternion.identity);
             PhotonNetwork.Destroy(gameObject);
         }
     }
+
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.gameObject.tag == "Player" || other.gameObject.tag == "Ground" || other.gameObject.tag == "Building")
+    //    {
+    //        PhotonNetwork.Instantiate("FreezeExplosion", transform.position, Quaternion.identity);
+    //        PhotonNetwork.Destroy(gameObject);
+    //    }
+    //}
 }
