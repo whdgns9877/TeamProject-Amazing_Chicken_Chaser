@@ -35,11 +35,17 @@ public class GameManager : MonoBehaviourPun
     #endregion
     //=========================================================
 
-    Player[] players = PhotonNetwork.PlayerList;
 
     public float GameTime;
 
     private Room curRoom;
+
+
+    bool doAgain = false;
+    bool checkChicken = false;
+    public bool CheckChicken { get { return checkChicken; } }
+
+    public bool DoAgain { get { return doAgain; } }
 
     void Awake()
     {
@@ -69,10 +75,25 @@ public class GameManager : MonoBehaviourPun
                 // 현재 룸에 있는 플레이어의 액터넘버와 로컬 플레이어의 액터 넘버가 같을 경우 플레이어 생성 
                 if (PhotonNetwork.PlayerList[i].ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
-                    PhotonNetwork.Instantiate("Player Car", playerSpawnPosArr[i].transform.position, Quaternion.identity);
+                    PhotonNetwork.Instantiate($"PlayerCar_{i}", playerSpawnPosArr[i].transform.position, Quaternion.identity);
                     break;
                 }
             }
+        }
+    }
+
+    private void Update()
+    {
+        //if game is over 
+        if (!ChickenTimer.Inst.IsGameOver && !checkChicken)
+        {
+            // count chicken in Queue, 
+            if (ChickenSpawn.Inst.MyChickenList.Count == 0)
+            {
+                Debug.Log("No one has chicek!");
+                doAgain = true;
+            }
+            checkChicken = true;
         }
     }
 

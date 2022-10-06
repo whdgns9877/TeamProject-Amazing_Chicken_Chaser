@@ -1,0 +1,214 @@
+fileFormatVersion: 2
+guid: 8a6162aebed146c4a9dd601b3c4027a7
+timeCreated: 1536512862
+licenseType: Store
+ModelImporter:
+  serializedVersion: 21
+  fileIDToRecycleName:
+    100000: Blinkers
+    100002: Body
+    100004: Bumper
+    100006: Chassis
+    100008: Collider
+    100010: Exhaust
+    100012: FogLights
+    100014: FrameWindow
+    100016: Glasses
+    100018: Grilles
+    100020: Handle
+    100022: HeadLight
+    100024: HeadLightTips
+    100026: Interior
+    100028: Interrior_Red
+    100030: Logo
+    100032: Mirrors
+    100034: Plate
+    100036: //RootNode
+    100038: RearBrakeLight
+    100040: Red_Parts
+    100042: Seams
+    100044: Steer
+    100046: TailLights
+    100048: Window
+    100050: Wing
+    100052: Wipers
+    400000: Blinkers
+    400002: Body
+    400004: Bumper
+    400006: Chassis
+    400008: Collider
+    400010: Exhaust
+    400012: FogLights
+    400014: FrameWindow
+    400016: Glasses
+    400018: Grilles
+    400020: Handle
+    400022: HeadLight
+    400024: HeadLightTips
+    400026: Interior
+    400028: Interrior_Red
+    400030: Logo
+    400032: Mirrors
+    400034: Plate
+    400036: //RootNode
+    400038: RearBrakeLight
+    400040: Red_Parts
+    400042: Seams
+    400044: Steer
+    400046: TailLights
+    400048: Window
+    400050: Wing
+    400052: Wipers
+    2300000: Blinkers
+    2300002: Body
+    2300004: Bumper
+    2300006: Chassis
+    2300008: Collider
+    2300010: Exhaust
+    2300012: FogLights
+    2300014: FrameWindow
+    2300016: Glasses
+    2300018: Grilles
+    2300020: Handle
+    2300022: HeadLight
+    2300024: HeadLightTips
+    2300026: Interior
+    2300028: Interrior_Red
+    2300030: Logo
+    2300032: Mirrors
+    2300034: Plate
+    2300036: RearBrakeLight
+    2300038: Red_Parts
+    2300040: Seams
+    2300042: Steer
+    2300044: TailLights
+    2300046: Window
+    2300048: Wing
+    2300050: Wipers
+    3300000: Blinkers
+    3300002: Body
+    3300004: Bumper
+    3300006: Chassis
+    3300008: Collider
+    3300010: Exhaust
+    3300012: FogLights
+    3300014: FrameWindow
+    3300016: Glasses
+    3300018: Grilles
+    3300020: Handle
+    3300022: HeadLight
+    3300024: HeadLightTips
+    3300026: Interior
+    3300028: Interrior_Red
+    3300030: Logo
+    3300032: Mirrors
+    3300034: Plate
+    3300036: RearBrakeLight
+    3300038: Red_Parts
+    3300040: Seams
+    3300042: Steer
+    3300044: TailLights
+    3300046: Window
+    3300048: Wing
+    3300050: Wipers
+    4300000: Wipers
+    4300002: HeadLightTips
+    4300004: FogLights
+    4300006: Mirrors
+    4300008: Plate
+    4300010: Handle
+    4300012: Blinkers
+    4300014: Bumper
+    4300016: Wing
+    4300018: Window
+    4300020: Body
+    4300022: Exhaust
+    4300024: FrameWindow
+    4300026: Chassis
+    4300028: Seams
+    4300030: HeadLight
+    4300032: Steer
+    4300034: TailLights
+    4300036: Logo
+    4300038: Red_Parts
+    4300040: Interior
+    4300042: Interrior_Red
+    4300044: RearBrakeLight
+    4300046: Glasses
+    4300048: Grilles
+    4300050: Collider
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
