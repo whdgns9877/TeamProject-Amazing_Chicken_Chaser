@@ -234,23 +234,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             return;
 
         //=====================================================================
-        // Imsi Code for Siyeon
-        #region Temp key for test
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            ChickenTimer.Inst.StopAllCoroutines();
-        }
-
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            LeftGame();
-        }
-
-        #endregion
-        //=====================================================================
-
-
-        //=====================================================================
         // Player GameOver
         if (ChickenTimer.Inst.IsGameOver == false && check == false)
         {
@@ -292,11 +275,15 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
             // play eating animation
             PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Eat", true);
+            if (SoundManager.Inst.Drift.isPlaying)
+                return;
+            SoundManager.Inst.Drift.Play();
         }
 
         // release brakes 
         if (Input.GetKeyUp(KeyCode.Space))
         {
+            SoundManager.Inst.Drift.Stop();
             wheelColliders[0].brakeTorque = 0f;
             wheelColliders[1].brakeTorque = 0f;
             wheelColliders[2].brakeTorque = 0f;
@@ -311,6 +298,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // drift key "shift"
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
+            SoundManager.Inst.Drift.Play();
             Drift(0.5f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
 
@@ -321,6 +309,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // drift key "shift"
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
+            SoundManager.Inst.Drift.Stop();
             Drift(5f);          // increase wheel stiffness to stop drifting
             SkidMark(2, false); // skidmark off
 
@@ -440,6 +429,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         #region 치킨 충돌, 플레이어와 충돌 시 치킨 처리 관련 코드 
         if (collision.collider.tag == "Chicken")
         {
+            SoundManager.Inst.SoundGetItem.Play();
             PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
 
             // If I have chicken
@@ -476,6 +466,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                     PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
                 }
             }
+
+            if (SoundManager.Inst.Crash.isPlaying)
+                return;
+            SoundManager.Inst.Crash.Play();
         }
         #endregion
         //===========================================================================
@@ -499,7 +493,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     public void ChickenPadak(string dosomething, bool doing)
     {
         // if I have no chicken, return
-        if (!myChicken.gameObject.activeSelf)
+        if (!myChicken.gameObject.activeSelf || !PV.IsMine || !PhotonNetwork.InRoom)
             return;
 
         ChickenAni.SetBool($"{dosomething}", doing);
@@ -591,26 +585,32 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
+            SoundManager.Inst.JumpBooster.Play();
         }
         if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
+            SoundManager.Inst.JumpBooster.Play();
         }
         if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
+            SoundManager.Inst.JumpBooster.Play();
         }
         if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
+            SoundManager.Inst.JumpBooster.Play();
         }
         if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
+            SoundManager.Inst.JumpBooster.Play();
         }
         if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY6, 0f);
+            SoundManager.Inst.JumpBooster.Play();
         }
 
         if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
@@ -627,18 +627,30 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             return;
         //=======================================
         // 미사일 충돌(아이템 충돌)
-        if (other.gameObject.tag == "Bomb")
+        if (other.gameObject.CompareTag("Bomb"))
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
             {
+                SoundManager.Inst.Boom.Play();
                 playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
             }
         }
 
         if (other.gameObject.CompareTag("Banana"))
         {
+            SoundManager.Inst.Slipped.Play();
             Drift(-10f);
             StartCoroutine(BananaSliding());
+        }
+
+        //얼음탄 충돌
+        if (other.gameObject.CompareTag("Freeze") && shield == false)
+        {
+            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
+            {
+                SoundManager.Inst.FreezeBoom.Play();
+                PV.RPC("FreezeStateActive", RpcTarget.AllViaServer);
+            }
         }
     }
     #endregion
@@ -663,6 +675,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     // function Check my Chicken Onw when ChickenTimer is Finish
     IEnumerator CheckHasChicken()
     {
+        canMove = false;
         // doAgain == false == no one got chicken
         if (GameManager.Inst.DoAgain)
         {
@@ -677,6 +690,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             PhotonNetwork.LoadLevel("GameScene");
 
             Debug.Log("Do again!");
+            canMove = true;
             yield return null;
         }
 
@@ -686,27 +700,32 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // no one got chicken, re-start round 
             if (!transform.GetChild(7).gameObject.activeInHierarchy)
             {
+                SoundManager.Inst.Bye.Play();
                 StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
             }
 
             // if player has chicken 
             if (transform.GetChild(7).gameObject.activeInHierarchy)
             {
+                SoundManager.Inst.Alive.Play();
                 GGText.SetActive(true);
                 GameOvertext.faceColor = Color.yellow;
                 GameOvertext.text = "Lucky! You Got Chicken!";
             }
-
+            canMove = true;
             yield return new WaitForSeconds(5f);
 
             // checked chicken and only one player left 
             if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
             {
-
+                SoundManager.Inst.Victory.Play();
                 winner = true;
                 Debug.Log("이겼나?" + winner);
                 ZeraAPIHandler.Inst.DeclareWinner();
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(5f);
+
+                SoundManager.Inst.GetBettingCoin.Play();
+
                 StartCoroutine(GoodGame("You Win!!\n You Got " + (ZeraAPIHandler.Inst.resBettingDeclareWinner.data.amount_won
                     - ZeraAPIHandler.Inst.resSettings.data.bets[0].amount)
                     + " ZERA !!", "StartScene", Color.green, 2f));
@@ -766,11 +785,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         if ((Slot[0] == 0 && Slot[1] != 0) || (Slot[0] == 0 && Slot[1] == 0)) // 첫번째만 비었거나 둘 다 비어있으면 첫번째부터 넣는다.
         {
+            SoundManager.Inst.SoundGetItem.Play();
             Slot[0] = num;
             Slot1.transform.GetChild(num).gameObject.SetActive(true);
         }
         else if (Slot[0] != 0 && Slot[1] == 0) // 두번째 칸이 비어있다면
         {
+            SoundManager.Inst.SoundGetItem.Play();
             Slot[1] = num;
             Slot2.transform.GetChild(num).gameObject.SetActive(true);
         }
@@ -802,23 +823,35 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         switch (num)
         {
             case 1: //부스터
+                SoundManager.Inst.SpeedBooster.Play();
                 PV.RPC("BoosterActive", RpcTarget.AllViaServer);
                 return;
             case 2: //미사일
+                SoundManager.Inst.Missile.Play();
                 GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation);
                 myMissile.AddComponent<Missile>();
                 myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
                 myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
                 return;
             case 3: //방어막
+                SoundManager.Inst.Shield.Play();
                 PV.RPC("ShieldActive", RpcTarget.AllViaServer);
                 return;
             case 4: //바나나
+                SoundManager.Inst.Banana.Play();
                 GameObject myBanana = PhotonNetwork.Instantiate("Banana", transform.position + (-transform.forward * 5f), Quaternion.Euler(90f, 0f, 0f));
                 myBanana.AddComponent<Banana>();
                 return;
             case 5: //안개
+                SoundManager.Inst.Fog.Play();
                 PhotonNetwork.Instantiate("Smoke", transform.position, Quaternion.Euler(0f, 0f, 0f));
+                return;
+            case 6: //얼음탄
+                SoundManager.Inst.Missile.Play();
+                GameObject myFreeze = PhotonNetwork.Instantiate("Freeze", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation * Quaternion.Euler(-50f, 0f, 0f));
+                myFreeze.AddComponent<Freeze>();
+                myFreeze.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+                myFreeze.transform.rotation = Quaternion.LookRotation(transform.forward);
                 return;
         }
     }
@@ -841,6 +874,21 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         yield return new WaitForSeconds(0.5f);
         Drift(5f); //드리프트 원래 값으로
+    }
+
+    [PunRPC]
+    void FreezeStateActive() //슬로우 활성화
+    {
+        transform.GetChild(10).gameObject.SetActive(true);
+        StartCoroutine(FreezeNow());
+    }
+
+    IEnumerator FreezeNow()
+    {
+        playerRigid.mass = 60000;
+        yield return new WaitForSeconds(5f);
+        transform.GetChild(10).gameObject.SetActive(false);
+        playerRigid.mass = 2000f;
     }
 
     #endregion

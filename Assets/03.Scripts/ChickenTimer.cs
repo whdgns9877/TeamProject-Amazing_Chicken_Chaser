@@ -49,11 +49,10 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     bool isGameOver = true;
     public bool IsGameOver { get { return isGameOver; } }
 
-    static int round = 1;
+    static int round = 0;
 
-    static double timeLimit = 0;
+    static double roundTimeLimit = -5.0;
 
-    private double realTimeLimit = 0;
 
     // 현재 자신이 속해있는 방
     private Room curRoom = null;
@@ -68,25 +67,11 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     {
         StartCoroutine(CountDown());
         round++;
-        realTimeLimit = timeLimit;
-        timeLimit += 5.0;
+        roundTimeLimit += 5.0;
     }
-
-
-
-    void setTime()
-    {
-        // set startTime of clients as hashtable value 
-        // convert hashtable value => string => double 
-        startTime = (double)(curRoom.CustomProperties["StartTime"]);
-    }
-
 
     IEnumerator CountDown()
     {
-        timer.text = $"$$$ Round {round} !! $$$ \n Player Ready!!";
-        yield return new WaitForSeconds(2f);
-
         if (PhotonNetwork.IsMasterClient)
         {
             Hashtable CustomValue = new Hashtable();
@@ -95,17 +80,29 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
             curRoom.SetCustomProperties(CustomValue); // set custom properties
         }
 
+        timer.text = $"$$$ Please Waiting For Other Players!!";
+
+        yield return new WaitForSeconds(3f);
+
+        timer.text = $"$$$ Round {round} !! $$$ \n Player Ready!!";
+
+        SoundManager.Inst.StartGame.Play();
+
+        yield return new WaitForSeconds(3f);
+        //Invoke("setTime", 1f);
         timer.text = "Start!!";
-        Invoke("setTime", 1f);
+
         yield return new WaitForSeconds(1f);
-        
+
+        setTime();
+
         // is game over? 
         while (isGameOver)
         {
             // is game started? 
             gameStart = true;
 
-            double timeLimit = 100f - realTimeLimit;
+            double timeLimit = 100f - roundTimeLimit;
 
             // curret time - game start time 
             timepassed = PhotonNetwork.Time - startTime;
@@ -122,5 +119,12 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
             }
             yield return null;
         }
+    }
+
+    void setTime()
+    {
+        // set startTime of clients as hashtable value 
+        // convert hashtable value => string => double 
+        startTime = (double)(curRoom.CustomProperties["StartTime"]) + 7f;
     }
 }

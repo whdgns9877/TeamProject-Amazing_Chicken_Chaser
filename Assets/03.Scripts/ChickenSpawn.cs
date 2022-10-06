@@ -102,7 +102,7 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
         if (ChickenList.Count > 0)
         {
             GameObject chicken = ChickenList.Dequeue();
-            chicken.transform.position = position + (Vector3.up * 4f);
+            chicken.transform.position = position + (Vector3.up * 6f);
             chicken.transform.rotation = rotation;
             chicken.SetActive(true);
 

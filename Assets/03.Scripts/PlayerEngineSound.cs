@@ -24,22 +24,18 @@ public class PlayerEngineSound : MonoBehaviour
         {
             if (isDrive) return;
             isDrive = true;
-            SoundManager.Inst.Drive.Play();
         }
         else
         {
-            SoundManager.Inst.Drive.Stop();
             isDrive = false;
         }
         if(PlayerSpeed >= 50f)
         {
             if (isAccel) return;
             isAccel = true;
-            SoundManager.Inst.Accel.Play();
         }
         else
         {
-            SoundManager.Inst.Accel.Stop();
             isAccel = false;
         }
         #endregion
