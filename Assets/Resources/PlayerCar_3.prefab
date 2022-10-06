@@ -1922,20 +1922,6 @@ MonoBehaviour:
   currSpeed: 0
   currAccel: 0
   currBackAccel: 0
-  jumpForceY: 0
-  jumpForceZ: 0
-  BoostForceZ: 0
-  BoostForceZ2: 0
-  jumpForceY2: 0
-  jumpForceZ2: 0
-  jumpForceY3: 0
-  jumpForceZ3: 0
-  jumpForceY4: 0
-  jumpForceZ4: 0
-  jumpForceY5: 0
-  jumpForceZ5: 0
-  jumpForceY6: 0
-  jumpForceZ6: 0
   shield: 0
   booster: 0
   PlayerSlot: {fileID: 0}
