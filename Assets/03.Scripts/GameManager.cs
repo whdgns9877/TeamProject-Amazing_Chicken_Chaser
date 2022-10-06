@@ -56,6 +56,8 @@ public class GameManager : MonoBehaviourPun
                 if ((int)curRoom.CustomProperties[i.ToString()] == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
                     PhotonNetwork.Instantiate("Player Car", playerSpawnPosArr[i].transform.position, Quaternion.identity);
+                    SoundManager.Inst.StartBGM.Stop();
+                    SoundManager.Inst.InGameBGM.Play();
                     break;
                 }
             }

@@ -60,6 +60,9 @@ MonoBehaviour:
   - ChickenPadak
   - RPCDurTime
   - ShieldActive
+  - BoostActive
+  - BoosterActive
+  - DistroyBananaPeel
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UI;
 using Photon.Pun;
 using System.Runtime.ExceptionServices;
-using UnityEngine.UIElements;
+//using UnityEngine.UIElements;
 using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
 using Cinemachine;
@@ -45,7 +46,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     public GameObject mycg;
 
     // 현재 속도
-    float currSpeed;
+    public float currSpeed;
 
     //플레이어 sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
@@ -86,14 +87,27 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //============================================================
     #region 아이템 관련 변수
-    [SerializeField] bool missile = false;
+
+    [Header("[플레이어 아이템 슬롯]")]
+    [SerializeField] GameObject PlayerSlot;
+    [SerializeField] GameObject Slot1;
+    [SerializeField] GameObject Slot2;
+    [Header("")]
+
+    [SerializeField] public bool missile = false;
     [SerializeField] public bool shield = false;
-    [SerializeField] bool mine = false;
+    [SerializeField] public bool booster = false;
+    [SerializeField] public bool banana = false;
+    [SerializeField] public bool smoke = false;
 
-    [SerializeField] GameObject MissileObj;
+    [SerializeField] int[] Slot = new int[2]; //아이템슬롯칸
+    #endregion
+    //============================================================
 
-
-
+    //============================================================
+    #region 사운드 관련 변수
+    bool isDrive = true;
+    bool isAccel = true;
     #endregion
     //============================================================
 
@@ -155,7 +169,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
 
-        MissileObj = Resources.Load<GameObject>("Missile");
+
+        // 슬롯 찾기
+        PlayerSlot = FindObjectOfType<PlayerSlot>().gameObject;
+        Slot1 = PlayerSlot.transform.GetChild(0).gameObject;
+        Slot2 = PlayerSlot.transform.GetChild(1).gameObject;
 
         // 자신의 태그를 바꿔주는 부분
 
@@ -306,30 +324,22 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // 미사일 발사
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
-            myMissile.AddComponent<Missile>();
-            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
-            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+            GetKeyDownControl(true); //아이템 사용키를 누르면 실행되는 함수
         }
-
-        //방어막 생성
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.LeftAlt))
         {
-            PV.RPC("ShieldActive", RpcTarget.AllViaServer);
-            shield = true;
-
+            GetKeyDownControl(false); //아이템 사용키를 누르면 실행되는 함수
         }
 
-        
+        // 얼음탄 발사
+        //if (Input.GetKeyDown(KeyCode.C))
+        //{
+        //    GameObject myMissile = PhotonNetwork.Instantiate("Freeze", transform.position + new Vector3(0f, 0.4f, 0.1f), transform.rotation * Quaternion.Euler(-50f,0f,0f));
+        //    myMissile.AddComponent<Freeze>();
+        //    myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 1f);
+        //    myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+        //}
 
-
-        // 부스터
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            transform.Find("Booster").gameObject.SetActive(true);
-            //transform.Find("Booster").transform.Find("Left").GetComponent<ParticleSystem>().Play();
-            ///transform.Find("Booster").transform.Find("Right").GetComponent<ParticleSystem>().Play();
-        }
 
 
         #endregion
@@ -573,6 +583,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #region TriggerEnter 부분 - 발판, 미사일 충돌
     private void OnTriggerEnter(Collider other)
     {
+        // 맵 발판 상호작용 부분 
+        #region 맵 발판 상호작용 부분
         if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
@@ -606,13 +618,15 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
+        #endregion
 
         // 미사일 충돌 관련 부분
+        #region 미사일
         if (!PV.IsMine)
             return;
         //=======================================
         // 미사일 충돌(아이템 충돌)
-        if (other.gameObject.tag == "Bomb" && shield == false)
+        if (other.gameObject.CompareTag("Bomb") && shield == false)
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
             {
@@ -628,7 +642,23 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
             }
         }
+        #endregion
 
+        // 얼음탄 충돌
+        //if (other.gameObject.tag == "Freeze" && shield == false)
+        //{
+        //    if (!other.gameObject.GetComponent<PhotonView>().IsMine)
+        //    {
+        //        StartCoroutine(SlowTime());
+        //    }
+        //}
+
+        // 바나나 밟았을 때 처리
+        if (other.gameObject.CompareTag("Banana")) //Tag == " " 함수는 내부에서 복사를 해서 비교하기 때문에 비용이 더 듬
+        {
+            Drift(-10f);
+            StartCoroutine(BananaSliding());
+        }
     }
     #endregion
     //===========================================================================
@@ -678,11 +708,126 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     /// 아이템 함수들의 총집합입니다
     /// </summary>
     #region 아이템 함수
+
+    public void GetItem(int num) //아이템 획득시
+    {
+        if ((Slot[0] == 0 && Slot[1] != 0) || (Slot[0] == 0 && Slot[1] == 0)) // 첫번째만 비었거나 둘 다 비어있으면 첫번째부터 넣는다.
+        {
+            Slot[0] = num;
+            Slot1.transform.GetChild(num).gameObject.SetActive(true);
+        }
+        else if (Slot[0] != 0 && Slot[1] == 0) // 두번째 칸이 비어있다면
+        {
+            Slot[1] = num; 
+            Slot2.transform.GetChild(num).gameObject.SetActive(true);
+        }
+        else
+        {
+            return; // 둘 다 차있는 경우
+        }
+    }
+
+    public void GetKeyDownControl(bool ctrl) //아이템 사용키 눌렀을 때 함수
+    {
+        if(ctrl) //Ctrl 키 눌렀을 때
+        {
+            if (Slot[0] != 0)
+                UseItem(Slot[0], 0);
+        }
+
+        else //Alt 키 눌렀을 때
+        {
+            if (Slot[1] != 0)
+                UseItem(Slot[1], 1);
+        }
+        //if (Slot[0] == 0 && Slot[1] == 0) //키를 눌렀는데 슬롯이 비어있다면 무효
+        //{
+        //    Debug.Log("아이템이 없다");
+        //    return;
+        //}
+            
+        //else if (Slot[0] != 0) //첫번째 칸에 무언가가 있다면(무적권 1번째부터 사용)
+        //{
+        //    Debug.Log("1번째 아이템을 사용한다!");
+        //    UseItem(Slot[0], 0);
+        //}
+        //else if (Slot[0] == 0 && Slot[1] != 0) //첫번째 칸은 비었고 두번째 칸에만 뭔가 있다면
+        //{
+        //    Debug.Log("2번째 아이템을 사용한다!");
+        //    UseItem(Slot[1], 1);
+        //}
+    }
+
+    void UseItem(int num, int i) //사용되는 아이템 정보
+    {
+        Slot[i] = 0; //사용한 슬롯은 일단 비운다
+        PlayerSlot.transform.GetChild(i).transform.GetChild(num).gameObject.SetActive(false);
+        switch(num)
+        {
+            case 1: //부스터
+                PV.RPC("BoosterActive", RpcTarget.AllViaServer);
+                return;
+            case 2: //미사일
+                GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation);
+                myMissile.AddComponent<Missile>();
+                myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+                myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+                return;
+            case 3: //방어막
+                PV.RPC("ShieldActive", RpcTarget.AllViaServer);
+                return;
+            case 4: //바나나
+                GameObject myBanana = PhotonNetwork.Instantiate("Banana", transform.position + (-transform.forward * 2), Quaternion.Euler(90f, 0f, 0f));
+                myBanana.AddComponent<Banana>();
+                return;
+            case 5: //안개
+                PhotonNetwork.Instantiate("Smoke", transform.position, Quaternion.Euler(0f, 0f, 0f));
+                return;
+
+        }
+        if (Slot[0] == 0 && Slot[1] != 0) //첫번째 슬롯 썼는데 두번째 슬롯이 남아있다면 첫번째 칸으로 옮기기
+        {
+            Slot[0] = Slot[1];
+            PlayerSlot.transform.GetChild(0).transform.GetChild(Slot[0]).gameObject.SetActive(true);
+            PlayerSlot.transform.GetChild(1).transform.GetChild(Slot[1]).gameObject.SetActive(false);
+            Slot[1] = 0;
+            
+        }
+    }
+
+
     [PunRPC]
-    void ShieldActive()
+    void ShieldActive() // 방어막 활성화
     {
         transform.GetChild(9).gameObject.SetActive(true);
     }
+
+    [PunRPC]
+    void BoosterActive() // 부스터 활성화
+    {
+        transform.GetChild(8).gameObject.SetActive(true);
+    }
+
+    //바나나 밟았을 때 실행되는 코루틴
+    IEnumerator BananaSliding() // 바나나 미끄러짐 활성화
+    {
+        yield return new WaitForSeconds(0.5f);
+        Drift(5f); //드리프트 원래 값으로
+    }
+
+    IEnumerator SlowTime() // 슬로우 걸림
+    {
+        wheelColliders[0].brakeTorque = -10f;
+        wheelColliders[1].brakeTorque = -10f;
+        wheelColliders[2].brakeTorque = -10f;
+        wheelColliders[3].brakeTorque = -10f;
+        yield return new WaitForSeconds(3f);
+
+    }
+
+
     #endregion
+
+
 }
 

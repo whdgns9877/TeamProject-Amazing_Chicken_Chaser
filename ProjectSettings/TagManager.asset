@@ -23,6 +23,9 @@ TagManager:
   - Bomb
   - Me
   - Bullet
+  - Obstruct
+  - Banana
+  - Freeze
   layers:
   - Default
   - TransparentFX
