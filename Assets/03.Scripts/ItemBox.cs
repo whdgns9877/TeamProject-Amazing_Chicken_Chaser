@@ -9,5 +9,4 @@ public class ItemBox : MonoBehaviour
     public ItemScriptableObject ItemScriptableObject { set { itemScriptableObject = value; } }
 
 
-
 }

@@ -17,7 +17,6 @@ public class PlayerEngineSound : MonoBehaviour
     void Update()
     {
         //차 움직일 때 나는 소리 코드
-        PlayerSpeed = transform.GetComponent<PlayerMove>().currAccel;
         Debug.Log(PlayerSpeed);
 
         #region 차 움직이면 소리 실행
