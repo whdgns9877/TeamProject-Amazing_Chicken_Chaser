@@ -1,4 +1,4 @@
-癤퓎sing System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -12,13 +12,12 @@ using Cinemachine;
 using TMPro;
 using Color = UnityEngine.Color;
 
-
-public class PlayerMove1 : MonoBehaviourPun, IPunObservable
+public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
-    [SerializeField] public float Acceleration = 1000f;       // ????? ???
-    [SerializeField] public float BrakingForce = 50000f;      // ?洹�??? 
-    [SerializeField] public float MaxTurnAngle = 45f;        // ??? ??
+    [SerializeField] public float Acceleration = 1000f;       // 자동차 속도
+    [SerializeField] public float BrakingForce = 50000f;      // 브레이크 
+    [SerializeField] public float MaxTurnAngle = 45f;        // 회전 각
     [SerializeField] public float MaxSpeed = 100f;
 
     [Header("Wheel Info")]
@@ -30,10 +29,10 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
     float zAxis;
 
 
-    // ??????? ????? ?????
+    // 동기화에 사용되는 포톤뷰
     PhotonView PV;
 
-    //?均??? 
+    //닉네임 
     UIPlayerInfo UIPlayerInfo;
 
 
@@ -42,24 +41,28 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
     TextMeshProUGUI GameOvertext;
 
     //============================================================
-    // ??????? ????? ????
-    #region ??????? ????? ????
-    // ?첨???? Rigidbody 
+    // 움직임과 관련된 변수
+    #region 움직임과 관련된 변수
+    // 플레이어 Rigidbody 
     Rigidbody playerRigid;
-    // ?첨???? ???? ??? 
+    // 플레이어 무게 중심 
     public GameObject mycg;
 
-    // ???? ???
-    float currSpeed;
+    // 현재 속도
+    public float currSpeed;
 
-    //?첨???? sideslipe 
+    // 현재 밟은 악셀의 힘
+    public float currAccel = 0f;
+    public float currBackAccel = 0f;
+
+    //플레이어 sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
     #endregion
     //============================================================
 
     //============================================================
-    // ??? ????? ?????? ????? ????
-    #region ???? ???? ????
+    // 맵에 배치된 발판들과 관련된 변수
+    #region 발판 관련 변수
     [Header("MapTypeInfo")]
 
     [SerializeField] int jumpForceY;
@@ -90,35 +93,42 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    #region ?????? ???? ????
+    #region 아이템 관련 변수
     [SerializeField] bool missile = false;
-    [SerializeField] bool shield = false;
+    [SerializeField] public bool shield = false;
+    [SerializeField] public bool booster = false;
+    [SerializeField] public bool banana = false;
+
     [SerializeField] bool mine = false;
-
-    [SerializeField] GameObject MissileObj;
-
-
 
     #endregion
     //============================================================
 
     //============================================================
-    #region ???? ????? ???? 
+    #region 사운드 관련 변수
+    bool isDrive = true;
+    bool isAccel = true;
+    #endregion
+    //============================================================
+
+    //============================================================
+    #region 치킨과 관련된 변수 
     Transform myChicken = null;
     Animator ChickenAni = null;
     #endregion
     //============================================================
 
     //============================================================
-    #region ?첨???? ??? ?????? ???? ????
+    #region 플레이어 위치 초기화를 위한 변수
     private bool canMove = true;
     #endregion
     //============================================================
 
     bool check = false;
     bool winner = false;
+
     //============================================================
-    // Network ??????? ???? ??? 
+    // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -148,7 +158,7 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
     private void Awake()
     {
-        // ????? 캐????? ?????쨈? (GetComponent?? ???????째? ??????? ??)
+        // 포톤뷰를 캐싱하여 가져온다 (GetComponent로 가져오는것 생각하면 됨)
         PV = photonView;
         playerRigid = GetComponent<Rigidbody>();
 
@@ -162,14 +172,13 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         GGText = GameObject.Find("Canvas").transform.GetChild(2).gameObject;
         GameOvertext = GGText.GetComponent<TextMeshProUGUI>();
 
-        MissileObj = Resources.Load<GameObject>("Missile");
 
-        // ????? ?짹?? ?????? ?觀?
+        // 자신의 태그를 바꿔주는 부분
 
         if (PV.IsMine)
         {
             gameObject.tag = "Me";
-            for (int i = 0; i < 7; i++) //???? ???? ???? ?짹?? ????(???? 7??째??? ?? ?????? ?? ??)
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
             {
                 transform.GetChild(i).gameObject.tag = "Me";
             }
@@ -178,7 +187,7 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         {
             gameObject.tag = "Player";
             gameObject.layer = LayerMask.NameToLayer("Player");
-            for (int i = 0; i < 7; i++) //???? ???? ???? ?짹?? ????(???? 7??째??? ?? ?????? ?? ??)
+            for (int i = 0; i < 7; i++) //자식들도 전부 나로 태그를 바꾼다(치킨이 7번째니까 그 전까지 싹 다)
             {
                 transform.GetChild(i).gameObject.tag = "Player";
             }
@@ -235,7 +244,6 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
         }
 
-
         //=====================================================================
 
         //=====================================================================
@@ -246,13 +254,38 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         }
         //=====================================================================
 
-        //=====================================================================
-        // Player braking
-        #region ?첨???? ??????, ?洹�????? ????? ??? 
 
         //input keys 
         xAxis = Input.GetAxis("Horizontal");
         zAxis = Input.GetAxis("Vertical");
+
+
+
+        //입력키에 따른 악셀의 정도
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+        {
+            if (currAccel < 100f)
+            {
+                currAccel += 0.01f;
+                if(SoundManager.Inst.Drive.clip == false)
+                    SoundManager.Inst.Drive.Play();
+                SoundManager.Inst.Drive.volume = currAccel;
+            }
+        }
+        else
+        {
+            if(currAccel > 0f )
+            {
+                currAccel -= 0.01f;
+            }
+        }
+
+        
+
+
+        //=====================================================================
+        // Player braking
+        #region 플레이어 브레이크와 관련된 코드 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -304,6 +337,61 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         // if wheel is off ground, no skidmark
         EraseSkidMark();
 
+        #endregion
+        //=====================================================================
+
+        //=====================================================================
+        #region 아이템 관련 스크립트
+        // 미사일 발사
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation);
+            myMissile.AddComponent<Missile>();
+            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+        }
+
+        // 얼음탄 발사
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            GameObject myMissile = PhotonNetwork.Instantiate("Freeze", transform.position + new Vector3(0f, 0.4f, 0.1f), transform.rotation * Quaternion.Euler(-50f,0f,0f));
+            myMissile.AddComponent<Freeze>();
+            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 1f);
+            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+        }
+
+        //방어막 생성
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            PV.RPC("ShieldActive", RpcTarget.AllViaServer);
+            shield = true;
+        }
+
+        //부스터 생성
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            PV.RPC("BoosterActive", RpcTarget.AllViaServer);
+            booster = true;
+        }
+
+        //바나나 생성
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            GameObject myBanana = PhotonNetwork.Instantiate("Banana", transform.position + (-transform.forward * 2), Quaternion.Euler(90f, 0f, 0f));
+            myBanana.AddComponent<Banana>();
+        }
+
+        //연막 생성
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            PhotonNetwork.Instantiate("Smoke", transform.position, Quaternion.Euler(0f,0f,0f));
+        }
+
+
+
+        #endregion
+        //=====================================================================
+
 
         // if Forward Left & rear right wheel is off the ground 
         if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
@@ -311,32 +399,13 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
         else
             PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
-
-        #endregion
-        //=====================================================================
-
-        //=====================================================================
-        #region ?????? ???? ??????
-        // ????? ???
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
-            myMissile.AddComponent<Missile>();
-            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
-            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
-        }
-        #endregion
-        //=====================================================================
-
-
-
     }
 
 
 
     private void FixedUpdate()
     {
-        // ?????? ????? ????? ????
+        // 본인의 제어권 안쪽만 실행
         // if game is not started, do not move 
         if (!PV.IsMine || !ChickenTimer.Inst.GameStart)
             return;
@@ -344,7 +413,7 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player car movment 
-        #region ?첨???? ??????? ???? ???
+        #region 플레이어 움직임에 대한 코드
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
@@ -356,21 +425,21 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         //if has horizontal key input, Steer wheels 
         if (xAxis != 0f)
         {
-            // ???? ?? ?????? 
+            // 전방 휠 움직임 
             wheelColliders[0].steerAngle = xAxis * MaxTurnAngle;    // front left wheel 
             wheelColliders[1].steerAngle = xAxis * MaxTurnAngle;    // front right wheel
         }
 
         else
         {
-            // ???? ?? ?????? 
+            // 전방 휠 움직임 
             wheelColliders[0].steerAngle = 0f;    // front left wheel 
             wheelColliders[1].steerAngle = 0f;    // front right wheel
         }
 
         if (zAxis != 0f && currSpeed <= MaxSpeed)
         {
-            // ????? ??? ?? 
+            // 토크를 주는 휠 
             // FWD 
             wheelColliders[0].motorTorque = zAxis * Acceleration;
             wheelColliders[1].motorTorque = zAxis * Acceleration;
@@ -394,7 +463,7 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         //set all the wheelmash position & rotation as same as wheelCollider
         for (int i = 0; i < wheelColliders.Length; i++)
         {
-            // wheel collider?? ???? wheel mesh?? ?????? ?? ????? ?? 
+            // wheel collider에 맞춰 wheel mesh를 움직일 수 있도록 함 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
         }
         #endregion
@@ -410,7 +479,7 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
         //===========================================================================
         // Chicken detection
-        #region ?? ?役�, ?첨????? ?役� ?? ?? ??? ???? ??? 
+        #region 치킨 충돌, 플레이어와 충돌 시 치킨 처리 관련 코드 
         if (collision.collider.tag == "Chicken")
         {
             PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
@@ -427,8 +496,6 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
         if (collision.collider.tag == "Player")
         {
-            PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
-
             // if I have chicken and opponent have chicken too 
             if (myChicken.gameObject.activeSelf && collision.transform.Find("MyChicken").gameObject.activeSelf)
                 return;
@@ -459,7 +526,7 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // Pun RPCs 
-    #region ???? ????? RPC
+    #region 치킨과 관련된 RPC
 
     [PunRPC]
     public void MyChicken(bool has)
@@ -497,7 +564,7 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function related to car movement 
-    #region ????? ??????? ???? ????? 
+    #region 자동차 움직임에 관한 함수들 
 
     // to move wheelmash as wheelCollider moves  
     void UpdateWheelPos(WheelCollider collider, Transform transform)
@@ -558,56 +625,85 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
-    #region ???? ???? ???
+    #region TriggerEnter 부분 - 발판, 미사일 충돌
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Jump") //????????? ???????
+        // 맵 발판 상호작용 부분 
+        #region 맵 발판 상호작용 부분
+        if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
         }
-        if (other.gameObject.tag == "Jump2") //????????? ???????
+        if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
         }
-        if (other.gameObject.tag == "Jump3") //????????? ???????
+        if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
         }
-        if (other.gameObject.tag == "Jump4") //????????? ???????
+        if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
         }
-        if (other.gameObject.tag == "Jump5") //????????? ???????
+        if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
         }
-        if (other.gameObject.tag == "Jump6") //????????? ???????
+        if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
         }
 
-        if (other.gameObject.tag == "Boost") //?館?????? ???????
+        if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
         }
-        if (other.gameObject.tag == "Boost2") //?館?????? ???????
+        if (other.gameObject.tag == "Boost2") //부스트발판 밟았을때
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
+        #endregion
 
-        // ????? ?役� ???? ?觀?
+        // 미사일 충돌 관련 부분
+        #region 미사일
         if (!PV.IsMine)
             return;
         //=======================================
-        // ????? ?役�(?????? ?役�)
-        if (other.gameObject.tag == "Bomb")
+        // 미사일 충돌(아이템 충돌)
+        if (other.gameObject.tag == "Bomb" && shield == false)
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
             {
                 playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
             }
+            // if I have chicken
+            if (myChicken.gameObject.activeSelf)
+            {
+                // deactive my chicken 
+                PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
+
+                // request master client to active chicken 
+                PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
+            }
+        }
+        #endregion
+
+        // 얼음탄 충돌
+        if(other.gameObject.tag == "Freeze" && shield == false)
+        {
+            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
+            {
+                StartCoroutine(SlowTime());
+            }
         }
 
+        // 바나나 밟았을 때 처리
+        if (other.gameObject.tag == "Banana")
+        {
+            Drift(-10f);
+            StartCoroutine(BananaSliding());
+        }
     }
     #endregion
     //===========================================================================
@@ -629,14 +725,14 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function Check my Chicken Onw when ChickenTimer is Finish
-    #region ???? ?????? ????? ?????? ???? ???????? ??? 
+
     IEnumerator CheckHasChicken()
     {
         // doAgain == false == no one got chicken
         if (GameManager.Inst.DoAgain)
         {
             PhotonNetwork.AutomaticallySyncScene = true;
-            
+
             GGText.SetActive(true);
             GameOvertext.faceColor = Color.blue;
             GameOvertext.text = "All Chickens ran away.. \n Let's try again!!";
@@ -652,13 +748,13 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         else
         {
             Debug.Log("go next!");
-            // ??? ????? ?????????? ???? ?????????????? ???? ?????? ?????????? ???????
+            // no one got chicken, re-start round 
             if (!transform.GetChild(7).gameObject.activeInHierarchy)
             {
                 StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
             }
 
-            // ???? ?????? ?????? ???? ????? ?????. 
+            // if player has chicken 
             if (transform.GetChild(7).gameObject.activeInHierarchy)
             {
                 GGText.SetActive(true);
@@ -671,10 +767,10 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
             // checked chicken and only one player left 
             if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
             {
-            winner = true;
-            Debug.Log("????" + winner);
-            ZeraAPIHandler.Inst.DeclareWinner();
-            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
+                winner = true;
+                Debug.Log("????" + winner);
+                ZeraAPIHandler.Inst.DeclareWinner();
+                StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
             }
 
 
@@ -691,18 +787,6 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
 
 
 
-
-
-    // ???? ?????? ???
-    private void LeftGame()
-    {
-        PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LoadLevel("StartScene");
-    }
-
-
-
-    // ???? ???? ?? winner/loser text ??? ?? ?? ??? ??? 
     IEnumerator GoodGame(string text, string scene, Color color, float wait)
     {
         // set active GG text 
@@ -718,7 +802,53 @@ public class PlayerMove1 : MonoBehaviourPun, IPunObservable
         yield return null;
     }
 
-    #endregion
+    // leave room 
+    private void LeftGame()
+    {
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel("StartScene");
+    }
+
     //===========================================================================
+
+
+    //===========================================================================
+    /// <summary>
+    /// 아이템 함수들의 총집합입니다
+    /// </summary>
+    #region 아이템 함수
+    [PunRPC]
+    void ShieldActive() // 방어막 활성화
+    {
+        transform.GetChild(9).gameObject.SetActive(true);
+    }
+
+    [PunRPC]
+    void BoosterActive() // 부스터 활성화
+    {
+        transform.GetChild(8).gameObject.SetActive(true);
+    }
+
+    //바나나 밟았을 때 실행되는 코루틴
+    IEnumerator BananaSliding() // 바나나 미끄러짐 활성화
+    {
+        yield return new WaitForSeconds(0.5f);
+        Drift(5f); //드리프트 원래 값으로
+    }
+
+    IEnumerator SlowTime() // 슬로우 걸림
+    {
+        wheelColliders[0].brakeTorque = -10f;
+        wheelColliders[1].brakeTorque = -10f;
+        wheelColliders[2].brakeTorque = -10f;
+        wheelColliders[3].brakeTorque = -10f;
+        yield return new WaitForSeconds(3f);
+
+    }
+
+
+    #endregion
+
+
 }
 

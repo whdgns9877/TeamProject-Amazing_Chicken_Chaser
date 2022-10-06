@@ -1977,13 +1977,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4773342266424200332}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b24e7580a0e634498b34c9d9cc769f2, type: 3}
+  m_Script: {fileID: 11500000, guid: 255d14fb3712b2e4a9a3e52dc50eaeb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Acceleration: 1100
-  BrakingForce: 10000
+  Acceleration: 1000
+  BrakingForce: 50000
   MaxTurnAngle: 45
-  MaxSpeed: 110
+  MaxSpeed: 100
   wheelMeshes:
   - {fileID: 4773342266424200333}
   - {fileID: 4773342266424200331}
@@ -2000,19 +2000,19 @@ MonoBehaviour:
   - {fileID: 4773342266424200968}
   - {fileID: 4773342266424200973}
   mycg: {fileID: 4773342266424200420}
-  jumpForceY: 1700000
-  jumpForceZ: -2000000
-  BoostForceZ: 10000
-  BoostForceZ2: 5000000
-  jumpForceY2: 1800000
-  jumpForceZ2: -1000000
-  jumpForceY3: 1500000
-  jumpForceZ3: 2000000
-  jumpForceY4: 2000000
-  jumpForceZ4: 2000000
-  jumpForceY5: 900000
-  jumpForceZ5: 100000
-  jumpForceY6: 2000000
+  jumpForceY: 0
+  jumpForceZ: 0
+  BoostForceZ: 0
+  BoostForceZ2: 0
+  jumpForceY2: 0
+  jumpForceZ2: 0
+  jumpForceY3: 0
+  jumpForceZ3: 0
+  jumpForceY4: 0
+  jumpForceZ4: 0
+  jumpForceY5: 0
+  jumpForceZ5: 0
+  jumpForceY6: 0
   jumpForceZ6: 0
   missile: 0
   shield: 0
