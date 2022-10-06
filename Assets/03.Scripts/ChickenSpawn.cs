@@ -37,6 +37,9 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
     Queue<GameObject> ChickenList;
 
+    public Queue<GameObject> MyChickenList { get { return ChickenList; } }
+
+    int round = 1;
     //=========================================================
     void Awake()
     {
@@ -50,9 +53,14 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
         if (!PhotonNetwork.IsMasterClient)
             return;
 
+        Debug.Log("Chichekn spawn!");
+        Debug.Log("my round " + round);
+
         List<int> chickenList = new List<int>();
 
         int maxrange = this.transform.childCount;
+
+            round++;
 
         for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount - 1; i++)
         {
@@ -77,6 +85,7 @@ public class ChickenSpawn : MonoBehaviourPun, IPunPrefabPool
 
             Vector3 chickenSpawnPos = this.transform.GetChild(ranNum).position;
             PhotonNetwork.Instantiate("Chicken", chickenSpawnPos, Quaternion.identity);
+
         }
     }
 

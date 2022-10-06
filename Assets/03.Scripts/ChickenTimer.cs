@@ -47,9 +47,13 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     public bool GameStart { get { return gameStart; } }
 
     bool isGameOver = true;
-    public bool IsGameOver { get { return isGameOver; } }   
+    public bool IsGameOver { get { return isGameOver; } }
 
+    static int round = 1;
 
+    static double timeLimit = 0;
+
+    private double realTimeLimit = 0;
 
     // 현재 자신이 속해있는 방
     private Room curRoom = null;
@@ -62,7 +66,10 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        StartCoroutine(CountDonw());
+        StartCoroutine(CountDown());
+        round++;
+        realTimeLimit = timeLimit;
+        timeLimit += 5.0;
     }
 
 
@@ -75,9 +82,9 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     }
 
 
-    IEnumerator CountDonw()
+    IEnumerator CountDown()
     {
-        timer.text = "Player Ready!!";
+        timer.text = $"$$$ Round {round} !! $$$ \n Player Ready!!";
         yield return new WaitForSeconds(2f);
 
         if (PhotonNetwork.IsMasterClient)
@@ -98,7 +105,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
             // is game started? 
             gameStart = true;
 
-            double timeLimit = 60f;
+            double timeLimit = 100f - realTimeLimit;
 
             // curret time - game start time 
             timepassed = PhotonNetwork.Time - startTime;

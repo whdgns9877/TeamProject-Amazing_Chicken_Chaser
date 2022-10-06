@@ -58,11 +58,10 @@ MonoBehaviour:
   - CreateChicken
   - OnEnable
   - ChickenPadak
-  - RPCDurTime
-  - ShieldActive
-  - BoostActive
+  - GetSessionID
+  - GetUserProfile
   - BoosterActive
-  - DistroyBananaPeel
+  - ShieldActive
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

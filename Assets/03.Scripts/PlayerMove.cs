@@ -5,11 +5,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using System.Runtime.ExceptionServices;
-//using UnityEngine.UIElements;
+using UnityEngine.UIElements;
 using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
 using Cinemachine;
 using TMPro;
+using Color = UnityEngine.Color;
+
 
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
@@ -35,7 +37,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     UIPlayerInfo UIPlayerInfo;
 
 
-    GameObject VictoryText = null;
+    //GameObject VictoryText = null;
+    GameObject GGText = null;
+    TextMeshProUGUI GameOvertext;
 
     //============================================================
     // 움직임과 관련된 변수
@@ -48,6 +52,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     // 현재 속도
     public float currSpeed;
 
+    // 현재 밟은 악셀의 힘
+    public float currAccel = 0f;
+    public float currBackAccel = 0f;
+
     //플레이어 sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
     #endregion
@@ -56,55 +64,38 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
     // 맵에 배치된 발판들과 관련된 변수
     #region 발판 관련 변수
-    [Header("MapTypeInfo")]
+    int jumpForceY;
+    int jumpForceZ;
 
-    [SerializeField] int jumpForceY;
-    [SerializeField] int jumpForceZ;
+    int BoostForceZ;
+    int BoostForceZ2;
 
-    [SerializeField] int BoostForceZ;
-    [SerializeField] int BoostForceZ2;
+    int jumpForceY2;
+    int jumpForceZ2;
 
-    [SerializeField] int jumpForceY2;
-    [SerializeField] int jumpForceZ2;
+    int jumpForceY3;
+    int jumpForceZ3;
 
+    int jumpForceY4;
+    int jumpForceZ4;
 
-    [SerializeField] int jumpForceY3;
-    [SerializeField] int jumpForceZ3;
+    int jumpForceY5;
+    int jumpForceZ5;
 
-
-    [SerializeField] int jumpForceY4;
-    [SerializeField] int jumpForceZ4;
-
-
-    [SerializeField] int jumpForceY5;
-    [SerializeField] int jumpForceZ5;
-
-    [SerializeField] int jumpForceY6;
+    int jumpForceY6;
 
     #endregion
     //============================================================
 
     //============================================================
     #region 아이템 관련 변수
-
-    [Header("[플레이어 아이템 슬롯]")]
+    [SerializeField] public bool shield = false;
+    [SerializeField] public bool booster = false;
     [SerializeField] GameObject PlayerSlot;
     [SerializeField] GameObject Slot1;
     [SerializeField] GameObject Slot2;
-    [Header("")]
+    [SerializeField] int[] Slot = new int[2];
 
-    [SerializeField] public bool shield = false;
-    [SerializeField] public bool booster = false;
-    [SerializeField] public bool freeze = false;
-    [SerializeField] public float FreezingForce = 50000f;
-    [SerializeField] int[] Slot = new int[2]; //아이템슬롯칸
-    #endregion
-    //============================================================
-
-    //============================================================
-    #region 사운드 관련 변수
-    bool isDrive = true;
-    bool isAccel = true;
     #endregion
     //============================================================
 
@@ -121,8 +112,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     #endregion
     //============================================================
 
-    private bool check = false;
-
+    bool check = false;
+    bool winner = false;
     //============================================================
     // Network 동기화를 위한 함수 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -164,13 +155,39 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         ChickenAni = myChicken.GetComponent<Animator>();
 
-        VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+        //VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+        GGText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
+        GameOvertext = GGText.GetComponent<TextMeshProUGUI>();
 
 
-        // 슬롯 찾기
         PlayerSlot = FindObjectOfType<PlayerSlot>().gameObject;
         Slot1 = PlayerSlot.transform.GetChild(0).gameObject;
         Slot2 = PlayerSlot.transform.GetChild(1).gameObject;
+
+
+
+        jumpForceY = 1700000;
+        jumpForceZ = -2000000;
+
+        BoostForceZ = 10000;
+        BoostForceZ2 = 3000000;
+
+        jumpForceY2 = 1800000;
+        jumpForceZ2 = -1000000;
+
+
+        jumpForceY3 = 1500000;
+        jumpForceZ3 = 2000000;
+
+
+        jumpForceY4 = 2000000;
+        jumpForceZ4 = 2000000;
+
+
+        jumpForceY5 = 900000;
+        jumpForceZ5 = 100000;
+
+        jumpForceY6 = 2000000;
 
         // 자신의 태그를 바꿔주는 부분
 
@@ -205,6 +222,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             UIPlayerInfo.SetMinimapImageColor(Color.blue);
         else
             UIPlayerInfo.SetMinimapImageColor(Color.red);
+
+        Debug.Log("my ID " + PV.ViewID);
+
     }
 
     //==============================================      UPDATE      ===========================================
@@ -213,16 +233,9 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         if (!PV.IsMine || !canMove)
             return;
 
-        //아이템 효과 처리
-        if(freeze)
-        {
-            
-        }
-        
-
         //=====================================================================
         // Imsi Code for Siyeon
-
+        #region Temp key for test
         if (Input.GetKeyDown(KeyCode.Z))
         {
             ChickenTimer.Inst.StopAllCoroutines();
@@ -233,7 +246,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             LeftGame();
         }
 
-
+        #endregion
         //=====================================================================
 
 
@@ -241,15 +254,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // Player GameOver
         if (ChickenTimer.Inst.IsGameOver == false && check == false)
         {
-            CheckHasChicken();
-            Invoke("CheckAliveAlone", 2f);
+            Debug.Log("game is over!");
+
+            // check if I have chicken 
+            StartCoroutine(CheckHasChicken());
+
             check = true;
         }
 
-        if (VictoryText.activeInHierarchy)
-        {
-            Invoke("LeftGame", 5f);
-        }
 
         //=====================================================================
 
@@ -261,14 +273,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         //=====================================================================
 
+        //=====================================================================
+        // Player braking
+        #region 플레이어 움직임, 브레이크와 관련된 코드 
 
         //input keys 
         xAxis = Input.GetAxis("Horizontal");
         zAxis = Input.GetAxis("Vertical");
-
-        //=====================================================================
-        // Player braking
-        #region 플레이어 브레이크와 관련된 코드 
 
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
@@ -300,7 +311,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // drift key "shift"
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            Drift(0.1f);        // decrease wheel stiffness for drifting
+            Drift(0.5f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
 
             // play running animation during drift
@@ -320,12 +331,19 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         // if wheel is off ground, no skidmark
         EraseSkidMark();
 
+
+        // if Forward Left & rear right wheel is off the ground 
+        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
+
+        else
+            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
+
         #endregion
         //=====================================================================
 
         //=====================================================================
         #region 아이템 관련 스크립트
-        // 미사일 발사
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             GetKeyDownControl(true); //아이템 사용키를 누르면 실행되는 함수
@@ -334,25 +352,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             GetKeyDownControl(false); //아이템 사용키를 누르면 실행되는 함수
         }
-
-        //얼음탄 발사
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            
-        }
-
-
-
         #endregion
         //=====================================================================
 
 
-        // if Forward Left & rear right wheel is off the ground 
-        if (!wheelColliders[0].isGrounded && wheelColliders[3].isGrounded)
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", true);
 
-        else
-            PV.RPC("ChickenPadak", RpcTarget.AllViaServer, "Fly", false);
     }
 
 
@@ -450,7 +454,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         if (collision.collider.tag == "Player")
         {
-            //PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
+            PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
 
             // if I have chicken and opponent have chicken too 
             if (myChicken.gameObject.activeSelf && collision.transform.Find("MyChicken").gameObject.activeSelf)
@@ -581,82 +585,57 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
-    #region TriggerEnter 부분 - 발판, 미사일 충돌
+    #region 발판 관련 함수
     private void OnTriggerEnter(Collider other)
     {
-        // 맵 발판 상호작용 부분 
-        #region 맵 발판 상호작용 부분
-        if (other.gameObject.CompareTag("Jump")) //점프발판대 밟았을때
+        if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
         }
-        if (other.gameObject.CompareTag("Jump2")) //점프발판대 밟았을때
+        if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
         }
-        if (other.gameObject.CompareTag("Jump3")) //점프발판대 밟았을때
+        if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
         }
-        if (other.gameObject.CompareTag("Jump4")) //점프발판대 밟았을때
+        if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
         }
-        if (other.gameObject.CompareTag("Jump5")) //점프발판대 밟았을때
+        if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
         }
-        if (other.gameObject.CompareTag("Jump6")) //점프발판대 밟았을때
+        if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY6, 0f);
         }
 
-        if (other.gameObject.CompareTag("Boost")) //부스트발판 밟았을때
+        if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
         }
-        if (other.gameObject.CompareTag("Boost2")) //부스트발판 밟았을때
+        if (other.gameObject.tag == "Boost2") //부스트발판 밟았을때
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
-        #endregion
 
         // 미사일 충돌 관련 부분
-        #region 미사일
         if (!PV.IsMine)
             return;
         //=======================================
         // 미사일 충돌(아이템 충돌)
-        if (other.gameObject.CompareTag("Bomb") && shield == false)
+        if (other.gameObject.tag == "Bomb")
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
             {
                 playerRigid.AddExplosionForce(500000f, transform.position, 10f, 100f);
             }
-            // if I have chicken
-            if (myChicken.gameObject.activeSelf)
-            {
-                // deactive my chicken 
-                PV.RPC("MyChicken", RpcTarget.AllViaServer, false);
-
-                // request master client to active chicken 
-                PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
-            }
-        }
-        #endregion
-
-        //얼음탄 충돌
-        if (other.gameObject.tag == "Freeze" && shield == false)
-        {
-            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
-            {
-                freeze = true;
-                StartCoroutine(FreezeNow());
-            }
         }
 
-        // 바나나 밟았을 때 처리
-        if (other.gameObject.CompareTag("Banana")) //Tag == " " 함수는 내부에서 복사를 해서 비교하기 때문에 비용이 더 듬
+        if (other.gameObject.CompareTag("Banana"))
         {
             Drift(-10f);
             StartCoroutine(BananaSliding());
@@ -682,28 +661,100 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function Check my Chicken Onw when ChickenTimer is Finish
-    private void CheckHasChicken()
+    IEnumerator CheckHasChicken()
     {
-        // 해당 함수가 실행되었을때 치킨을 갖고있지않으면 방을 나가면서 스타트씬으로 돌아간다
-        if (!transform.GetChild(7).gameObject.activeInHierarchy)
+        // doAgain == false == no one got chicken
+        if (GameManager.Inst.DoAgain)
         {
-            LeftGame();
+            PhotonNetwork.AutomaticallySyncScene = true;
+
+            GGText.SetActive(true);
+            GameOvertext.faceColor = Color.blue;
+            GameOvertext.text = "All Chickens ran away.. \n Let's try again!!";
+
+
+            yield return new WaitForSeconds(2f);
+            PhotonNetwork.LoadLevel("GameScene");
+
+            Debug.Log("Do again!");
+            yield return null;
+        }
+
+        else
+        {
+            Debug.Log("go next!");
+            // no one got chicken, re-start round 
+            if (!transform.GetChild(7).gameObject.activeInHierarchy)
+            {
+                StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
+            }
+
+            // if player has chicken 
+            if (transform.GetChild(7).gameObject.activeInHierarchy)
+            {
+                GGText.SetActive(true);
+                GameOvertext.faceColor = Color.yellow;
+                GameOvertext.text = "Lucky! You Got Chicken!";
+            }
+
+            yield return new WaitForSeconds(5f);
+
+            // checked chicken and only one player left 
+            if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
+            {
+
+                winner = true;
+                Debug.Log("이겼나?" + winner);
+                ZeraAPIHandler.Inst.DeclareWinner();
+                yield return new WaitForSeconds(2f);
+                StartCoroutine(GoodGame("You Win!!\n You Got " + (ZeraAPIHandler.Inst.resBettingDeclareWinner.data.amount_won
+                    - ZeraAPIHandler.Inst.resSettings.data.bets[0].amount)
+                    + " ZERA !!", "StartScene", Color.green, 2f));
+
+            }
+
+
+            yield return new WaitForSeconds(2f);
+
+            if (check && !winner && PhotonNetwork.CurrentRoom.PlayerCount >= 2)
+            {
+                PhotonNetwork.AutomaticallySyncScene = true;
+                PhotonNetwork.LoadLevel("GameScene");
+            }
+            yield return null;
         }
     }
 
-    private void CheckAliveAlone()
-    {
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-            VictoryText.SetActive(true);
-    }
 
+
+
+
+    // 방을 나가는 함수
     private void LeftGame()
     {
         PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel("StartScene");
     }
-    //===========================================================================
 
+
+
+    // 게임 종료 시 winner/loser text 출력 후 씬 전환 함수 
+    IEnumerator GoodGame(string text, string scene, Color color, float wait)
+    {
+        // set active GG text 
+        GGText.SetActive(true);
+
+        GameOvertext.text = text;
+        GameOvertext.faceColor = color;
+        yield return new WaitForSeconds(wait);
+
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel(scene);
+
+        yield return null;
+    }
+
+    //===========================================================================
 
     //===========================================================================
     /// <summary>
@@ -720,7 +771,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         else if (Slot[0] != 0 && Slot[1] == 0) // 두번째 칸이 비어있다면
         {
-            Slot[1] = num; 
+            Slot[1] = num;
             Slot2.transform.GetChild(num).gameObject.SetActive(true);
         }
         else
@@ -731,7 +782,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     public void GetKeyDownControl(bool ctrl) //아이템 사용키 눌렀을 때 함수
     {
-        if(ctrl) //Ctrl 키 눌렀을 때
+        if (ctrl) //Ctrl 키 눌렀을 때
         {
             if (Slot[0] != 0)
                 UseItem(Slot[0], 0);
@@ -748,7 +799,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         Slot[i] = 0; //사용한 슬롯은 일단 비운다
         PlayerSlot.transform.GetChild(i).transform.GetChild(num).gameObject.SetActive(false);
-        switch(num)
+        switch (num)
         {
             case 1: //부스터
                 PV.RPC("BoosterActive", RpcTarget.AllViaServer);
@@ -768,12 +819,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 return;
             case 5: //안개
                 PhotonNetwork.Instantiate("Smoke", transform.position, Quaternion.Euler(0f, 0f, 0f));
-                return;
-            case 6: //얼음탄
-                GameObject myFreeze = PhotonNetwork.Instantiate("Freeze", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation * Quaternion.Euler(-50f, 0f, 0f));
-                myFreeze.AddComponent<Freeze>();
-                myFreeze.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
-                myFreeze.transform.rotation = Quaternion.LookRotation(transform.forward);
                 return;
         }
     }
@@ -796,15 +841,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         yield return new WaitForSeconds(0.5f);
         Drift(5f); //드리프트 원래 값으로
-    }
-
-    //얼음탄 맞았을 때 느려지는 코루틴
-    IEnumerator FreezeNow()
-    {
-        playerRigid.mass = 60000;
-        yield return new WaitForSeconds(5f);
-        playerRigid.mass = 2000f;
-        freeze = false;
     }
 
     #endregion
