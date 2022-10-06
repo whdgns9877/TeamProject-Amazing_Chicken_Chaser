@@ -9,17 +9,9 @@ public class TestCar : MonoBehaviour
 {
     [Header("Car Info")]
     [SerializeField] public float Acceleration = 1000f;       // 자동차 속도
-    [SerializeField] public float BrakingForce = 1000f;      // 브레이크 
+    [SerializeField] public float BrakingForce = 50000f;      // 브레이크 
     [SerializeField] public float MaxTurnAngle = 45f;        // 회전 각
     [SerializeField] public float MaxSpeed = 100f;
-    public float stiffness;
-
-
-    public float MyextremumSlip;
-    public float MyextremumValue;
-    public float MyasymptoteSlip;
-    public float MYasymptoteValue;
-
 
 
     [Header("Wheel Info")]
@@ -80,6 +72,11 @@ public class TestCar : MonoBehaviour
         // Apply brakes
         if (Input.GetKey(KeyCode.Space))
         {
+         
+            // front wheel brake
+            wheelColliders[0].brakeTorque = BrakingForce;
+            wheelColliders[1].brakeTorque = BrakingForce;
+
             // Rear Wheel Brake
             wheelColliders[2].brakeTorque = BrakingForce;
             wheelColliders[3].brakeTorque = BrakingForce;
@@ -102,7 +99,7 @@ public class TestCar : MonoBehaviour
         // drift key "shift"
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            Drift(stiffness);        // decrease wheel stiffness for drifting
+            Drift(0.3f);        // decrease wheel stiffness for drifting
             SkidMark(2, true);  // skidmark on
 
         }
@@ -116,10 +113,6 @@ public class TestCar : MonoBehaviour
 
         // if wheel is off ground, no skidmark
         EraseSkidMark();
-
-
-
-
 
     }
 
