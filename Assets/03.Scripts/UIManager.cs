@@ -27,7 +27,6 @@ public class UIManager : MonoBehaviourPunCallbacks
     [SerializeField] Button          Button_CreateRoomPanel  = null;  // 방생성 판넬을 띄워줄 버튼
     [SerializeField] Transform       Tr_Content_Room         = null;  // 방 생성시 스크롤뷰에 넣어줄 방의 위치(Vertical Layout Group 사용으로 알맞게 들어가게 할것임)
     [SerializeField] Button          Button_CreateRoom       = null;  // 방을 생성하는 버튼
-    [SerializeField] TMP_InputField  InputField_RoomName     = null;  // 방 이름을 받을 인풋필드
     [SerializeField] GameObject      room                    = null;  // 방정보에 따라 만들어줄 방 프리팹
     [SerializeField] Toggle[]        togglesForMaxPlayer     = null;  // 최대 플레이어를 정해줄 토글들
     [SerializeField] TextMeshProUGUI Text_MyZera             = null;  // 나의 코스트
@@ -96,13 +95,17 @@ public class UIManager : MonoBehaviourPunCallbacks
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 30;
 
-        //if(ZeraAPIHandler.Inst.getUserProfile == false || ZeraAPIHandler.Inst.getSessionID == false)
         StartCoroutine(ConnectAPI());
+        SoundManager.Inst.StartBGM.Play();
+        SoundManager.Inst.InGameBGM.Stop();
     }
 
     private void Start()
     {
-        // 마스터서버 접속 요청
+        // 서버 연결되어 있는 상태라면 연결하지않고
+        if (PhotonNetwork.IsConnected)
+            return;
+        // 그렇지 않으면 연결해준다
         PhotonNetwork.ConnectUsingSettings();
     }
 
@@ -221,6 +224,7 @@ public class UIManager : MonoBehaviourPunCallbacks
                 (
                     delegate
                     {
+                        PlayClickSound();
                         roomNameText = roomData.roomName;
                         // 이 부분이 실제로 방에 참가하는 부분
                         enterRoomDone = false;
@@ -315,6 +319,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     public void OnClick_JoinLobby()
     {
         StartCoroutine(WaitConnectOsiris());
+        SoundManager.Inst.ClickSound.Play();
     }
 
     // 접속 끊기 버튼에 쓰일 함수
@@ -323,6 +328,7 @@ public class UIManager : MonoBehaviourPunCallbacks
         Text_ConnectionInfo.text = "연결 끊어짐 ...";
         PhotonNetwork.Disconnect();
         StartCoroutine(ConnectAPI());
+        SoundManager.Inst.ClickNagative.Play();
     }
 
     // 방 생성패널 버튼에 달아줄 함수
@@ -332,6 +338,7 @@ public class UIManager : MonoBehaviourPunCallbacks
         Panel_CreateRoom.SetActive(true);
         // 중복해서 계속 버튼이 눌리지 않게 생성 버튼은 클릭을 막는다
         Button_CreateRoom.GetComponent<Button>().interactable = false;
+        SoundManager.Inst.ClickSound.Play();
     }
 
     // 방을 생성할때 최대 플레이어수를 결정해주는 함수
@@ -349,6 +356,7 @@ public class UIManager : MonoBehaviourPunCallbacks
     // 방 생성 버튼에 달 함수
     public void OnCreateRoomButtonClicked()
     {
+        SoundManager.Inst.ClickSound.Play();
         // 방을 만들었으니 생성버튼을 다시 사용할수 있게 클릭을 풀어주고
         Button_CreateRoomPanel.GetComponent<Button>().interactable = true;
 
@@ -370,6 +378,7 @@ public class UIManager : MonoBehaviourPunCallbacks
 
     public void OnLeaveRoomButtonClicked()
     {
+        SoundManager.Inst.ClickSound.Play();
         leftRoomDone = false;
         StartCoroutine(ChangeUIProcess());
         Text_MyZera.text = myZera.ToString();
@@ -379,9 +388,15 @@ public class UIManager : MonoBehaviourPunCallbacks
     public void OnClick_ReadyButton()
     {
         if (ready == true)
+        {
+            SoundManager.Inst.ClickNagative.Play();
             ready = false;
+        }
         else
+        {
+            SoundManager.Inst.ClickReady.Play();
             ready = true;
+        }
         SetLocalTag("IsReady", ready);
     }
 
@@ -399,6 +414,7 @@ public class UIManager : MonoBehaviourPunCallbacks
         }
         else
         {
+            SoundManager.Inst.ClickNagative.Play();
             Panel_Notice.GetComponentInChildren<TextMeshProUGUI>().text = "아직 모든 플레이어가 준비 되지 않았습니다";
             Panel_Notice.SetActive(true);
         }
@@ -417,11 +433,12 @@ public class UIManager : MonoBehaviourPunCallbacks
         // 기본적으로 API에 연결되어 정보를 받아왔을때 아래 내용들을 실행한다
         ZeraAPIHandler.Inst.GetMyZeraBalance();
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2f);
 
         // 방장(마스터 클라이언트)가 게임씬으로 이동할때 클라이언트들도 같이 이동
         PhotonNetwork.AutomaticallySyncScene = true;
         canLogin = true;
+
         yield return null;
     }
 
@@ -663,4 +680,6 @@ public class UIManager : MonoBehaviourPunCallbacks
     }
 
     #endregion
+
+    public void PlayClickSound() => SoundManager.Inst.ClickSound.Play();
 }

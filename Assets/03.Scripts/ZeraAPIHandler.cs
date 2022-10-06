@@ -153,8 +153,8 @@ public class ZeraAPIHandler : MonoBehaviourPun
     {
         ReqBettingPlaceBet reqBettingPlaceBet = new ReqBettingPlaceBet();
 
-		reqBettingPlaceBet.players_session_id = new string[PhotonNetwork.CurrentRoom.PlayerCount];
-		for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; i++)
+		reqBettingPlaceBet.players_session_id = new string[PhotonNetwork.CurrentRoom.MaxPlayers];
+		for (int i = 0; i < PhotonNetwork.CurrentRoom.MaxPlayers; i++)
         {
 			Debug.Log( (i + 1) + "번째 플레이어 세션 아이디 " + allPlayersSessionID[i]);
 			reqBettingPlaceBet.players_session_id[i] = allPlayersSessionID[i];

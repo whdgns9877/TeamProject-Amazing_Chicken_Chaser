@@ -12,24 +12,32 @@ public class SoundManager : MonoBehaviour
     [Header("[ Click Sound ]")]
     [SerializeField] public AudioSource ClickSound;
     [SerializeField] public AudioSource ClickNagative;
+    [SerializeField] public AudioSource ClickReady;
 
     [Header("[ InGame Enviornment ]")]
-    [SerializeField] public AudioSource ReadyToStart;
-    [SerializeField] public AudioSource RoundOver;
-    [SerializeField] public AudioSource GameOver;
+    [SerializeField] public AudioSource StartGame;
+    [SerializeField] public AudioSource Alive;
+    [SerializeField] public AudioSource Bye;
     [SerializeField] public AudioSource Victory;
-    [Header("")]
-
+    [SerializeField] public AudioSource GetBettingCoin;
+    
+    [Header("[ InGame Play Sound ]")]
+    [SerializeField] public AudioSource SoundGetItem;
     [SerializeField] public AudioSource JumpBooster;
+
     [SerializeField] public AudioSource SpeedBooster;
+    [SerializeField] public AudioSource Missile;
+    [SerializeField] public AudioSource Shield;
+    [SerializeField] public AudioSource Fog;
+    [SerializeField] public AudioSource Banana;
+
+    [SerializeField] public AudioSource Boom;
+    [SerializeField] public AudioSource FreezeBoom;
+    [SerializeField] public AudioSource Slipped;
 
     [Header("[ Player Car Sound ]")]
-    [SerializeField] public AudioSource Drive;
-    [SerializeField] public AudioSource Accel;
     [SerializeField] public AudioSource Drift;
-    [SerializeField] public AudioSource Honk;
-
-
+    [SerializeField] public AudioSource Crash;
 
     #region ΩÃ±€≈Ê
     public static SoundManager instance = null;

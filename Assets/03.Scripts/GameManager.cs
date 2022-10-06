@@ -49,6 +49,9 @@ public class GameManager : MonoBehaviourPun
 
     void Awake()
     {
+        SoundManager.Inst.StartBGM.Stop();
+        SoundManager.Inst.InGameBGM.Play();
+
         if (PhotonNetwork.IsMasterClient)
         {
             // 게임씬 이동후 마스터가 베팅을한다

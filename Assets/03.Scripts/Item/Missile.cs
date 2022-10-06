@@ -27,9 +27,9 @@ public class Missile : MonoBehaviourPun
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        aliveTime -= Time.deltaTime;
+        aliveTime -= Time.fixedDeltaTime;
         if (aliveTime <= 0)
             Destroy(gameObject);
 

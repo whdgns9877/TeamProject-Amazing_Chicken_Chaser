@@ -25,16 +25,16 @@ public class Freeze : MonoBehaviourPun
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        aliveTime -= Time.deltaTime;
+        aliveTime -= Time.fixedDeltaTime;
         if (aliveTime <= 0)
             Destroy(gameObject);
 
         transform.Translate(Vector3.forward, Space.Self);
     }
 
-    private void OnParticleCollision(GameObject other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Player" || other.gameObject.tag == "Ground" || other.gameObject.tag == "Building")
         {
@@ -43,12 +43,4 @@ public class Freeze : MonoBehaviourPun
         }
     }
 
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.gameObject.tag == "Player" || other.gameObject.tag == "Ground" || other.gameObject.tag == "Building")
-    //    {
-    //        PhotonNetwork.Instantiate("FreezeExplosion", transform.position, Quaternion.identity);
-    //        PhotonNetwork.Destroy(gameObject);
-    //    }
-    //}
 }
