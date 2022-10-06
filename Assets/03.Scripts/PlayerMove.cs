@@ -17,7 +17,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
     [SerializeField] public float Acceleration = 1000f;       // 자동차 속도
-    [SerializeField] public float BrakingForce = 1000f;      // 브레이크 
+    [SerializeField] public float BrakingForce = 50000f;      // 브레이크 
     [SerializeField] public float MaxTurnAngle = 45f;        // 회전 각
     [SerializeField] public float MaxSpeed = 100f;
 
@@ -64,43 +64,37 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
     // 맵에 배치된 발판들과 관련된 변수
     #region 발판 관련 변수
-    [Header("MapTypeInfo")]
+    int jumpForceY;
+    int jumpForceZ;
 
-    [SerializeField] int jumpForceY;
-    [SerializeField] int jumpForceZ;
+    int BoostForceZ;
+    int BoostForceZ2;
 
-    [SerializeField] int BoostForceZ;
-    [SerializeField] int BoostForceZ2;
+    int jumpForceY2;
+    int jumpForceZ2;
 
-    [SerializeField] int jumpForceY2;
-    [SerializeField] int jumpForceZ2;
+    int jumpForceY3;
+    int jumpForceZ3;
 
+    int jumpForceY4;
+    int jumpForceZ4;
 
-    [SerializeField] int jumpForceY3;
-    [SerializeField] int jumpForceZ3;
+    int jumpForceY5;
+    int jumpForceZ5;
 
-
-    [SerializeField] int jumpForceY4;
-    [SerializeField] int jumpForceZ4;
-
-
-    [SerializeField] int jumpForceY5;
-    [SerializeField] int jumpForceZ5;
-
-    [SerializeField] int jumpForceY6;
-    [SerializeField] int jumpForceZ6;
+    int jumpForceY6;
 
     #endregion
     //============================================================
 
     //============================================================
     #region 아이템 관련 변수
-    [SerializeField] bool missile = false;
     [SerializeField] public bool shield = false;
     [SerializeField] public bool booster = false;
-    [SerializeField] public bool banana = false;
-
-    [SerializeField] bool mine = false;
+    [SerializeField] GameObject PlayerSlot;
+    [SerializeField] GameObject Slot1;
+    [SerializeField] GameObject Slot2;
+    [SerializeField] int[] Slot = new int[2];
 
     #endregion
     //============================================================
@@ -162,8 +156,41 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         ChickenAni = myChicken.GetComponent<Animator>();
 
         //VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
-        GGText = GameObject.Find("Canvas").transform.GetChild(2).gameObject;
+        GGText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
         GameOvertext = GGText.GetComponent<TextMeshProUGUI>();
+
+
+        PlayerSlot = FindObjectOfType<PlayerSlot>().gameObject;
+        Slot1 = PlayerSlot.transform.GetChild(0).gameObject;
+        Slot2 = PlayerSlot.transform.GetChild(1).gameObject;
+
+
+
+        jumpForceY = 1700000;
+        jumpForceZ = -2000000;
+
+        BoostForceZ = 10000;
+        BoostForceZ2 = 3000000;
+
+        jumpForceY2 = 1800000;
+        jumpForceZ2 = -1000000;
+
+
+        jumpForceY3 = 1500000;
+        jumpForceZ3 = 2000000;
+
+
+        jumpForceY4 = 2000000;
+        jumpForceZ4 = 2000000;
+
+
+        jumpForceY5 = 900000;
+        jumpForceZ5 = 100000;
+
+        jumpForceY6 = 2000000;
+
+
+
 
 
         // 자신의 태그를 바꿔주는 부분
@@ -321,49 +348,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         #region 아이템 관련 스크립트
-        // 미사일 발사
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation);
-            myMissile.AddComponent<Missile>();
-            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
-            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+            GetKeyDownControl(true); //아이템 사용키를 누르면 실행되는 함수
         }
-
-        // ice bullet 
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.LeftAlt))
         {
-            GameObject myMissile = PhotonNetwork.Instantiate("Freeze", transform.position + new Vector3(0f, 0.4f, 0.1f), transform.rotation * Quaternion.Euler(-50f, 0f, 0f));
-            myMissile.AddComponent<Freeze>();
-            myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 1f);
-            myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
-        }
-
-        // shield 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            PV.RPC("ShieldActive", RpcTarget.AllViaServer);
-            shield = true;
-        }
-
-        // booster
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            PV.RPC("BoosterActive", RpcTarget.AllViaServer);
-            booster = true;
-        }
-
-        // banana
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            GameObject myBanana = PhotonNetwork.Instantiate("Banana", transform.position + (-transform.forward * 2), Quaternion.Euler(90f, 0f, 0f));
-            myBanana.AddComponent<Banana>();
-        }
-
-        // smoke 
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            PhotonNetwork.Instantiate("Smoke", transform.position, Quaternion.Euler(0f, 0f, 0f));
+            GetKeyDownControl(false); //아이템 사용키를 누르면 실행되는 함수
         }
         #endregion
         //=====================================================================
@@ -625,7 +616,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
         {
-            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, 0);
         }
 
         if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
@@ -660,15 +651,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
                 // request master client to active chicken 
                 PV.RPC("CreateChicken", RpcTarget.AllViaServer, transform.position);
-            }
-        }
-
-        // attacked by ice bullet 
-        if (other.gameObject.tag == "Freeze" && shield == false)
-        {
-            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
-            {
-                StartCoroutine(SlowTime());
             }
         }
 
@@ -783,38 +765,91 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     /// <summary>
-    /// all item functions 
+    /// 아이템 함수들의 총집합입니다
     /// </summary>
-    #region function related to items 
+    #region 아이템 함수
+
+    public void GetItem(int num) //아이템 획득시
+    {
+        if ((Slot[0] == 0 && Slot[1] != 0) || (Slot[0] == 0 && Slot[1] == 0)) // 첫번째만 비었거나 둘 다 비어있으면 첫번째부터 넣는다.
+        {
+            Slot[0] = num;
+            Slot1.transform.GetChild(num).gameObject.SetActive(true);
+        }
+        else if (Slot[0] != 0 && Slot[1] == 0) // 두번째 칸이 비어있다면
+        {
+            Slot[1] = num;
+            Slot2.transform.GetChild(num).gameObject.SetActive(true);
+        }
+        else
+        {
+            return; // 둘 다 차있는 경우
+        }
+    }
+
+    public void GetKeyDownControl(bool ctrl) //아이템 사용키 눌렀을 때 함수
+    {
+        if (ctrl) //Ctrl 키 눌렀을 때
+        {
+            if (Slot[0] != 0)
+                UseItem(Slot[0], 0);
+        }
+
+        else //Alt 키 눌렀을 때
+        {
+            if (Slot[1] != 0)
+                UseItem(Slot[1], 1);
+        }
+    }
+
+    void UseItem(int num, int i) //사용되는 아이템 정보
+    {
+        Slot[i] = 0; //사용한 슬롯은 일단 비운다
+        PlayerSlot.transform.GetChild(i).transform.GetChild(num).gameObject.SetActive(false);
+        switch (num)
+        {
+            case 1: //부스터
+                PV.RPC("BoosterActive", RpcTarget.AllViaServer);
+                return;
+            case 2: //미사일
+                GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation);
+                myMissile.AddComponent<Missile>();
+                myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+                myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
+                return;
+            case 3: //방어막
+                PV.RPC("ShieldActive", RpcTarget.AllViaServer);
+                return;
+            case 4: //바나나
+                GameObject myBanana = PhotonNetwork.Instantiate("Banana", transform.position + (-transform.forward * 5f), Quaternion.Euler(90f, 0f, 0f));
+                myBanana.AddComponent<Banana>();
+                return;
+            case 5: //안개
+                PhotonNetwork.Instantiate("Smoke", transform.position, Quaternion.Euler(0f, 0f, 0f));
+                return;
+        }
+    }
+
+
     [PunRPC]
-    void ShieldActive() // active shield
+    void ShieldActive() // 방어막 활성화
     {
         transform.GetChild(9).gameObject.SetActive(true);
     }
 
     [PunRPC]
-    void BoosterActive() // active booster
+    void BoosterActive() // 부스터 활성화
     {
         transform.GetChild(8).gameObject.SetActive(true);
     }
 
-    // coroutine related to banana
-    IEnumerator BananaSliding() // slip by stepping banana
+    //바나나 밟았을 때 실행되는 코루틴
+    IEnumerator BananaSliding() // 바나나 미끄러짐 활성화
     {
         yield return new WaitForSeconds(0.5f);
-        Drift(5f); // reset drift value 
+        Drift(5f); //드리프트 원래 값으로
     }
 
-    IEnumerator SlowTime() // slow motion
-    {
-        wheelColliders[0].brakeTorque = -10f;
-        wheelColliders[1].brakeTorque = -10f;
-        wheelColliders[2].brakeTorque = -10f;
-        wheelColliders[3].brakeTorque = -10f;
-        yield return new WaitForSeconds(3f);
-    }
     #endregion
-
-    //===========================================================================
 }
 
