@@ -42,6 +42,7 @@ public class ZeraAPIHandler : MonoBehaviourPun
 	public Res_BalanceInfo    resBalanceInfo    = null;
 	public Res_Settings       resSettings       = null;
 	public ResBettingPlaceBet resBettingPlaceBet = null;
+	public ResBettingDeclareWinner resBettingDeclareWinner = null;
 
 	public string selectedBettingID = null;
 
@@ -181,7 +182,7 @@ public class ZeraAPIHandler : MonoBehaviourPun
 	}
 	IEnumerator processRequestBetting_Zera_DeclareWinner()
 	{
-		ResBettingDeclareWinner resBettingDeclareWinner = null;
+		resBettingDeclareWinner = null;
 		ReqBettingDeclareWinner reqBettingDeclareWinner = new ReqBettingDeclareWinner();
 		reqBettingDeclareWinner.betting_id = gameBetID;
 		reqBettingDeclareWinner.winner_player_id = resGetUserProfile.userProfile._id;
@@ -191,8 +192,7 @@ public class ZeraAPIHandler : MonoBehaviourPun
 			{
 				Debug.Log("## CoinDeclareWinner : " + response.message);
 				resBettingDeclareWinner = response;
-				Debug.Log("내가 얻는 돈 : " + resBettingDeclareWinner.data.amount_won);
-				Debug.Log("내가 승자라서 돈가져갈게요");
+				Debug.Log("내가 승자라서 돈가져갈게요 ^^");
 			}
 		});
 	}

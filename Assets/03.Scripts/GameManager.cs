@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviourPun
         else
         {
             // 나머지 클라이언트들은 2초뒤에 베팅아이디를 받아온다
-            Invoke(nameof(GetGameBetID), 2f);
+            Invoke(nameof(GetGameBetID), 4f);
         }
 
         // 서버에 잘 연결된 상태로 게임 씬에 들어오면 실행

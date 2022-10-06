@@ -158,8 +158,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         ChickenAni = myChicken.GetComponent<Animator>();
 
-        //VictoryText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
-        GGText = GameObject.Find("Canvas").transform.GetChild(2).gameObject;
+        GGText = GameObject.Find("Canvas").transform.GetChild(1).gameObject;
         GameOvertext = GGText.GetComponent<TextMeshProUGUI>();
 
         MissileObj = Resources.Load<GameObject>("Missile");
@@ -663,7 +662,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             winner = true;
             Debug.Log("�̰峪?" + winner);
             ZeraAPIHandler.Inst.DeclareWinner();
-            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
+            yield return new WaitForSeconds(2f);
+            StartCoroutine(GoodGame("You Win!!\n You Got "
+                + (ZeraAPIHandler.Inst.resBettingDeclareWinner.data.amount_won
+                - ZeraAPIHandler.Inst.resSettings.data.bets[0].amount)
+                + " ZERA !!", "StartScene", Color.green, 2f));
         }
 
 
