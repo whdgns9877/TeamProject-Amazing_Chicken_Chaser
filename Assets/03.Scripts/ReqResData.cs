@@ -154,6 +154,7 @@ public class Res_Settings
 //
 //
 // Request Place bet
+[System.Serializable]
 public class ReqBettingPlaceBet
 {
 	public string[] players_session_id;
@@ -164,6 +165,8 @@ public class ReqBettingPlaceBet
 public class ResBettingPlaceBet
 {
 	public string message;
+
+	[System.Serializable]
 	public class Data
 	{
 		public string betting_id;
@@ -191,6 +194,7 @@ public class ReqBettingDeclareWinner
 public class ResBettingDeclareWinner
 {
 	public string message;
+	[System.Serializable]
 	public class Data
 	{
 		public int amount_won;

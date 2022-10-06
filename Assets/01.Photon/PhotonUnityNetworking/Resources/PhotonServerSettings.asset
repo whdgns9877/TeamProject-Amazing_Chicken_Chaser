@@ -58,6 +58,8 @@ MonoBehaviour:
   - CreateChicken
   - OnEnable
   - ChickenPadak
+  - GetSessionID
+  - GetUserProfile
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -16,9 +16,9 @@ using Color = UnityEngine.Color;
 public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
-    [SerializeField] public float Acceleration = 1000f;       // ÀÚµ¿Â÷ ¼Óµµ
-    [SerializeField] public float BrakingForce = 50000f;      // ºê·¹ÀÌÅ© 
-    [SerializeField] public float MaxTurnAngle = 45f;        // È¸Àü °¢
+    [SerializeField] public float Acceleration = 1000f;       // ï¿½Úµï¿½ï¿½ï¿½ ï¿½Óµï¿½
+    [SerializeField] public float BrakingForce = 50000f;      // ï¿½ê·¹ï¿½ï¿½Å© 
+    [SerializeField] public float MaxTurnAngle = 45f;        // È¸ï¿½ï¿½ ï¿½ï¿½
     [SerializeField] public float MaxSpeed = 100f;
 
     [Header("Wheel Info")]
@@ -30,10 +30,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     float zAxis;
 
 
-    // µ¿±âÈ­¿¡ »ç¿ëµÇ´Â Æ÷Åæºä
+    // ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
     PhotonView PV;
 
-    //´Ð³×ÀÓ 
+    //ï¿½Ð³ï¿½ï¿½ï¿½ 
     UIPlayerInfo UIPlayerInfo;
 
 
@@ -42,24 +42,24 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     TextMeshProUGUI GameOvertext;
 
     //============================================================
-    // ¿òÁ÷ÀÓ°ú °ü·ÃµÈ º¯¼ö
-    #region ¿òÁ÷ÀÓ°ú °ü·ÃµÈ º¯¼ö
-    // ÇÃ·¹ÀÌ¾î Rigidbody 
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
+    #region ï¿½ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Rigidbody 
     Rigidbody playerRigid;
-    // ÇÃ·¹ÀÌ¾î ¹«°Ô Áß½É 
+    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß½ï¿½ 
     public GameObject mycg;
 
-    // ÇöÀç ¼Óµµ
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½
     float currSpeed;
 
-    //ÇÃ·¹ÀÌ¾î sideslipe 
+    //ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ sideslipe 
     WheelFrictionCurve myFriction = new WheelFrictionCurve();
     #endregion
     //============================================================
 
     //============================================================
-    // ¸Ê¿¡ ¹èÄ¡µÈ ¹ßÆÇµé°ú °ü·ÃµÈ º¯¼ö
-    #region ¹ßÆÇ °ü·Ã º¯¼ö
+    // ï¿½Ê¿ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½Çµï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
+    #region ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     [Header("MapTypeInfo")]
 
     [SerializeField] int jumpForceY;
@@ -90,7 +90,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    #region ¾ÆÀÌÅÛ °ü·Ã º¯¼ö
+    #region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     [SerializeField] bool missile = false;
     [SerializeField] bool shield = false;
     [SerializeField] bool mine = false;
@@ -103,14 +103,14 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //============================================================
 
     //============================================================
-    #region Ä¡Å²°ú °ü·ÃµÈ º¯¼ö 
+    #region Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½ 
     Transform myChicken = null;
     Animator ChickenAni = null;
     #endregion
     //============================================================
 
     //============================================================
-    #region ÇÃ·¹ÀÌ¾î À§Ä¡ ÃÊ±âÈ­¸¦ À§ÇÑ º¯¼ö
+    #region ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ä¡ ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     private bool canMove = true;
     #endregion
     //============================================================
@@ -118,7 +118,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     bool check = false;
     bool winner = false;
     //============================================================
-    // Network µ¿±âÈ­¸¦ À§ÇÑ ÇÔ¼ö 
+    // Network ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -148,7 +148,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     private void Awake()
     {
-        // Æ÷Åæºä¸¦ Ä³½ÌÇÏ¿© °¡Á®¿Â´Ù (GetComponent·Î °¡Á®¿À´Â°Í »ý°¢ÇÏ¸é µÊ)
+        // ï¿½ï¿½ï¿½ï¿½ä¸¦ Ä³ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½ (GetComponentï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½)
         PV = photonView;
         playerRigid = GetComponent<Rigidbody>();
 
@@ -164,12 +164,12 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         MissileObj = Resources.Load<GameObject>("Missile");
 
-        // ÀÚ½ÅÀÇ ÅÂ±×¸¦ ¹Ù²ãÁÖ´Â ºÎºÐ
+        // ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½Â±×¸ï¿½ ï¿½Ù²ï¿½ï¿½Ö´ï¿½ ï¿½Îºï¿½
 
         if (PV.IsMine)
         {
             gameObject.tag = "Me";
-            for (int i = 0; i < 7; i++) //ÀÚ½Äµéµµ ÀüºÎ ³ª·Î ÅÂ±×¸¦ ¹Ù²Û´Ù(Ä¡Å²ÀÌ 7¹øÂ°´Ï±î ±× Àü±îÁö ½Ï ´Ù)
+            for (int i = 0; i < 7; i++) //ï¿½Ú½Äµéµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Â±×¸ï¿½ ï¿½Ù²Û´ï¿½(Ä¡Å²ï¿½ï¿½ 7ï¿½ï¿½Â°ï¿½Ï±ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½)
             {
                 transform.GetChild(i).gameObject.tag = "Me";
             }
@@ -178,7 +178,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         {
             gameObject.tag = "Player";
             gameObject.layer = LayerMask.NameToLayer("Player");
-            for (int i = 0; i < 7; i++) //ÀÚ½Äµéµµ ÀüºÎ ³ª·Î ÅÂ±×¸¦ ¹Ù²Û´Ù(Ä¡Å²ÀÌ 7¹øÂ°´Ï±î ±× Àü±îÁö ½Ï ´Ù)
+            for (int i = 0; i < 7; i++) //ï¿½Ú½Äµéµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Â±×¸ï¿½ ï¿½Ù²Û´ï¿½(Ä¡Å²ï¿½ï¿½ 7ï¿½ï¿½Â°ï¿½Ï±ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½)
             {
                 transform.GetChild(i).gameObject.tag = "Player";
             }
@@ -248,7 +248,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player braking
-        #region ÇÃ·¹ÀÌ¾î ¿òÁ÷ÀÓ, ºê·¹ÀÌÅ©¿Í °ü·ÃµÈ ÄÚµå 
+        #region ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ê·¹ï¿½ï¿½Å©ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Úµï¿½ 
 
         //input keys 
         xAxis = Input.GetAxis("Horizontal");
@@ -316,8 +316,8 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //=====================================================================
 
         //=====================================================================
-        #region ¾ÆÀÌÅÛ °ü·Ã ½ºÅ©¸³Æ®
-        // ¹Ì»çÀÏ ¹ß»ç
+        #region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®
+        // ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½ß»ï¿½
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             GameObject myMissile = PhotonNetwork.Instantiate("Missile", transform.position + new Vector3(0, 0.4f, 0f), transform.rotation);
@@ -336,7 +336,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     private void FixedUpdate()
     {
-        // º»ÀÎÀÇ Á¦¾î±Ç ¾ÈÂÊ¸¸ ½ÇÇà
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ê¸ï¿½ ï¿½ï¿½ï¿½ï¿½
         // if game is not started, do not move 
         if (!PV.IsMine || !ChickenTimer.Inst.GameStart)
             return;
@@ -344,7 +344,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //=====================================================================
         // Player car movment 
-        #region ÇÃ·¹ÀÌ¾î ¿òÁ÷ÀÓ¿¡ ´ëÇÑ ÄÚµå
+        #region ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½
         // move C.G of vehicle
         playerRigid.centerOfMass = mycg.transform.localPosition;
 
@@ -356,21 +356,21 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //if has horizontal key input, Steer wheels 
         if (xAxis != 0f)
         {
-            // Àü¹æ ÈÙ ¿òÁ÷ÀÓ 
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
             wheelColliders[0].steerAngle = xAxis * MaxTurnAngle;    // front left wheel 
             wheelColliders[1].steerAngle = xAxis * MaxTurnAngle;    // front right wheel
         }
 
         else
         {
-            // Àü¹æ ÈÙ ¿òÁ÷ÀÓ 
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
             wheelColliders[0].steerAngle = 0f;    // front left wheel 
             wheelColliders[1].steerAngle = 0f;    // front right wheel
         }
 
         if (zAxis != 0f && currSpeed <= MaxSpeed)
         {
-            // ÅäÅ©¸¦ ÁÖ´Â ÈÙ 
+            // ï¿½ï¿½Å©ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ 
             // FWD 
             wheelColliders[0].motorTorque = zAxis * Acceleration;
             wheelColliders[1].motorTorque = zAxis * Acceleration;
@@ -394,7 +394,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         //set all the wheelmash position & rotation as same as wheelCollider
         for (int i = 0; i < wheelColliders.Length; i++)
         {
-            // wheel collider¿¡ ¸ÂÃç wheel mesh¸¦ ¿òÁ÷ÀÏ ¼ö ÀÖµµ·Ï ÇÔ 
+            // wheel colliderï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ wheel meshï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Öµï¿½ï¿½ï¿½ ï¿½ï¿½ 
             UpdateWheelPos(wheelColliders[i], wheelMeshes[i].transform);
         }
         #endregion
@@ -410,7 +410,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
         //===========================================================================
         // Chicken detection
-        #region Ä¡Å² Ãæµ¹, ÇÃ·¹ÀÌ¾î¿Í Ãæµ¹ ½Ã Ä¡Å² Ã³¸® °ü·Ã ÄÚµå 
+        #region Ä¡Å² ï¿½æµ¹, ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ ï¿½æµ¹ ï¿½ï¿½ Ä¡Å² Ã³ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ 
         if (collision.collider.tag == "Chicken")
         {
             PhotonView colliPV = collision.gameObject.GetComponent<PhotonView>();
@@ -459,7 +459,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // Pun RPCs 
-    #region Ä¡Å²°ú °ü·ÃµÈ RPC
+    #region Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ RPC
 
     [PunRPC]
     public void MyChicken(bool has)
@@ -497,7 +497,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function related to car movement 
-    #region ÀÚµ¿Â÷ ¿òÁ÷ÀÓ¿¡ °üÇÑ ÇÔ¼öµé 
+    #region ï¿½Úµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ 
 
     // to move wheelmash as wheelCollider moves  
     void UpdateWheelPos(WheelCollider collider, Transform transform)
@@ -558,48 +558,48 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     //===========================================================================
 
     //===========================================================================
-    #region ¹ßÆÇ °ü·Ã ÇÔ¼ö
+    #region ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Jump") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Jump") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
         }
-        if (other.gameObject.tag == "Jump2") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Jump2") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
         }
-        if (other.gameObject.tag == "Jump3") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Jump3") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
         }
-        if (other.gameObject.tag == "Jump4") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Jump4") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
         }
-        if (other.gameObject.tag == "Jump5") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Jump5") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
         }
-        if (other.gameObject.tag == "Jump6") //Á¡ÇÁ¹ßÆÇ´ë ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Jump6") //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
         }
 
-        if (other.gameObject.tag == "Boost") //ºÎ½ºÆ®¹ßÆÇ ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Boost") //ï¿½Î½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
         }
-        if (other.gameObject.tag == "Boost2") //ºÎ½ºÆ®¹ßÆÇ ¹â¾ÒÀ»¶§
+        if (other.gameObject.tag == "Boost2") //ï¿½Î½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
 
-        // ¹Ì»çÀÏ Ãæµ¹ °ü·Ã ºÎºÐ
+        // ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½
         if (!PV.IsMine)
             return;
         //=======================================
-        // ¹Ì»çÀÏ Ãæµ¹(¾ÆÀÌÅÛ Ãæµ¹)
+        // ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½æµ¹(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½æµ¹)
         if (other.gameObject.tag == "Bomb")
         {
             if (!other.gameObject.GetComponent<PhotonView>().IsMine)
@@ -629,7 +629,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
     //===========================================================================
     // function Check my Chicken Onw when ChickenTimer is Finish
-    #region Ä¡Å²À» °¡Áö°í ÀÖ´ÂÁö È®ÀÎÇÏ°í ¹æÀ» ³»º¸³»´Â ÇÔ¼ö 
+    #region Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ 
     IEnumerator CheckHasChicken()
     {
         // doAgain == false == no one got chicken
@@ -652,13 +652,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         else
         {
             Debug.Log("go next!");
-            // ÇØ´ç ÇÔ¼ö°¡ ½ÇÇàµÇ¾úÀ»¶§ Ä¡Å²À» °®°íÀÖÁö¾ÊÀ¸¸é ¹æÀ» ³ª°¡¸é¼­ ½ºÅ¸Æ®¾ÀÀ¸·Î µ¹¾Æ°£´Ù
+            // ï¿½Ø´ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½é¼­ ï¿½ï¿½Å¸Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½ï¿½ï¿½
             if (!transform.GetChild(7).gameObject.activeInHierarchy)
             {
                 StartCoroutine(GoodGame("You Missed Chicken!", "StartScene", Color.red, 2f));
             }
 
-            // Ä¡Å²À» °¡Áö°í ÀÖÀ¸¸é ´ÙÀ½ ¶ó¿îµå·Î ³Ñ¾î°£´Ù. 
+            // Ä¡Å²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¾î°£ï¿½ï¿½. 
             if (transform.GetChild(7).gameObject.activeInHierarchy)
             {
                 GGText.SetActive(true);
@@ -671,8 +671,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             // checked chicken and only one player left 
             if (check && PhotonNetwork.CurrentRoom.PlayerCount == 1)
             {
-                winner = true;
-                StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
+            winner = true;
+            Debug.Log("ï¿½Ì°å³ª?" + winner);
+            ZeraAPIHandler.Inst.DeclareWinner();
+            StartCoroutine(GoodGame("You Win!!", "StartScene", Color.green, 2f));
             }
 
 
@@ -691,7 +693,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
 
 
-    // ¹æÀ» ³ª°¡´Â ÇÔ¼ö
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
     private void LeftGame()
     {
         PhotonNetwork.LeaveRoom();
@@ -700,7 +702,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 
 
 
-    // °ÔÀÓ Á¾·á ½Ã winner/loser text Ãâ·Â ÈÄ ¾À ÀüÈ¯ ÇÔ¼ö 
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ winner/loser text ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½Ô¼ï¿½ 
     IEnumerator GoodGame(string text, string scene, Color color, float wait)
     {
         // set active GG text 
