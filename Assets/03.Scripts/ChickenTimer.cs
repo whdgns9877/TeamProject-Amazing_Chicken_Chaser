@@ -51,6 +51,9 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
 
     static int round = 1;
 
+    static double timeLimit = 0;
+
+    private double realTimeLimit = 0;
 
     // 현재 자신이 속해있는 방
     private Room curRoom = null;
@@ -65,6 +68,8 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
     {
         StartCoroutine(CountDown());
         round++;
+        realTimeLimit = timeLimit;
+        timeLimit += 5.0;
     }
 
 
@@ -100,7 +105,7 @@ public class ChickenTimer : MonoBehaviourPunCallbacks
             // is game started? 
             gameStart = true;
 
-            double timeLimit = 60f;
+            double timeLimit = 100f - realTimeLimit;
 
             // curret time - game start time 
             timepassed = PhotonNetwork.Time - startTime;
