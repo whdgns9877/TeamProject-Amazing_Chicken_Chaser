@@ -2015,15 +2015,13 @@ MonoBehaviour:
   jumpForceY5: 900000
   jumpForceZ5: 100000
   jumpForceY6: 2000000
-  jumpForceZ6: 0
   PlayerSlot: {fileID: 0}
   Slot1: {fileID: 0}
   Slot2: {fileID: 0}
-  missile: 0
   shield: 0
   booster: 0
-  banana: 0
-  smoke: 0
+  freeze: 0
+  FreezingForce: 3000
   Slot: 0000000000000000
 --- !u!114 &4773342266424200907
 MonoBehaviour:

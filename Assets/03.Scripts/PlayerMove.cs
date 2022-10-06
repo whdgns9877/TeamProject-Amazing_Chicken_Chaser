@@ -15,7 +15,7 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
 {
     [Header("Car Info")]
     [SerializeField] public float Acceleration = 1000f;       // 자동차 속도
-    [SerializeField] public float BrakingForce = 1000f;      // 브레이크 
+    [SerializeField] public float BrakingForce = 50000f;      // 브레이크 
     [SerializeField] public float MaxTurnAngle = 45f;        // 회전 각
     [SerializeField] public float MaxSpeed = 100f;
 
@@ -80,7 +80,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     [SerializeField] int jumpForceZ5;
 
     [SerializeField] int jumpForceY6;
-    [SerializeField] int jumpForceZ6;
 
     #endregion
     //============================================================
@@ -94,12 +93,10 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     [SerializeField] GameObject Slot2;
     [Header("")]
 
-    [SerializeField] public bool missile = false;
     [SerializeField] public bool shield = false;
     [SerializeField] public bool booster = false;
-    [SerializeField] public bool banana = false;
-    [SerializeField] public bool smoke = false;
-
+    [SerializeField] public bool freeze = false;
+    [SerializeField] public float FreezingForce = 50000f;
     [SerializeField] int[] Slot = new int[2]; //아이템슬롯칸
     #endregion
     //============================================================
@@ -216,6 +213,13 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         if (!PV.IsMine || !canMove)
             return;
 
+        //아이템 효과 처리
+        if(freeze)
+        {
+            
+        }
+        
+
         //=====================================================================
         // Imsi Code for Siyeon
 
@@ -331,14 +335,11 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             GetKeyDownControl(false); //아이템 사용키를 누르면 실행되는 함수
         }
 
-        // 얼음탄 발사
-        //if (Input.GetKeyDown(KeyCode.C))
-        //{
-        //    GameObject myMissile = PhotonNetwork.Instantiate("Freeze", transform.position + new Vector3(0f, 0.4f, 0.1f), transform.rotation * Quaternion.Euler(-50f,0f,0f));
-        //    myMissile.AddComponent<Freeze>();
-        //    myMissile.transform.position = transform.position + new Vector3(0, 0.4f, 1f);
-        //    myMissile.transform.rotation = Quaternion.LookRotation(transform.forward);
-        //}
+        //얼음탄 발사
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            
+        }
 
 
 
@@ -585,36 +586,36 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
     {
         // 맵 발판 상호작용 부분 
         #region 맵 발판 상호작용 부분
-        if (other.gameObject.tag == "Jump") //점프발판대 밟았을때
+        if (other.gameObject.CompareTag("Jump")) //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY, jumpForceZ);
         }
-        if (other.gameObject.tag == "Jump2") //점프발판대 밟았을때
+        if (other.gameObject.CompareTag("Jump2")) //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY2, jumpForceZ2);
         }
-        if (other.gameObject.tag == "Jump3") //점프발판대 밟았을때
+        if (other.gameObject.CompareTag("Jump3")) //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY3, jumpForceZ3);
         }
-        if (other.gameObject.tag == "Jump4") //점프발판대 밟았을때
+        if (other.gameObject.CompareTag("Jump4")) //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY4, jumpForceZ4);
         }
-        if (other.gameObject.tag == "Jump5") //점프발판대 밟았을때
+        if (other.gameObject.CompareTag("Jump5")) //점프발판대 밟았을때
         {
             GetComponent<Rigidbody>().AddForce(0, jumpForceY5, jumpForceZ5);
         }
-        if (other.gameObject.tag == "Jump6") //점프발판대 밟았을때
+        if (other.gameObject.CompareTag("Jump6")) //점프발판대 밟았을때
         {
-            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, jumpForceZ6);
+            GetComponent<Rigidbody>().AddForce(0, jumpForceY6, 0f);
         }
 
-        if (other.gameObject.tag == "Boost") //부스트발판 밟았을때
+        if (other.gameObject.CompareTag("Boost")) //부스트발판 밟았을때
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ);
         }
-        if (other.gameObject.tag == "Boost2") //부스트발판 밟았을때
+        if (other.gameObject.CompareTag("Boost2")) //부스트발판 밟았을때
         {
             GetComponent<Rigidbody>().AddRelativeForce(0, 0, BoostForceZ2);
         }
@@ -644,14 +645,15 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         }
         #endregion
 
-        // 얼음탄 충돌
-        //if (other.gameObject.tag == "Freeze" && shield == false)
-        //{
-        //    if (!other.gameObject.GetComponent<PhotonView>().IsMine)
-        //    {
-        //        StartCoroutine(SlowTime());
-        //    }
-        //}
+        //얼음탄 충돌
+        if (other.gameObject.tag == "Freeze" && shield == false)
+        {
+            if (!other.gameObject.GetComponent<PhotonView>().IsMine)
+            {
+                freeze = true;
+                StartCoroutine(FreezeNow());
+            }
+        }
 
         // 바나나 밟았을 때 처리
         if (other.gameObject.CompareTag("Banana")) //Tag == " " 함수는 내부에서 복사를 해서 비교하기 때문에 비용이 더 듬
@@ -740,22 +742,6 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
             if (Slot[1] != 0)
                 UseItem(Slot[1], 1);
         }
-        //if (Slot[0] == 0 && Slot[1] == 0) //키를 눌렀는데 슬롯이 비어있다면 무효
-        //{
-        //    Debug.Log("아이템이 없다");
-        //    return;
-        //}
-            
-        //else if (Slot[0] != 0) //첫번째 칸에 무언가가 있다면(무적권 1번째부터 사용)
-        //{
-        //    Debug.Log("1번째 아이템을 사용한다!");
-        //    UseItem(Slot[0], 0);
-        //}
-        //else if (Slot[0] == 0 && Slot[1] != 0) //첫번째 칸은 비었고 두번째 칸에만 뭔가 있다면
-        //{
-        //    Debug.Log("2번째 아이템을 사용한다!");
-        //    UseItem(Slot[1], 1);
-        //}
     }
 
     void UseItem(int num, int i) //사용되는 아이템 정보
@@ -777,21 +763,18 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
                 PV.RPC("ShieldActive", RpcTarget.AllViaServer);
                 return;
             case 4: //바나나
-                GameObject myBanana = PhotonNetwork.Instantiate("Banana", transform.position + (-transform.forward * 2), Quaternion.Euler(90f, 0f, 0f));
+                GameObject myBanana = PhotonNetwork.Instantiate("Banana", transform.position + (-transform.forward * 5f), Quaternion.Euler(90f, 0f, 0f));
                 myBanana.AddComponent<Banana>();
                 return;
             case 5: //안개
                 PhotonNetwork.Instantiate("Smoke", transform.position, Quaternion.Euler(0f, 0f, 0f));
                 return;
-
-        }
-        if (Slot[0] == 0 && Slot[1] != 0) //첫번째 슬롯 썼는데 두번째 슬롯이 남아있다면 첫번째 칸으로 옮기기
-        {
-            Slot[0] = Slot[1];
-            PlayerSlot.transform.GetChild(0).transform.GetChild(Slot[0]).gameObject.SetActive(true);
-            PlayerSlot.transform.GetChild(1).transform.GetChild(Slot[1]).gameObject.SetActive(false);
-            Slot[1] = 0;
-            
+            case 6: //얼음탄
+                GameObject myFreeze = PhotonNetwork.Instantiate("Freeze", transform.position + new Vector3(0f, 0.4f, 0f), transform.rotation * Quaternion.Euler(-50f, 0f, 0f));
+                myFreeze.AddComponent<Freeze>();
+                myFreeze.transform.position = transform.position + new Vector3(0, 0.4f, 0f);
+                myFreeze.transform.rotation = Quaternion.LookRotation(transform.forward);
+                return;
         }
     }
 
@@ -815,19 +798,15 @@ public class PlayerMove : MonoBehaviourPun, IPunObservable
         Drift(5f); //드리프트 원래 값으로
     }
 
-    IEnumerator SlowTime() // 슬로우 걸림
+    //얼음탄 맞았을 때 느려지는 코루틴
+    IEnumerator FreezeNow()
     {
-        wheelColliders[0].brakeTorque = -10f;
-        wheelColliders[1].brakeTorque = -10f;
-        wheelColliders[2].brakeTorque = -10f;
-        wheelColliders[3].brakeTorque = -10f;
-        yield return new WaitForSeconds(3f);
-
+        playerRigid.mass = 60000;
+        yield return new WaitForSeconds(5f);
+        playerRigid.mass = 2000f;
+        freeze = false;
     }
 
-
     #endregion
-
-
 }
 
