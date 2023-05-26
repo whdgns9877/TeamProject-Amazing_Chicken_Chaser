@@ -45,6 +45,7 @@
 
 &nbsp;
 
-🔗 * [Notion](https://www.notion.so/Team-Project_A-C-C-5210c026a6b9454d99f5f78e826774a1?pvs=4, "Notion Link")
+## 🔗 Links
+* [Notion](https://www.notion.so/Team-Project_A-C-C-5210c026a6b9454d99f5f78e826774a1?pvs=4, "Notion Link")
 * [Development Log](https://blog.naver.com/whdgns9877/222873997963, "Development Link")
 
