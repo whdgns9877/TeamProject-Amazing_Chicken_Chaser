@@ -2,12 +2,13 @@
 &nbsp;
 
 # 🎆[ **Team Accelerators** ]
-![Sprite_GameTitle](https://github.com/whdgns9877/TeamProject-Amazing_Chicken_Chaser/assets/49630123/e710a88a-b4fa-4243-8feb-8d5f33a556a4)
+![Sprite_GameLogo](https://github.com/whdgns9877/TeamProject-Amazing_Chicken_Chaser/assets/49630123/ecea20d2-5b4c-4b3d-a606-d135417c3da3)
+![Sprite_GameTitle](https://github.com/whdgns9877/TeamProject-Amazing_Chicken_Chaser/assets/49630123/ef06a54a-1041-4700-8db2-7fd17eec4b05)
 #
 &nbsp;
 # 💾 [ **Amazing Chicken Chaser** ]
 ## 🎞️ **Introduce Project**
-![TokTokDiaryIntroduce](https://github.com/KingOneChance/TokTokDiary/assets/49630123/b51b2582-fb4d-487d-939c-14882a67c781)
+
 &nbsp;
 
 ## 🔧 기술 스택
