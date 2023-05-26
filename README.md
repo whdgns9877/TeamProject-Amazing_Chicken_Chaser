@@ -14,6 +14,13 @@
 ![image41](https://github.com/whdgns9877/TeamProject-Amazing_Chicken_Chaser/assets/49630123/b8fd6302-4237-4e66-9889-c2b693df026a)
 &nbsp;
 
+&nbsp;
+## 플레이 영상
+![Video Label](http://img.youtube.com/vi/ak0H_gCgwcw/0.jpg)
+
+[VideoLink] (https://youtu.be/ak0H_gCgwcw)
+&nbsp;
+
 ## 🔧 기술 스택
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=c-sharp&logoColor=white)
 &nbsp;&nbsp;&nbsp;&nbsp;
