@@ -16,17 +16,18 @@
 ![Unity](https://img.shields.io/badge/unity-%23000000.svg?style=for-the-badge&logo=unity&logoColor=white)
 &nbsp;&nbsp;&nbsp;&nbsp;
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
-
+&nbsp;&nbsp;&nbsp;&nbsp;
+![photon](https://github.com/whdgns9877/RoyalOfLegend/assets/49630123/5078b0ca-0ca5-43c6-ad71-500b7ef6a70d) PUN2
 &nbsp;
 
 ## 🗓️ 작업 기간
-2022.12.26 ~ 2023.03.07
+2022.09.13 ~ 2022.10.07
 
 &nbsp;
 
 ## 😎 맡은 업무
 
-* 프로젝트에 필요한 전체적인 기능구현Task를 나누어 팀원들에게 분배
+* 포톤서버 연결, 방생성, 로비창, 
 * 앱을 실행하고 필요한 권한(카메라, 갤러리)을 부여하는 기능 구현
 * 카메라와 갤러리를 이용한 사진찍기 및 사진 저장
 * 비동기 로딩씬 구현
