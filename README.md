@@ -45,5 +45,5 @@
 
 &nbsp;
 
-🔗 [Notion](https://www.notion.so/Team-Project_A-C-C-5210c026a6b9454d99f5f78e826774a1, "Notion Link")
+🔗 [Notion](https://www.notion.so/Team-Project_A-C-C-5210c026a6b9454d99f5f78e826774a1?pvs=4, "Notion Link")
 
