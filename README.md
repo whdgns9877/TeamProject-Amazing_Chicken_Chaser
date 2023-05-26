@@ -2,7 +2,7 @@
 &nbsp;
 
 # 🎆[ **Team Accelerators** ]
-![image21](https://github.com/KingOneChance/TokTokDiary/assets/49630123/6a61be51-8dfe-413c-b929-a8dda75ac76e)
+![Sprite_GameTitle](https://github.com/whdgns9877/TeamProject-Amazing_Chicken_Chaser/assets/49630123/e710a88a-b4fa-4243-8feb-8d5f33a556a4)
 #
 &nbsp;
 # 💾 [ **Amazing Chicken Chaser** ]
